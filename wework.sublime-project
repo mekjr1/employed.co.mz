@@ -1,0 +1,18 @@
+{
+	"folders":
+	[
+		{
+			"path": "."
+		},
+		{
+			"path": "../wework-config"
+		}
+	],
+	"settings":
+	{
+		"tabSize": 4,
+		"translateTabsToSpaces": false,
+		"trim_trailing_white_space_on_save": true,
+		"useTabStops": true
+	}
+}

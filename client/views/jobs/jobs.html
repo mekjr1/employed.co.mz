@@ -1,0 +1,8 @@
+<template name="jobs">
+	{{#each jobs}}
+		{{>jobSmall}}
+	{{/each}}
+	<div class="text-center">
+		{{> infiniteScroll }}
+	</div>
+</template>
