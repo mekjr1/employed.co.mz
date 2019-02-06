@@ -11,6 +11,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint .",
     "pretest": "npm run lint --silent"
+	"start": "node api.js"
   },
   "repository": {
     "type": "git",
