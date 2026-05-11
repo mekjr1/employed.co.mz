@@ -36,4 +36,14 @@ daysUntilExpiration = function() {
   var daysAgo = new Date();
   daysAgo.setDate(daysAgo.getDate() - daysToWait);
   return daysAgo;
-}
+};
+
+countrySlug = function(country) {
+  return country && country.toLowerCase().replace(/\s+/g, '-');
+};
+
+countryFromSlug = function(slug) {
+  return _.find(COUNTRIES, function(country) {
+    return countrySlug(country) === slug;
+  });
+};

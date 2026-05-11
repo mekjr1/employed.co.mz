@@ -20,3 +20,7 @@ UI.registerHelper("getCount", function(name) {
   if (name)
     return Counter.get(name);
 });
+
+UI.registerHelper("featuredJobPriceLabel", function() {
+  return FEATURED_JOB_PRICE_LABEL;
+});

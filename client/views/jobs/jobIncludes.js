@@ -36,12 +36,12 @@ Template.jobFeatured.events({
     btn.button('loading');
     StripeCheckout.open({
       key: Meteor.settings.public.Stripe.pubKey,
-      name: 'We Work Meteor',
+      name: APP_NAME,
       billingAddress: false,
       allowRememberMe: true,
       description: 'Featured Job Post - 30 Days',
-      currency: "usd",
-      amount: 10000,
+      currency: FEATURED_JOB_CURRENCY,
+      amount: FEATURED_JOB_AMOUNT_CENTS,
       email: getUserEmail(Meteor.user()),
       closed: function() {
         btn.button('reset');

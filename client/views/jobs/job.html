@@ -29,7 +29,12 @@
 								<i class="fa fa-map-marker"></i> {{location}}
 							{{/if}}
 						</div>
-						<div class="col-sm-6 job-url">
+						<div class="col-sm-3">
+							{{#if country}}
+								<i class="fa fa-flag"></i> {{country}}
+							{{/if}}
+						</div>
+						<div class="col-sm-3 job-url">
 							{{#if url}}
 								<i class="fa fa-external-link fa-m"></i>&nbsp;&nbsp;<a href="{{url}}" target="_blank" rel="noopener">{{cutString url 50}}</a>
 							{{/if}}

@@ -1,4 +1,13 @@
-JOB_TYPES = ["Full Time", "Part Time", "Hourly Contract", "Term Contract", "Mentoring", "Internship", "Bounty", "Open Source", "Volunteer", "Other"];
+APP_NAME = "Employed";
+APP_TAGLINE = "Jobs in Mexico and Mozambique";
+
+COUNTRIES = ["Mexico", "Mozambique"];
+
+JOB_TYPES = ["Full Time", "Part Time", "Contract", "Temporary", "Internship", "Freelance", "Remote", "Volunteer", "Other"];
+
+FEATURED_JOB_AMOUNT_CENTS = 10000;
+FEATURED_JOB_CURRENCY = "usd";
+FEATURED_JOB_PRICE_LABEL = "US$100";
 
 SUMMERNOTE_OPTIONS = {
   type: 'summernote',
@@ -15,4 +24,4 @@ SUMMERNOTE_OPTIONS = {
 };
 
 STATUSES = ["pending", "active", "flagged", "inactive", "filled"];
-PROFILE_STATUSES = ["active", "flagged"];
+PROFILE_STATUSES = ["pending", "active", "flagged"];

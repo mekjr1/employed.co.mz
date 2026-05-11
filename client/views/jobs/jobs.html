@@ -1,8 +1,31 @@
 <template name="jobs">
+	<div class="row">
+		<div class="col-sm-12">
+			<ul class="nav nav-pills">
+				<li class="{{allCountriesActive}}"><a href="{{pathFor 'jobs'}}">All Markets</a></li>
+				{{#each countryLinks}}
+					<li class="{{countryActive name}}"><a href="{{path}}">{{name}}</a></li>
+				{{/each}}
+			</ul>
+			<hr>
+		</div>
+	</div>
 	{{#each jobs}}
 		{{>jobSmall}}
+  {{else}}
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <div class="row">
+        <div class="col-sm-12">
+            <h4>
+              No active jobs found.
+            </h4>
+        </div>
+      </div>
+    </div>
+</div>
 	{{/each}}
-	<div class="text-center">
+	<!-- <div class="text-center">
 		{{> infiniteScroll }}
-	</div>
+	</div> -->
 </template>

@@ -11,7 +11,8 @@ Router.configure({
     },
     progressSpinner: false,
     progressDelay: 250,
-    title: "We Work Meteor - Job board and developer listing just for Meteor"
+    // title: APP_NAME + " - Job board and talent listing"
+    title: APP_NAME + " - " + APP_TAGLINE
 });
 
 
@@ -42,31 +43,60 @@ Router.map(function() {
                         featuredThrough: -1
                     }
                 }),
-                profiles: Profiles.find({}, {
-                    sort: {
-                        availableForHire: -1,
-                        randomSorter: 1
-                    },
-                    limit: 8
-                }),
-                profile: Profiles.findOne({
-                    userId: Meteor.userId()
-                })
+                // profiles: Profiles.find({
+                //   status:'active'
+                // }, {
+                //     sort: {
+                //         availableForHire: -1,
+                //         randomSorter: 1
+                //     },
+                //     limit: 8
+                // }),
+                // profile: Profiles.findOne({
+                //     userId: Meteor.userId()
+                // })
             };
         },
         subscriptions: function() {
-            return [subs.subscribe('homeJobs'), subs.subscribe('featuredJobs'), Meteor.subscribe('homeDevelopers'), subs.subscribe('developerCount'), subs.subscribe('jobCount')];
+            return [subs.subscribe('homeJobs'), subs.subscribe('featuredJobs'), /*Meteor.subscribe('homeDevelopers'), subs.subscribe('developerCount'), subs.subscribe('jobCount')*/];
         }
     });
 
     this.route('jobs', {
         path: '/jobs',
-        title: "We Work Meteor - All Jobs"
+        title: APP_NAME + " - All Jobs",
+        subscriptions: function() {
+            return [subs.subscribe('jobs')];
+        }
+    });
+
+    this.route('jobsCountry', {
+        path: '/jobs/country/:country',
+        template: 'jobs',
+        title: function() {
+            var country = countryFromSlug(this.params.country);
+            return APP_NAME + " - Jobs in " + (country || "Selected Country");
+        },
+        data: function() {
+            return {
+                country: countryFromSlug(this.params.country)
+            };
+        },
+        subscriptions: function() {
+            return [subs.subscribe('jobs', 100, countryFromSlug(this.params.country))];
+        },
+        onBeforeAction: function() {
+            if (!countryFromSlug(this.params.country)) {
+                this.redirect('jobs');
+            } else {
+                this.next();
+            }
+        }
     });
 
     this.route('myJobs', {
         path: '/myjobs',
-        title: "We Work Meteor - My Jobs",
+        title: APP_NAME + " - My Jobs",
         data: function() {
             return {
                 jobs: Jobs.find({
@@ -87,7 +117,7 @@ Router.map(function() {
         path: '/jobs/:_id/:slug?',
         title: function() {
             if (this.data())
-                return "We Work Meteor - " + this.data().title;
+                return APP_NAME + " - " + this.data().title;
         },
         data: function() {
             return Jobs.findOne({
@@ -112,12 +142,12 @@ Router.map(function() {
 
     this.route('jobNew', {
         path: '/job',
-        title: "We Work Meteor - Post a Job"
+        title: APP_NAME + " - Post a Job"
     });
 
     this.route('jobEdit', {
         path: '/jobs/:_id/:slug/edit',
-        title: "We Work Meteor - Edit Job Post",
+        title: APP_NAME + " - Edit Job Post",
         data: function() {
             return {
                 job: Jobs.findOne({
@@ -130,92 +160,92 @@ Router.map(function() {
         }
     });
 
-    this.route('profiles', {
-        path: '/profiles',
-        title: "We Work Meteor - All Developers",
-        subscriptions: function() {
-            return subs.subscribe('developerUsers');
-        }
-    });
+    // this.route('profiles', {
+    //     path: '/profiles',
+    //     title: APP_NAME + " - All Candidates",
+    //     subscriptions: function() {
+    //         return subs.subscribe('developerUsers');
+    //     }
+    // });
 
-    this.route('profile', {
-        path: '/profiles/:_id/:slug?',
-        title: function() {
-            if (this.data())
-                return "We Work Meteor - " + this.data().displayName() + " - " + this.data().title;
-        },
-        data: function() {
-            return Profiles.findOne({
-                _id: this.params._id
-            });
-        },
-        waitOn: function() {
-            return subs.subscribe('profile', this.params._id);
-        },
-        onBeforeAction: function() {
-            var expectedSlug = this.data().slug();
-            if (this.params.slug !== expectedSlug) {
-                this.redirect("profile", {
-                    _id: this.params._id,
-                    slug: expectedSlug
-                });
-            } else {
-                this.next();
-            }
-        }
-    });
+    // this.route('profile', {
+    //     path: '/profiles/:_id/:slug?',
+    //     title: function() {
+    //         if (this.data())
+    //             return APP_NAME + " - " + this.data().displayName() + " - " + this.data().title;
+    //     },
+    //     data: function() {
+    //         return Profiles.findOne({
+    //             _id: this.params._id
+    //         });
+    //     },
+    //     waitOn: function() {
+    //         return subs.subscribe('profile', this.params._id);
+    //     },
+    //     onBeforeAction: function() {
+    //         var expectedSlug = this.data().slug();
+    //         if (this.params.slug !== expectedSlug) {
+    //             this.redirect("profile", {
+    //                 _id: this.params._id,
+    //                 slug: expectedSlug
+    //             });
+    //         } else {
+    //             this.next();
+    //         }
+    //     }
+    // });
 
-    this.route('profileNew', {
-        path: '/profile',
-        title: "We Work Meteor - Create Developer Profile",
-        onBeforeAction: function() {
-            if (Meteor.user().isDeveloper) {
-                Router.go('profile', Profiles.findOne({
-                    userId: Meteor.userId()
-                }));
-            } else {
-                this.next();
-            }
-        }
-    });
+    // this.route('profileNew', {
+    //     path: '/profile',
+    //     title: APP_NAME + " - Create Candidate Profile",
+    //     onBeforeAction: function() {
+    //         if (Meteor.user().isDeveloper) {
+    //             Router.go('profile', Profiles.findOne({
+    //                 userId: Meteor.userId()
+    //             }));
+    //         } else {
+    //             this.next();
+    //         }
+    //     }
+    // });
 
-    this.route('profileEdit', {
-        path: '/profiles/:_id/:slug/edit',
-        title: "We Work Meteor - Edit My Developer Profile",
-        data: function() {
-            return {
-                profile: Profiles.findOne({
-                    _id: this.params._id
-                })
-            };
-        },
-        waitOn: function() {
-            return subs.subscribe('profile', this.params._id);
-        }
-    });
+    // this.route('profileEdit', {
+    //     path: '/profiles/:_id/:slug/edit',
+    //     title: APP_NAME + " - Edit My Candidate Profile",
+    //     data: function() {
+    //         return {
+    //             profile: Profiles.findOne({
+    //                 _id: this.params._id
+    //             })
+    //         };
+    //     },
+    //     waitOn: function() {
+    //         return subs.subscribe('profile', this.params._id);
+    //     }
+    // });
 
-    //legacy url redirects
-    this.route('experts', function() {
-        this.redirect("profiles");
-    });
-    this.route('experts/:_id', function() {
-        this.redirect("profile", {
-            _id: this.params._id
-        });
-    });
+    // //legacy url redirects
+    // this.route('experts', function() {
+    //     this.redirect("profiles");
+    // });
+    // this.route('experts/:_id', function() {
+    //     this.redirect("profile", {
+    //         _id: this.params._id
+    //     });
+    // });
 });
 
 Router.plugin('ensureSignedIn', {
-    only: ['profileEdit', 'profileNew', 'jobEdit', 'jobNew']
+    only: [/*'profileEdit', 'profileNew',*/ 'jobEdit', 'jobNew']
 });
 
 
-Router.onBeforeAction(function() {
-    loadUploadcare();
-    this.next();
-}, {
-    only: ['profileEdit', 'profileNew', 'jobEdit', 'jobNew']
-});
+// Router.onBeforeAction(function() {
+//     loadUploadcare();
+//     this.next();
+// }, {
+//     only: ['profileEdit', 'profileNew', 'jobEdit', 'jobNew']
+// });
 
 Router.plugin('dataNotFound', {
     notFoundTemplate: 'notFound'

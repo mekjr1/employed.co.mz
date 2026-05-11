@@ -1,23 +1,26 @@
-## We Work Meteor 
-https://www.weworkmeteor.com/ 
-# Meteor Job Board and Developer Directory
+# Employed
 
-If you have a project or problem you need help with, you can post a job or contact a developer.
+Employed is a Meteor-based job board being adapted for the jobs market in Mexico and Mozambique.
 
-If you are a developer, you can apply to jobs or offer your services for hire.
+Companies can post roles, candidates can browse active opportunities, and admins can moderate listings before they go live.
+
+## Markets
+
+- Mexico
+- Mozambique
 
 ## Settings
-This app does need a settings file to run - see `settings-example.json` for the supported values.  The actual settings used for wework.meteor.com are kept private
 
-## Contributing
-If anyone wants to improve on this, please submit a pull request w/ your changes.
+This app needs a settings file to run. See `settings-example.json` for the supported values, including Stripe, reCAPTCHA, and admin email settings.
 
-## Forking
-Forking for unique communities is quite welcome and encouraged, but please alter the colors or appearance at least a little bit so all forks don't look exactly the same.  Feel free to submit a pull request on this file to add your fork to the list below once it is live.
+For local development, `settings-example.json` enables the reCAPTCHA development bypass.
 
+## Upstream
 
-#### Forks for other communities 
-[Ethereum Jobs](http://jobs.ethercasts.com/) by @jorisbontje [Repo](https://github.com/EtherCasts/wework)
+This project was originally imported from `nate-strauser/wework`. The original upstream has been added as:
 
+```bash
+git remote add upstream https://github.com/nate-strauser/wework.git
+```
 
-[ ![Codeship Status for nate-strauser/wework](https://codeship.com/projects/20fcf290-9cc5-0131-c1a7-7ae80bc9bd82/status?branch=master)](https://codeship.com/projects/17832)
+The current codebase includes upstream updates through `upstream/master` as of commit `ebdc55c`.

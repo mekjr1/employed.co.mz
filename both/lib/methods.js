@@ -90,9 +90,9 @@ Meteor.methods({
     if (Meteor.isServer) {
       var result = Stripe.charges.create({
         source: tokenId,
-        amount: 10000,
-        currency: "usd",
-        description: "We Work Meteor - Featured Job Post - 30 Days"
+        amount: FEATURED_JOB_AMOUNT_CENTS,
+        currency: FEATURED_JOB_CURRENCY,
+        description: APP_NAME + " - Featured Job Post - 30 Days"
       });
 
       if (result && (result.status === "succeeded" || result.status === "paid")) { //'paid' status is not in stripe docs, but is occuring - see https://github.com/nate-strauser/wework/issues/108

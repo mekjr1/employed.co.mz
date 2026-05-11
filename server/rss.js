@@ -18,8 +18,8 @@ RssFeed.publish('jobs', function(query) {
   if (secondMostRecent)
     lastBuildDate = secondMostRecent.createdAt;
 
-  self.setValue('title', self.cdata('We Work Meteor - Recent Jobs'));
-  self.setValue('description', self.cdata('This is a feed of recent jobs posted to We Work Meteor.'));
+  self.setValue('title', self.cdata(APP_NAME + ' - Recent Jobs'));
+  self.setValue('description', self.cdata('This is a feed of recent jobs posted to ' + APP_NAME + '.'));
   self.setValue('link', Meteor.absoluteUrl());
   self.setValue('lastBuildDate', lastBuildDate);
   self.setValue('pubDate', pubDate);
@@ -45,50 +45,50 @@ RssFeed.publish('jobs', function(query) {
   });
 });
 
-var profileRss = function(query) {
-  var self = this;
-  var pubDate = new Date();
-  var lastBuildDate = new Date();
-  var mostRecent = Profiles.findOne({}, {
-    sort: {
-      createdAt: -1
-    }
-  });
-  var secondMostRecent = Profiles.findOne({}, {
-    sort: {
-      createdAt: -1
-    },
-    skip: 1
-  });
-  if (mostRecent)
-    pubDate = mostRecent.createdAt;
-  if (secondMostRecent)
-    lastBuildDate = secondMostRecent.createdAt;
+// var profileRss = function(query) {
+//   var self = this;
+//   var pubDate = new Date();
+//   var lastBuildDate = new Date();
+//   var mostRecent = Profiles.findOne({}, {
+//     sort: {
+//       createdAt: -1
+//     }
+//   });
+//   var secondMostRecent = Profiles.findOne({}, {
+//     sort: {
+//       createdAt: -1
+//     },
+//     skip: 1
+//   });
+//   if (mostRecent)
+//     pubDate = mostRecent.createdAt;
+//   if (secondMostRecent)
+//     lastBuildDate = secondMostRecent.createdAt;
 
-  self.setValue('title', self.cdata('We Work Meteor - Recent Profiles'));
-  self.setValue('description', self.cdata('This is a feed of recent profiles listed on We Work Meteor.'));
-  self.setValue('link', Meteor.absoluteUrl());
-  self.setValue('lastBuildDate', lastBuildDate);
-  self.setValue('pubDate', pubDate);
-  self.setValue('ttl', 1);
+//   self.setValue('title', self.cdata(APP_NAME + ' - Recent Profiles'));
+//   self.setValue('description', self.cdata('This is a feed of recent profiles listed on ' + APP_NAME + '.'));
+//   self.setValue('link', Meteor.absoluteUrl());
+//   self.setValue('lastBuildDate', lastBuildDate);
+//   self.setValue('pubDate', pubDate);
+//   self.setValue('ttl', 1);
 
-  Profiles.find({
-    status: "active"
-  }, {
-    sort: {
-      createdAt: -1
-    }
-  }).forEach(function(profile) {
-    self.addItem({
-      title: self.cdata(profile.title),
-      description: self.cdata(profile.htmlDescription),
-      link: Meteor.absoluteUrl(profile.path()),
-      guid: Meteor.absoluteUrl(profile.path()),
-      pubDate: profile.createdAt
-    });
-  });
-};
+//   Profiles.find({
+//     status: "active"
+//   }, {
+//     sort: {
+//       createdAt: -1
+//     }
+//   }).forEach(function(profile) {
+//     self.addItem({
+//       title: self.cdata(profile.title),
+//       description: self.cdata(profile.htmlDescription),
+//       link: Meteor.absoluteUrl(profile.path()),
+//       guid: Meteor.absoluteUrl(profile.path()),
+//       pubDate: profile.createdAt
+//     });
+//   });
+// };
 
-RssFeed.publish('profiles', profileRss)
+// RssFeed.publish('profiles', profileRss)
 
-RssFeed.publish('experts', profileRss);
+// RssFeed.publish('experts', profileRss);

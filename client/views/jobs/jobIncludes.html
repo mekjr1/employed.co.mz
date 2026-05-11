@@ -31,10 +31,10 @@
     </div>
 </template>
 <template name="jobSuggestedTweet">
-    <div class="row">
+        <div class="row">
         <div class="col-sm-12">
             {{title}} -
-            {{#if remote}}#Remote {{jobtype}}{{else}}{{jobtype}} in {{location}}{{/if}} {{urlFor 'job'}} #meteorjob #meteorjs
+            {{#if remote}}#Remote {{jobtype}}{{else}}{{jobtype}} in {{location}}{{/if}} {{country}} {{urlFor 'job'}} #EmployedJobs #Mexico #Mozambique
             <hr>
         </div>
     </div>
@@ -81,7 +81,7 @@
                                     </ul>
                                 </div>
                                 <div class="col-sm-6 text-center">
-                                    <a id="buy-featured" class="btn btn-primary btn-lg" role="button" href="#">Buy 30 Days for $100</a>
+                                    <a id="buy-featured" class="btn btn-primary btn-lg" role="button" href="#">Buy 30 Days for {{featuredJobPriceLabel}}</a>
                                 </div>
                             </div>
                         </div>
