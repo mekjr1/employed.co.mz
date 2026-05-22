@@ -1,0 +1,13 @@
+<!--
+  Default avatar shown when a user has no uploaded image.
+  Branded version: indigo bg + amber spark + cream "?" mark
+  (deliberately not a generic person silhouette — we'd rather
+  cue "your spot, claim it" than fall back to a stranger glyph).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-labelledby="avatarTitle">
+  <title id="avatarTitle">Employed user</title>
+  <rect width="200" height="200" rx="100" fill="#4F46E5"/>
+  <circle cx="100" cy="86" r="32" fill="#FAFAF7"/>
+  <path d="M40 178 a60 60 0 0 1 120 0 Z" fill="#FAFAF7"/>
+  <circle cx="158" cy="42" r="11" fill="#F59E0B"/>
+</svg>

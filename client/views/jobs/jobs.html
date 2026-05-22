@@ -1,31 +1,152 @@
 <template name="jobs">
-	<div class="row">
-		<div class="col-sm-12">
-			<ul class="nav nav-pills">
-				<li class="{{allCountriesActive}}"><a href="{{pathFor 'jobs'}}">All Markets</a></li>
-				{{#each countryLinks}}
-					<li class="{{countryActive name}}"><a href="{{path}}">{{name}}</a></li>
-				{{/each}}
-			</ul>
-			<hr>
-		</div>
-	</div>
-	{{#each jobs}}
-		{{>jobSmall}}
-  {{else}}
-  <div class="panel panel-default">
-    <div class="panel-body">
-      <div class="row">
-        <div class="col-sm-12">
-            <h4>
-              No active jobs found.
-            </h4>
-        </div>
-      </div>
+    <div class="jobs-page-header">
+        <h2 class="jobs-page-title">{{t 'jobs.list_title' site=activeMarketSiteName}}</h2>
+        {{#if jobCount}}
+            <span class="jobs-count-badge">{{jobCount}} {{t 'jobs.count_label'}}</span>
+        {{/if}}
     </div>
-</div>
-	{{/each}}
-	<!-- <div class="text-center">
-		{{> infiniteScroll }}
-	</div> -->
+
+    {{!-- Filter bar --}}
+    <div class="job-filters">
+        <form class="form-inline" id="jobFilters" role="search" aria-label="{{t 'jobs.filter.aria'}}">
+            <div class="form-group">
+                <label class="sr-only" for="jobFilterQuery">{{t 'jobs.filter.query'}}</label>
+                <input type="search" class="form-control" id="jobFilterQuery"
+                    placeholder="{{t 'jobs.filter.query_placeholder'}}"
+                    value="{{filterQuery}}" maxlength="80">
+            </div>
+            <div class="form-group">
+                <label class="sr-only" for="jobFilterType">{{t 'jobs.filter.type'}}</label>
+                <select class="form-control" id="jobFilterType" aria-label="{{t 'jobs.filter.type'}}">
+                    <option value="">{{t 'jobs.filter.type_any'}}</option>
+                    {{#each jobTypes}}
+                        <option value="{{this}}" {{selectedAttr ../filterType this}}>{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" id="jobFilterRemote" {{checkedAttr filterRemote}}>
+                    {{t 'jobs.filter.remote_only'}}
+                </label>
+            </div>
+            {{#if filtersActive}}
+                <button type="button" class="btn btn-default btn-sm" id="jobFilterClear">
+                    <i class="fa fa-times" aria-hidden="true"></i> {{t 'jobs.filter.clear'}}
+                </button>
+            {{/if}}
+        </form>
+    </div>
+
+    {{!-- A9.36 — Featured strip: at most one grid row (3 tiles desktop,
+         2 tablet, 1 mobile). Randomly sampled server-side. Rendered as
+         its own grid so it visually sits above the main paginated feed
+         even when filters narrow the main grid down. --}}
+    {{#if hasFeatured}}
+        <section class="featured-strip" aria-label="{{t 'jobs.featured_strip_label'}}">
+            <div class="featured-strip-heading">
+                <span class="featured-strip-badge">
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    {{t 'jobs.featured_strip_label'}}
+                </span>
+                <span class="featured-strip-subtitle">{{t 'jobs.featured_strip_subtitle'}}</span>
+            </div>
+            <div class="job-grid featured-strip-grid">
+                {{#each featuredJobs}}
+                    {{>jobSmall}}
+                {{/each}}
+            </div>
+        </section>
+    {{/if}}
+
+    {{!-- Job list --}}
+    {{#if jobCount}}
+        <div class="job-grid jobs-main-grid">
+            {{#each jobsWithAds}}
+                {{#if isAd}}
+                    <div class="job-ad-inline" aria-label="{{t 'jobs.ad_inline.label'}}">
+                        {{> adSlot position="feed-inline"}}
+                    </div>
+                {{else}}
+                    {{> jobSmall job}}
+                {{/if}}
+            {{/each}}
+        </div>
+
+        {{!-- A9.36 — Pagination. Page size selector (12 / 24 / 48) lives
+             in JobsFilter so it survives filter changes and a
+             back-button navigation. --}}
+        <nav class="jobs-pagination" aria-label="{{t 'jobs.pagination.previous'}} / {{t 'jobs.pagination.next'}}">
+            <div class="pagination-summary">
+                <span class="pagination-range">
+                    {{t 'jobs.pagination.showing' from=pageFromLabel to=pageToLabel total=totalCount}}
+                </span>
+            </div>
+            <div class="pagination-controls">
+                <label class="pagination-page-size">
+                    <span class="pagination-page-size-label">{{t 'jobs.pagination.page_size_label'}}</span>
+                    <select id="jobPageSize" class="form-control input-sm">
+                        {{#each pageSizeOptions}}
+                            <option value="{{this}}" {{selectedAttr ../currentPageSize this}}>{{this}}</option>
+                        {{/each}}
+                    </select>
+                </label>
+                <div class="pagination-buttons btn-group" role="group">
+                    <button type="button" class="btn btn-default btn-sm" id="jobPagePrev"
+                        {{disabledAttr prevDisabled}}>
+                        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                        <span class="hidden-xs">{{t 'jobs.pagination.previous'}}</span>
+                    </button>
+                    <span class="pagination-page-of">
+                        {{t 'jobs.pagination.page_of' page=currentPageLabel total=totalPages}}
+                    </span>
+                    <button type="button" class="btn btn-default btn-sm" id="jobPageNext"
+                        {{disabledAttr nextDisabled}}>
+                        <span class="hidden-xs">{{t 'jobs.pagination.next'}}</span>
+                        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    {{else}}
+        <div class="jobs-empty-state">
+            <div class="empty-icon" aria-hidden="true">
+                <svg viewBox="0 0 140 120" focusable="false">
+                    {{!-- briefcase body --}}
+                    <rect x="18" y="38" width="104" height="66" rx="8" fill="#EEF2FF" stroke="#4F46E5" stroke-width="2"/>
+                    {{!-- handle --}}
+                    <path d="M58 38 V28 a4 4 0 0 1 4 -4 h16 a4 4 0 0 1 4 4 V38" fill="none" stroke="#4F46E5" stroke-width="2" stroke-linecap="round"/>
+                    {{!-- middle divider --}}
+                    <line x1="18" y1="66" x2="122" y2="66" stroke="#4F46E5" stroke-width="2" opacity="0.4"/>
+                    <rect x="60" y="60" width="20" height="10" rx="2" fill="#4F46E5" opacity="0.2"/>
+                    {{!-- magnifier on top --}}
+                    <circle cx="96" cy="82" r="14" fill="#FAFAF7" stroke="#4338CA" stroke-width="3"/>
+                    <line x1="107" y1="93" x2="118" y2="104" stroke="#4338CA" stroke-width="4" stroke-linecap="round"/>
+                    {{!-- amber spark accent --}}
+                    <circle cx="30" cy="30" r="4" fill="#F59E0B"/>
+                </svg>
+            </div>
+            <h4>{{t 'jobs.none_found'}}</h4>
+            {{#if filtersActive}}
+                <p>{{t 'jobs.none_found_filters'}}</p>
+                <button type="button" class="btn btn-default" id="jobFilterClearEmpty">
+                    {{t 'jobs.filter.clear'}}
+                </button>
+            {{else}}
+                <p>{{t 'jobs.none_found_empty'}}</p>
+            {{/if}}
+
+            {{!-- A9.33 — Ads Phase 0 (mock). `empty-state` slot when no
+                 jobs match. See docs/ads-strategy.md. --}}
+            {{> adSlot position="empty-state"}}
+        </div>
+    {{/if}}
+
+    {{!-- A9.33 — Ads Phase 0 (mock). `feed-sponsor` at the foot of the
+         results list ("results-footer" position). Gated on `jobCount`
+         (cursors are always truthy in Blaze, so `{{#if jobs}}` would
+         double-show alongside the empty-state slot). --}}
+    {{#if jobCount}}
+        {{> adSlot position="feed-sponsor"}}
+    {{/if}}
 </template>

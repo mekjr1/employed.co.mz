@@ -1,0 +1,70 @@
+{
+  "public": {
+    "uploadcare": {
+      "publickey": "local-uploadcare-key"
+    },
+    "Stripe": {
+      "pubKey": "pk_test_local"
+    },
+    "recaptcha": {
+      "v3SiteKey": "local-recaptcha-site-key",
+      "bypassInDevelopment": true
+    },
+    "astronomer": {
+      "appId": "local-astronomer-app-id"
+    },
+    "ads": {
+      "enabled": true,
+      "mock": true
+    }
+  },
+  "kadira": {
+    "appId": "local-kadira-app-id",
+    "appSecret": "local-kadira-secret"
+  },
+  "Stripe": {
+    "secretKey": "sk_test_local"
+  },
+  "private": {
+    "adminEmail": "admin@employed.co.mz",
+    "fromEmail": "Employed <admin@employed.co.mz>",
+    "ipSalt": "docker-dev-only-ipsalt-do-not-use-in-prod",
+    "stripe": {
+      "secretKey": "sk_test_local",
+      "webhookSecret": "whsec_local_dev_secret_replace_for_real_webhook_testing"
+    },
+    "mpesa": {
+      "simulate": true
+    },
+    "emola": {
+      "simulate": true
+    },
+    "devAccounts": {
+      "enabled": true,
+      "admin": {
+        "email": "admin@example.test",
+        "password": "admin12345",
+        "name": "Local Admin"
+      },
+      "users": [
+        {
+          "email": "user@example.test",
+          "password": "user12345",
+          "name": "Local User"
+        }
+      ]
+    },
+    "devSeed": {
+      "enabled": true,
+      "reset": false,
+      "admins": 2,
+      "users": 100,
+      "jobs": 400,
+      "password": "seedpass123"
+    },
+    "recaptcha": {
+      "v3SecretKey": "local-recaptcha-secret-key",
+      "scoreThreshold": 0.5
+    }
+  }
+}

@@ -1,76 +1,174 @@
 <template name="jobNew">
-    <div class="row">
-        <div class="col-sm-10 col-sm-offset-1">
-                <h4 class="text-center">Post roles for candidates in Mexico or Mozambique.</h4>
-                <br>
-                <p>Jobs are free to post.
+    <div class="post-job-page">
+        <div class="post-job-header">
+            <h1>{{t 'form.panel.create_title'}}</h1>
+            <p>{{t 'form.intro_market'}}</p>
+        </div>
 
-                Your job post will remain on this site for 90 days.  After 90 days the post will no longer appear to visitors.
+        {{!-- Step progress --}}
+        <div class="post-job-progress" aria-label="Form progress">
+            <div class="progress-step {{stepClass 1}}">
+                <div class="step-circle">{{stepIcon 1}}</div>
+                <div class="step-label">{{t 'form.step.basics'}}</div>
+            </div>
+            <div class="progress-step {{stepClass 2}}">
+                <div class="step-circle">{{stepIcon 2}}</div>
+                <div class="step-label">{{t 'form.step.details'}}</div>
+            </div>
+            <div class="progress-step {{stepClass 3}}">
+                <div class="step-circle">{{stepIcon 3}}</div>
+                <div class="step-label">{{t 'form.step.preview'}}</div>
+            </div>
+        </div>
 
-                You can feature your job post on the home page for 30 days after creating your post.</p>
-                <br>
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4>Create Your Job Post</h4>
+        <div class="post-job-card">
+            {{#if formError}}
+                <div class="alert alert-danger" role="alert" aria-live="polite">
+                    <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {{formError}}
                 </div>
-                <div class="panel-body">
-                    {{#autoForm id="jobNew" collection="Jobs" type="normal" }}
-                        {{>jobFields}}
+            {{/if}}
 
-                        <!-- reCAPTCHA v3 Badge Notice -->
+            {{#autoForm id="jobNew" collection="Jobs" type="normal"}}
+                {{> afFieldInput name="country" type="hidden" value=activeMarket.country}}
+
+                {{!-- p2-fix-006: keep every step rendered so AutoForm sees
+                     the full document on submit (Spacebars {{#if}} destroys
+                     DOM nodes between steps, dropping the data). We toggle
+                     visibility via the `stepDisplayClass` helper instead. --}}
+
+                {{!-- Step 1: Basics --}}
+                <div class="wizard-step {{stepDisplayClass 1}}" data-step="1">
+                    <h3 class="post-job-step-title">{{t 'form.step.basics'}}</h3>
+                    {{> afQuickField name='title' placeholder=(t 'form.placeholder.title')}}
+                    {{> afQuickField name="jobtype" firstOption=(t 'form.placeholder.job_type') options="allowed"}}
+                    {{> afQuickField name='company' placeholder=(t 'form.placeholder.company')}}
+                    {{> afQuickField name='location' placeholder=activeMarket.locationPlaceholder}}
+                    {{> afQuickField name='remote'}}
+                    <div class="post-job-nav">
+                        <span></span>
+                        <button type="button" class="btn btn-primary next-step" data-step="1">
+                            {{t 'form.step.next'}} <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+
+                {{!-- Step 2: Details --}}
+                <div class="wizard-step {{stepDisplayClass 2}}" data-step="2">
+                    <h3 class="post-job-step-title">{{t 'form.step.details'}}</h3>
+                    {{#if isMobile}}
                         <div class="form-group">
-                            <small class="text-muted">
-                                This site is protected by reCAPTCHA and the Google
-                                <a href="https://policies.google.com/privacy" target="_blank">Privacy Policy</a> and
-                                <a href="https://policies.google.com/terms" target="_blank">Terms of Service</a> apply.
-                            </small>
+                            <label for="jobDescriptionField">{{t 'jobs.field.description'}}</label>
+                            <textarea id="jobDescriptionField" class="form-control job-description-textarea"
+                                name="description" rows="10"
+                                placeholder="{{t 'form.placeholder.description'}}"
+                                maxlength="50000"></textarea>
+                            <div class="char-counter" id="descCharCounter">0 / 50,000</div>
                         </div>
+                    {{else}}
+                        {{> afQuickField name='description' rows=8 placeholder=(t 'form.placeholder.description')}}
+                    {{/if}}
+                    {{> afQuickField name='url' placeholder=(t 'form.placeholder.url')}}
+                    {{> afQuickField name='contact' placeholder=(t 'form.placeholder.contact')}}
+                    {{> afQuickField name='applyWhatsApp' placeholder='+258 84 1234567'}}
+                    <div class="post-job-nav">
+                        <button type="button" class="btn btn-default prev-step" data-step="2">
+                            <i class="fa fa-arrow-left" aria-hidden="true"></i> {{t 'form.step.back'}}
+                        </button>
+                        <button type="button" class="btn btn-primary next-step" data-step="2">
+                            {{t 'form.step.next'}} <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
 
-                        <div>
-                            <button type="submit" class="btn btn-primary" id="submitJobBtn"><i class="fa fa-chevron-right"></i> Continue to preview your post</button>
-                        </div>
-                    {{/autoForm}}
-                </div>
-            </div>
-        </div>
-    </div>
-</template>
-<template name="jobEdit">
-    <div class="row">
-        <div class="col-sm-10 col-sm-offset-1">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4>Edit Job Post</h4>
-                </div>
-                <div class="panel-body">
-                    {{!-- {{#if $eq job.status 'pending'}} --}}
-                        {{#autoForm id="jobEdit" collection="Jobs" doc=job type="update" }}
-                            {{>jobFields}}
-                            <div>
-                                <button type="submit" class="btn btn-primary"><i class="fa fa-floppy-o"></i> Update</button>
-                                <button id="cancel" class="btn btn-default"> Cancel</button>
+                {{!-- Step 3: Preview & Post --}}
+                <div class="wizard-step {{stepDisplayClass 3}}" data-step="3">
+                    <h3 class="post-job-step-title">{{t 'form.step.preview'}}</h3>
+                    <div class="job-preview-card">
+                        <div class="preview-label">{{t 'form.preview.label'}}</div>
+                        <div class="job-card-inner">
+                            <div class="job-avatar" aria-hidden="true">{{previewInitial}}</div>
+                            <div class="job-main">
+                                <span class="job-title-link" style="cursor:default;">{{previewTitle}}</span>
+                                <div class="job-badges">
+                                    {{#if previewJobtype}}<span class="label label-default">{{previewJobtype}}</span>{{/if}}
+                                    {{#if previewRemote}}<span class="label label-success"><i class="fa fa-globe" aria-hidden="true"></i> {{t 'jobs.label.remote'}}</span>{{/if}}
+                                </div>
+                                <div class="job-meta">
+                                    {{#if previewCompany}}<span>{{previewCompany}}</span>{{/if}}
+                                    {{#if previewLocation}}<span class="job-meta-sep">·</span><span>{{previewLocation}}</span>{{/if}}
+                                </div>
+                                {{#if previewContact}}
+                                    <div class="job-meta" style="margin-top:6px;">
+                                        <i class="fa fa-envelope" aria-hidden="true"></i>
+                                        <span>{{previewContact}}</span>
+                                    </div>
+                                {{/if}}
                             </div>
-                        {{/autoForm}}
-                    {{!-- {{else}}
-                        <div class="alert alert-info">
-                            <i class="fa fa-exclamation-triangle fa-2x pull-left"></i> Only pending jobs can be edited.
-                            <br>
-                            <a href="{{pathFor 'job' _id=job._id}}">Back to post</a>
                         </div>
-                    {{/if}} --}}
+                        {{#if previewDescriptionHtml}}
+                            <div class="job-preview-description" style="margin-top:16px; padding-top:16px; border-top:1px solid #E5E7EB;">
+                                {{{previewDescriptionHtml}}}
+                            </div>
+                        {{/if}}
+                    </div>
+                    <div style="font-size:13px; color:#6B7280; margin-bottom:20px;">
+                        <i class="fa fa-info-circle" aria-hidden="true"></i>
+                        {{t 'form.policy.line1'}} {{t 'form.policy.line2'}} {{t 'form.policy.line3'}}
+                    </div>
+                    <div style="font-size:12px; color:#6B7280; margin-bottom:20px;">
+                        {{t 'form.recaptcha.notice'}}
+                        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">{{t 'form.recaptcha.privacy'}}</a>
+                        {{t 'form.recaptcha.and'}}
+                        <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer">{{t 'form.recaptcha.terms'}}</a>.
+                    </div>
+                    <div class="post-job-nav">
+                        <button type="button" class="btn btn-default prev-step" data-step="3">
+                            <i class="fa fa-arrow-left" aria-hidden="true"></i> {{t 'form.step.back'}}
+                        </button>
+                        <button type="submit" class="btn btn-primary btn-lg" id="submitJobBtn">
+                            <i class="fa fa-check" aria-hidden="true"></i> {{t 'form.submit.post_job'}}
+                        </button>
+                    </div>
                 </div>
-            </div>
+            {{/autoForm}}
         </div>
     </div>
 </template>
+
+<template name="jobEdit">
+    <div class="post-job-page">
+        <div class="post-job-header">
+            <h1>{{t 'form.panel.edit_title'}}</h1>
+        </div>
+        <div class="post-job-card">
+            {{#if formError}}
+                <div class="alert alert-danger" role="alert" aria-live="polite">
+                    <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {{formError}}
+                </div>
+            {{/if}}
+            {{#autoForm id="jobEdit" collection="Jobs" doc=job type="update"}}
+                {{>jobFields}}
+                <div class="post-job-nav">
+                    <button type="button" id="cancel" class="btn btn-default">
+                        <i class="fa fa-times" aria-hidden="true"></i> {{t 'action.cancel'}}
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-floppy-o" aria-hidden="true"></i> {{t 'action.update'}}
+                    </button>
+                </div>
+            {{/autoForm}}
+        </div>
+    </div>
+</template>
+
 <template name="jobFields">
-    {{> afQuickField name='title' placeholder="Title displayed for your listing"}}
-    {{> afQuickField name="jobtype" firstOption="(Select a Job Type)" options="allowed"}}
-    {{> afQuickField name='company' placeholder="Name of the hiring company"}}
-    {{> afQuickField name="country" firstOption="(Select a Country)" options="allowed"}}
-    {{> afQuickField name='location' placeholder="City or region, for example Mexico City, Guadalajara, Maputo, or Beira"}}
+    {{> afQuickField name='title' placeholder=(t 'form.placeholder.title')}}
+    {{> afQuickField name="jobtype" firstOption=(t 'form.placeholder.job_type') options="allowed"}}
+    {{> afQuickField name='company' placeholder=(t 'form.placeholder.company')}}
+    {{> afQuickField name='location' placeholder=activeMarket.locationPlaceholder}}
     {{> afQuickField name='remote'}}
-    {{> afQuickField name='description' rows=8 placeholder="Tell candidates about the role, requirements, salary range, work arrangement, and hiring process."}}
-    {{> afQuickField name='url' placeholder="External URL of job posting"}}
-    {{> afQuickField name='contact' placeholder="Email, phone, or hiring contact to display on the listing"}}
+    {{> afQuickField name='description' rows=8 placeholder=(t 'form.placeholder.description')}}
+    {{> afQuickField name='url' placeholder=(t 'form.placeholder.url')}}
+    {{> afQuickField name='contact' placeholder=(t 'form.placeholder.contact')}}
+    {{> afQuickField name='applyWhatsApp' placeholder='+258 84 1234567'}}
 </template>

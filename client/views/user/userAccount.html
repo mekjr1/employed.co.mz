@@ -1,0 +1,73 @@
+<!--
+  A9.3 — signed-in account self-service page. Three actions:
+    1. Display the account email / verification state.
+    2. Download a JSON export of everything the user owns
+       (calls /api/me/export with the resume login token).
+    3. Schedule the account for permanent deletion in 30 days, with a
+       prominent confirmation modal. Users can cancel the pending
+       deletion any time before the cron runs.
+
+  Localised entirely via i18n keys under the `account.*` namespace
+  (see both/lib/i18n.js).
+-->
+<template name="userAccount">
+  <div class="row">
+    <div class="col-md-8 col-md-offset-2">
+      <h2>{{t 'account.title'}}</h2>
+      <p class="text-muted">{{t 'account.subtitle'}}</p>
+
+      <div class="panel panel-default">
+        <div class="panel-heading"><strong>{{t 'account.profile_heading'}}</strong></div>
+        <div class="panel-body">
+          <dl class="dl-horizontal">
+            <dt>{{t 'account.email'}}</dt>
+            <dd>{{accountEmail}}
+              {{#if accountEmailVerified}}
+                <span class="brand-pill brand-pill-verified" title="{{t 'account.email_verified'}}">
+                  <svg class="brand-pill-icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle cx="50" cy="50" r="46" fill="#4F46E5"/><path d="M30 52 L44 66 L72 36" fill="none" stroke="#FAFAF7" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  {{t 'account.email_verified'}}
+                </span>
+              {{else}}
+                <span class="brand-pill brand-pill-unverified" title="{{t 'account.email_unverified'}}">
+                  <svg class="brand-pill-icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle cx="50" cy="50" r="46" fill="#F59E0B"/><path d="M50 28 L50 56" stroke="#FAFAF7" stroke-width="9" stroke-linecap="round"/><circle cx="50" cy="72" r="5" fill="#FAFAF7"/></svg>
+                  {{t 'account.email_unverified'}}
+                </span>
+              {{/if}}
+            </dd>
+            <dt>{{t 'account.created_at'}}</dt>
+            <dd>{{formatDate accountCreatedAt}}</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="panel panel-default">
+        <div class="panel-heading"><strong>{{t 'account.export.heading'}}</strong></div>
+        <div class="panel-body">
+          <p>{{t 'account.export.body'}}</p>
+          <button type="button" class="btn btn-default" id="download-export">
+            <i class="fa fa-download"></i> {{t 'account.export.button'}}
+          </button>
+        </div>
+      </div>
+
+      <div class="panel panel-danger">
+        <div class="panel-heading"><strong>{{t 'account.delete.heading'}}</strong></div>
+        <div class="panel-body">
+          {{#if deletionPending}}
+            <div class="alert alert-warning" role="alert" aria-live="polite">
+              {{t 'account.delete.scheduled' date=(formatDate deletionScheduledFor) cancelLink=cancelLinkLabel}}
+            </div>
+            <button type="button" class="btn btn-default" id="cancel-deletion">
+              {{t 'account.delete.cancel'}}
+            </button>
+          {{else}}
+            <p>{{t 'account.delete.body'}}</p>
+            <button type="button" class="btn btn-danger" id="request-deletion">
+              <i class="fa fa-trash"></i> {{t 'account.delete.button'}}
+            </button>
+          {{/if}}
+        </div>
+      </div>
+    </div>
+  </div>
+</template>

@@ -2,12 +2,9 @@
 	<footer class="container-fluid">
 		<div class="row">
 			<div class="col-xs-12 text-center">
-				<small>
-					Employed
-					&nbsp;-&nbsp;
-          <i class="fa fa-github fa-lg"></i>&nbsp;&nbsp;<a href="https://github.com/mekjr1/employed.co.mz" target="_blank">GitHub</a>
-          &nbsp;-&nbsp;
-					<i class="fa fa-rocket fa-lg"></i>&nbsp;&nbsp;<a href="https://www.meteor.com/hosting" target="_blank">Hosted on Galaxy</a>
+				<small class="footer-brand">
+					<img src="/images/logo.svg" alt="" class="footer-brand-logo" width="18" height="18" />
+					<span>Employed</span>
 				</small>
 			</div>
 		</div>
@@ -15,18 +12,20 @@
 			<div class="col-xs-12 text-center">
 				<br>
 				<small>
-					<i class="fa fa-rss"></i> RSS <a href="/rss/jobs" target="_blank">Jobs</a>
-           <!-- <a href="/rss/profiles" target="_blank">Developers</a> -->
+					<i class="fa fa-rss" aria-hidden="true"></i> {{t 'footer.rss_label'}} <a href="/rss/jobs" target="_blank" rel="noopener noreferrer">{{t 'footer.jobs'}}</a>
 					&nbsp;-&nbsp;
-					<i class="fa fa-code"></i> JSON <a href="/api/jobs" target="_blank">Jobs</a>
-           <!-- <a href="/api/profiles" target="_blank">Developers</a> -->
+					<i class="fa fa-code" aria-hidden="true"></i> {{t 'footer.json_label'}} <a href="/api/jobs" target="_blank" rel="noopener noreferrer">{{t 'footer.jobs'}}</a>
+					&nbsp;-&nbsp;
+					<a href="/privacy">{{t 'legal.privacy_link'}}</a>
+					&nbsp;-&nbsp;
+					<a href="/terms">{{t 'legal.terms_link'}}</a>
 				</small>
 				<br>
 			</div>
 		</div>
 		<div class="row">
 			<div class="col-xs-12 text-center" id="disclaimer">
-				Employed is an independent jobs marketplace for Mexico and Mozambique.
+				{{t 'footer.disclaimer'}}
 			</div>
 		</div>
 	</footer>

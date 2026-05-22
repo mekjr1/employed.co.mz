@@ -1,0 +1,25 @@
+<!-- 820×312 — Facebook page cover (also fits LinkedIn Personal background) -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 312" role="img" aria-labelledby="fbCoverTitle">
+  <title id="fbCoverTitle">Employed — Facebook cover</title>
+  <rect width="820" height="312" fill="#27272B"/>
+  <!-- Dot grid -->
+  <g fill="#4F46E5" opacity="0.18">
+    <circle cx="60" cy="50" r="2"/><circle cx="120" cy="50" r="2"/><circle cx="180" cy="50" r="2"/>
+    <circle cx="60" cy="100" r="2"/><circle cx="120" cy="100" r="2"/>
+    <circle cx="60" cy="150" r="2"/>
+  </g>
+  <!-- Mark -->
+  <g transform="translate(60 96)">
+    <rect width="120" height="120" rx="26" fill="#4F46E5"/>
+    <g fill="#FFFFFF">
+      <rect x="26" y="26" width="12" height="68" rx="3"/>
+      <rect x="26" y="26" width="62" height="12" rx="3"/>
+      <rect x="26" y="54" width="44" height="12" rx="3"/>
+      <rect x="26" y="82" width="58" height="12" rx="3"/>
+    </g>
+    <circle cx="98" cy="32" r="7" fill="#F59E0B"/>
+  </g>
+  <text x="220" y="174" font-family="Montserrat, sans-serif" font-weight="900" font-size="72" fill="#FAFAF7" letter-spacing="-2">Employ<tspan fill="#F59E0B">ed</tspan></text>
+  <text x="222" y="210" font-family="Inter, sans-serif" font-weight="500" font-size="20" fill="#9CA3AF" letter-spacing="0.5">Local jobs. Honest listings. No noise.</text>
+  <line x1="222" y1="232" x2="282" y2="232" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+</svg>

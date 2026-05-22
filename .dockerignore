@@ -1,0 +1,42 @@
+# A9.42 — broadened so secrets and dev-only files never reach the image.
+.git
+.gitignore
+.meteor/local
+node_modules
+npm-debug.log
+meteor.log
+.demeteorized
+.DS_Store
+
+# Secrets & per-host config
+settings-*.json
+.env
+.env.*
+
+# Keep tests in the build context because package.json declares
+# meteor.testModule.server = tests/main.js, and Meteor validates that path even
+# outside test mode.
+
+# Docs and CI metadata not needed in the runtime image
+.github/
+FIXES_PLAN.md
+BOOTSTRAP5_MIGRATION.md
+CHANGELOG.md
+CLAUDE.md
+LICENSE
+LICENSE.txt
+README.md
+
+# A9.30 — Brand asset tooling and source SVGs. The PNGs under
+# public/images/ are committed, so the runtime image already has every
+# raster it needs. Excluding these from the build context keeps the
+# image lean and prevents `@resvg/resvg-js` (a build-time devDependency)
+# from ever being reachable from production code.
+brand/
+scripts/
+
+# Logs and editor artifacts
+*.log
+.vscode/
+.idea/
+*.swp

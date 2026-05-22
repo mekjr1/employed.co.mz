@@ -13,3 +13,14 @@ node_modules
 meteor.log
 .claude
 docs/claudePlans/**
+
+# UAT / Playwright test outputs and caches
+uat-artifacts/
+.playwright-mcp/
+tests/e2e/test-results/
+tests/e2e/playwright-report/
+tests/e2e/e2e-results.json
+
+# A10.0 — perf scaffolding
+build/
+.lighthouse/

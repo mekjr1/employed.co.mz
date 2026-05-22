@@ -1,0 +1,32 @@
+// ============================================================
+// useraccounts:bootstrap → hand-rolled BS5 replacement (PR 2 scaffold)
+// ============================================================
+//
+// STATUS: Empty scaffold. The actual templates land in PR 2 and live
+// in `client/views/account/`. This file is the spot where any global
+// account-flow styling overrides go (auth card padding, divider
+// between social login + email, password-strength meter colours, etc.).
+//
+// PR 2 checklist:
+//   [ ] Write `client/views/account/signIn.html` (BS5 form-floating)
+//   [ ] Write `client/views/account/signUp.html`
+//   [ ] Write `client/views/account/forgotPassword.html`
+//   [ ] Write `client/views/account/resetPassword.html` (token route)
+//   [ ] Write `client/views/account/verifyEmail.html` (token route)
+//   [ ] Write `client/views/account/changePassword.html`
+//   [ ] Wire all of them to `Accounts.*` API directly (no AccountsTemplates)
+//   [ ] Mount router entries that replace `useraccounts:iron-routing`
+//   [ ] `meteor remove useraccounts:bootstrap useraccounts:iron-routing`
+//   [ ] Smoke test sign-in / sign-up / forgot-password end-to-end on
+//       Docker UAT stack (mailhog confirms the password-reset email
+//       arrives + click-through works).
+//   [ ] Update brand/BS5-MIGRATION.md status: PR 2 complete.
+//
+// The `Accounts.emailTemplates.verifyEmail` and `resetPassword`
+// templates already wired in `server/accounts.js` during the rebrand
+// pass will continue to work unchanged — they emit branded HTML
+// regardless of which UI surface kicks off the flow.
+
+.auth-card {
+  // placeholder — fill in PR 2 with the actual card styling
+}

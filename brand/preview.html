@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Employed — Brand kit preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --indigo:#4F46E5; --indigo-700:#4338CA; --indigo-100:#E0E7FF; --indigo-50:#EEF2FF;
+    --amber:#F59E0B; --amber-50:#FEF3C7; --amber-700:#B45309;
+    --dark:#27272B; --cream:#FAFAF7;
+    --ink:#111827; --body:#374151; --muted:#6B7280; --rule:#E5E7EB; --paper:#F9FAFB;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Inter',system-ui,sans-serif;color:var(--body);background:var(--paper);line-height:1.55}
+  header.page{padding:48px 64px 28px;border-bottom:1px solid var(--rule);background:#fff}
+  header.page h1{font-family:'Montserrat';font-weight:900;font-size:42px;margin:0;color:var(--ink);letter-spacing:-1.5}
+  header.page h1 .ed{color:var(--amber)}
+  header.page p{max-width:76ch;color:var(--muted);margin:8px 0}
+  main{padding:24px 64px 80px}
+  h2{font-family:'Montserrat';font-weight:800;font-size:22px;color:var(--ink);margin:32px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--indigo-100)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+  .tile{background:#fff;border:1px solid var(--rule);border-radius:12px;padding:18px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+  .tile.dark{background:var(--dark)}
+  .tile h4{font-family:'Inter';font-weight:600;font-size:13px;color:var(--ink);margin:0}
+  .tile.dark h4{color:var(--cream)}
+  .tile small{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--muted)}
+  .tile.dark small{color:#9CA3AF}
+  .tile img,.tile object{max-width:100%;height:auto}
+  .palette{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+  .swatch{aspect-ratio:1;border-radius:10px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.08);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:8px;font-family:ui-monospace,Menlo,monospace;font-size:10px}
+  .social-frame{background:#fff;border:1px solid var(--rule);border-radius:12px;padding:18px;margin:8px 0}
+  .social-frame h4{margin:0 0 8px;font-family:Inter;font-weight:600;font-size:13px;color:var(--ink)}
+  .social-frame .ratio{position:relative;overflow:hidden;border-radius:8px;border:1px solid var(--rule)}
+  .social-frame .ratio img,.social-frame .ratio object{display:block;width:100%;height:auto}
+</style>
+</head>
+<body>
+
+<header class="page">
+  <h1>Employ<span class="ed">ed</span> — brand kit</h1>
+  <p>Every asset in this folder rendered for visual inspection. Source paths under each tile. This page lives in‑repo at <code>brand/preview.html</code> — open in any browser.</p>
+</header>
+
+<main>
+
+<h2>Palette</h2>
+<div class="palette">
+  <div class="swatch" style="background:#4F46E5;color:rgba(255,255,255,0.85);">#4F46E5<br>indigo</div>
+  <div class="swatch" style="background:#4338CA;color:rgba(255,255,255,0.85);">#4338CA<br>indigo-700</div>
+  <div class="swatch" style="background:#E0E7FF;color:#3730A3;">#E0E7FF<br>indigo-100</div>
+  <div class="swatch" style="background:#F59E0B;color:#78350F;">#F59E0B<br>amber</div>
+  <div class="swatch" style="background:#27272B;color:#FAFAF7;">#27272B<br>dark</div>
+  <div class="swatch" style="background:#FAFAF7;color:#374151;">#FAFAF7<br>cream</div>
+</div>
+
+<h2>Logos</h2>
+<div class="grid">
+  <div class="tile">
+    <object data="logo/logo-mark.svg" width="120" height="120" type="image/svg+xml"></object>
+    <h4>Square mark</h4>
+    <small>logo/logo-mark.svg</small>
+  </div>
+  <div class="tile dark">
+    <object data="logo/logo-mark-dark.svg" width="120" height="120" type="image/svg+xml"></object>
+    <h4>Square mark (dark surfaces)</h4>
+    <small>logo/logo-mark-dark.svg</small>
+  </div>
+  <div class="tile" style="color:#111827;">
+    <object data="logo/logo-mark-monochrome.svg" width="120" height="120" type="image/svg+xml" style="color:#111827"></object>
+    <h4>Monochrome</h4>
+    <small>logo/logo-mark-monochrome.svg</small>
+  </div>
+  <div class="tile">
+    <object data="logo/favicon.svg" width="64" height="64" type="image/svg+xml"></object>
+    <h4>Favicon (optimised)</h4>
+    <small>logo/favicon.svg</small>
+  </div>
+  <div class="tile" style="flex-direction:column;grid-column:span 2">
+    <object data="logo/logo-horizontal.svg" width="320" height="90" type="image/svg+xml"></object>
+    <h4>Horizontal lockup</h4>
+    <small>logo/logo-horizontal.svg</small>
+  </div>
+  <div class="tile dark" style="flex-direction:column;grid-column:span 2">
+    <object data="logo/logo-horizontal-dark.svg" width="320" height="90" type="image/svg+xml"></object>
+    <h4>Horizontal lockup (dark surfaces)</h4>
+    <small>logo/logo-horizontal-dark.svg</small>
+  </div>
+  <div class="tile">
+    <object data="logo/wordmark.svg" width="200" height="60" type="image/svg+xml"></object>
+    <h4>Wordmark only</h4>
+    <small>logo/wordmark.svg</small>
+  </div>
+</div>
+
+<h2>Trust seals</h2>
+<div class="grid">
+  <div class="tile">
+    <object data="seals/featured-seal.svg" width="100" height="100" type="image/svg+xml"></object>
+    <h4>Featured</h4>
+    <small>seals/featured-seal.svg</small>
+  </div>
+  <div class="tile">
+    <object data="seals/verified-seal.svg" width="100" height="100" type="image/svg+xml"></object>
+    <h4>Verified</h4>
+    <small>seals/verified-seal.svg</small>
+  </div>
+  <div class="tile">
+    <object data="seals/unverified-seal.svg" width="100" height="100" type="image/svg+xml"></object>
+    <h4>Pending verification</h4>
+    <small>seals/unverified-seal.svg</small>
+  </div>
+</div>
+
+<h2>Social media</h2>
+
+<div class="social-frame">
+  <h4>OG / Twitter card · 1200 × 630</h4>
+  <div class="ratio" style="aspect-ratio:1200/630;"><object data="social/og-card.svg" type="image/svg+xml" style="width:100%;height:100%"></object></div>
+</div>
+
+<div class="social-frame">
+  <h4>Facebook cover · 820 × 312</h4>
+  <div class="ratio" style="aspect-ratio:820/312;"><object data="social/facebook-cover.svg" type="image/svg+xml" style="width:100%;height:100%"></object></div>
+</div>
+
+<div class="social-frame">
+  <h4>Twitter/X banner · 1500 × 500</h4>
+  <div class="ratio" style="aspect-ratio:1500/500;"><object data="social/twitter-banner.svg" type="image/svg+xml" style="width:100%;height:100%"></object></div>
+</div>
+
+<div class="social-frame">
+  <h4>LinkedIn banner · 1584 × 396</h4>
+  <div class="ratio" style="aspect-ratio:1584/396;"><object data="social/linkedin-banner.svg" type="image/svg+xml" style="width:100%;height:100%"></object></div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <div class="social-frame">
+    <h4>Instagram post · 1080 × 1080</h4>
+    <div class="ratio" style="aspect-ratio:1/1;"><object data="social/instagram-post.svg" type="image/svg+xml" style="width:100%;height:100%"></object></div>
+  </div>
+  <div class="social-frame">
+    <h4>Instagram story · 1080 × 1920</h4>
+    <div class="ratio" style="aspect-ratio:1080/1920;max-height:640px;"><object data="social/instagram-story.svg" type="image/svg+xml" style="width:100%;height:100%"></object></div>
+  </div>
+</div>
+
+<h2>Merchandise</h2>
+
+<div class="social-frame">
+  <h4>T-shirt front</h4>
+  <div style="display:flex;justify-content:center;background:var(--paper);padding:18px;border-radius:8px"><object data="merch/tshirt-front.svg" type="image/svg+xml" style="width:280px;height:auto"></object></div>
+</div>
+
+<div class="social-frame">
+  <h4>Die-cut sticker · 70mm</h4>
+  <div style="display:flex;justify-content:center;background:var(--paper);padding:18px;border-radius:8px"><object data="merch/sticker.svg" type="image/svg+xml" style="width:240px;height:auto"></object></div>
+</div>
+
+<div class="social-frame">
+  <h4>Business card · front + back · 85 × 55 mm</h4>
+  <div class="ratio" style="aspect-ratio:2050/650;"><object data="merch/business-card.svg" type="image/svg+xml" style="width:100%;height:100%"></object></div>
+</div>
+
+<h2>Email</h2>
+<div class="social-frame">
+  <h4>Signature (paste into Gmail/Outlook)</h4>
+  <iframe src="email/signature.html" style="width:100%;height:200px;border:1px solid var(--rule);border-radius:8px"></iframe>
+</div>
+<div class="social-frame">
+  <h4>Transactional email header (reference)</h4>
+  <iframe src="email/branded-header.html" style="width:100%;height:120px;border:1px solid var(--rule);border-radius:8px"></iframe>
+</div>
+
+</main>
+</body>
+</html>

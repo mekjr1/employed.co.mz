@@ -1,0 +1,118 @@
+// A9.33 — Ads Phase 0 styling. Visually distinct enough that a
+// stakeholder reviewing the site can spot every mock placeholder in
+// one glance, but still respects the brand palette so it doubles as a
+// realistic preview of the Tier 2 sponsor card.
+
+@import "../../lib/journal.variables.import.less";
+
+.ad-slot {
+    // CLS budget — see docs/ads-strategy.md. Reserved even in mock
+    // mode so layout does not shift when Phase 3 swaps in AdSense.
+    min-height: 200px;
+    margin: 16px 0;
+    display: block;
+}
+
+.ad-slot--home-spotlight {
+    margin: 24px 0 8px;
+}
+
+.ad-slot--feed-sponsor {
+    margin: 12px 0;
+}
+
+.ad-slot--empty-state {
+    margin: 24px auto 0;
+    max-width: 480px;
+}
+
+.mock-ad {
+    position: relative;
+    border: 2px dashed #C7C3B7;
+    background: repeating-linear-gradient(
+        135deg,
+        #FAFAF7 0px,
+        #FAFAF7 12px,
+        #F1EFE8 12px,
+        #F1EFE8 24px
+    );
+    padding: 20px 20px 16px;
+    border-radius: 8px;
+    box-shadow: none;
+
+    &__label {
+        position: absolute;
+        top: 10px;
+        left: 12px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #8C8678;
+        background: #FAFAF7;
+        padding: 2px 8px;
+        border-radius: 3px;
+    }
+
+    &__body {
+        margin-top: 18px;
+    }
+
+    &__title {
+        margin: 0 0 6px;
+        font-size: 18px;
+        font-weight: 700;
+        color: #27272B;
+        font-family: Montserrat, Inter, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    &__subtitle {
+        margin: 0 0 12px;
+        font-size: 14px;
+        line-height: 1.45;
+        color: #5C5749;
+    }
+
+    &__cta {
+        display: inline-block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #4F46E5;
+        text-decoration: none;
+        border-bottom: 1px solid currentColor;
+        padding-bottom: 1px;
+
+        &:hover, &:focus {
+            color: #4338CA;
+            text-decoration: none;
+        }
+    }
+
+    &__meta {
+        margin-top: 12px;
+        padding-top: 8px;
+        border-top: 1px dotted #C7C3B7;
+        font-size: 11px;
+        color: #8C8678;
+        font-family: Menlo, Consolas, monospace;
+
+        code {
+            background: transparent;
+            padding: 0;
+            color: inherit;
+            border: 0;
+        }
+    }
+}
+
+// Mobile: collapse to single column, slightly tighter padding.
+@media (max-width: 767px) {
+    .mock-ad {
+        padding: 18px 14px 14px;
+
+        &__title { font-size: 16px; }
+        &__subtitle { font-size: 13px; }
+
+        &__cta { width: 100%; text-align: center; }
+    }
+}

@@ -1,0 +1,55 @@
+<!--
+	A9.19 — accessible confirm/alert modals. Replaces native window.confirm,
+	window.prompt, and window.alert which are unthemed, unlocalised, and
+	awkward for screen readers. Uses the existing peppelg:bootstrap-3-modal
+	helpers (Modal.show / Modal.hide).
+
+	Templates expect `data` of the shape produced by client/lib/dialog.js:
+	    { title, message, submitClass, submitLabel, cancelLabel,
+	      withReason, withPrompt, promptPlaceholder, promptValue }
+-->
+
+<template name="appConfirmModal">
+	<div class="modal fade" data-dialog-id="{{dialogId}}" role="dialog" aria-modal="true" aria-labelledby="app-confirm-title" tabindex="-1">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title" id="app-confirm-title">{{title}}</h4>
+				</div>
+				<div class="modal-body">
+					<p>{{message}}</p>
+					{{#if withReason}}
+						<label for="app-confirm-reason" class="sr-only">{{reasonLabel}}</label>
+						<textarea id="app-confirm-reason" class="form-control reason" rows="2" placeholder="{{reasonLabel}}"></textarea>
+					{{/if}}
+					{{#if withPrompt}}
+						<label for="app-confirm-prompt" class="sr-only">{{message}}</label>
+						<input id="app-confirm-prompt" class="form-control prompt" type="text" value="{{promptValue}}" placeholder="{{promptPlaceholder}}">
+					{{/if}}
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default cancel-btn" data-dismiss="modal">{{cancelLabel}}</button>
+					<button type="button" class="btn submit-btn {{submitClass}}">{{submitLabel}}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+
+<template name="appAlertModal">
+	<div class="modal fade" data-dialog-id="{{dialogId}}" role="alertdialog" aria-modal="true" aria-labelledby="app-alert-title" tabindex="-1">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title" id="app-alert-title">{{title}}</h4>
+				</div>
+				<div class="modal-body">
+					<p>{{message}}</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary ok-btn" data-dismiss="modal">{{okLabel}}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>

@@ -1,26 +1,31 @@
 <template name="jobDeactivate">
-    <div class="modal fade">
-        <div class="modal-dialog">
+    <div class="modal fade" role="dialog" aria-modal="true" aria-labelledby="deactivate-modal-title" tabindex="-1">
+        <div class="modal-dialog" role="document">
             <div class="modal-content">
 
                 <div class="modal-header">
-                    <h4 class="modal-title">Why do you want to deactivate?</h4>
+                    <h4 class="modal-title" id="deactivate-modal-title">{{t 'deactivate.title'}}</h4>
                 </div>
 
                 <div class="modal-body">
-                    <br><br>
+                    <p class="text-muted">
+                        {{t 'deactivate.body'}}
+                    </p>
                     <div class="row">
-                        <div class="col-sm-6 text-center">
-                            <a class="deactivate filled btn btn-primary btn-lg" role="button" href="#">Position Filled</a>
+                        <div class="col-sm-4 text-center">
+                            <button type="button" class="deactivate filled btn btn-primary btn-lg btn-block">{{t 'deactivate.position_filled'}}</button>
                         </div>
-                        <div class="col-sm-6 text-center">
-                            <a class="deactivate btn btn-danger btn-lg" role="button" href="#">Other Reasons</a>
+                        <div class="col-sm-4 text-center">
+                            <button type="button" class="deactivate btn btn-warning btn-lg btn-block">{{t 'deactivate.other_reasons'}}</button>
+                        </div>
+                        <div class="col-sm-4 text-center">
+                            <button type="button" class="delete-permanent btn btn-danger btn-lg btn-block">{{t 'deactivate.delete_permanent'}}</button>
                         </div>
                     </div>
-                    <br><br><br>
+                    <br><br>
                     <div class="row">
                         <div class="col-sm-12 text-right">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal">{{t 'action.cancel'}}</button>
                         </div>
                     </div>
                 </div>

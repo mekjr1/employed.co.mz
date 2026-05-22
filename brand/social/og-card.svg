@@ -1,0 +1,43 @@
+<!--
+  1200×630 — Open Graph / Twitter card.
+  This is the canonical artwork; also dropped into public/images/og-card.svg
+  so seo.js can reference it directly. PNG export instructions live in
+  brand/README.md.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="ogCardTitle">
+  <title id="ogCardTitle">Employed — Local jobs · Moçambique · México</title>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#27272B"/>
+
+  <!-- Dot grid (top-left) -->
+  <g fill="#4F46E5" opacity="0.18">
+    <circle cx="80" cy="80" r="3"/>  <circle cx="160" cy="80" r="3"/> <circle cx="240" cy="80" r="3"/>
+    <circle cx="320" cy="80" r="3"/> <circle cx="400" cy="80" r="3"/>
+    <circle cx="80" cy="160" r="3"/> <circle cx="160" cy="160" r="3"/> <circle cx="240" cy="160" r="3"/>
+    <circle cx="80" cy="240" r="3"/> <circle cx="160" cy="240" r="3"/>
+    <circle cx="80" cy="320" r="3"/>
+  </g>
+
+  <!-- Big logo mark -->
+  <g transform="translate(96 200)">
+    <rect width="240" height="240" rx="52" fill="#4F46E5"/>
+    <g fill="#FFFFFF">
+      <rect x="52" y="52" width="24" height="136" rx="6"/>
+      <rect x="52" y="52" width="124" height="24" rx="6"/>
+      <rect x="52" y="108" width="86" height="24" rx="6"/>
+      <rect x="52" y="164" width="116" height="24" rx="6"/>
+    </g>
+    <circle cx="196" cy="64" r="14" fill="#F59E0B"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="400" y="330" font-family="Montserrat, 'Trebuchet MS', sans-serif" font-weight="900" font-size="124" fill="#FAFAF7" letter-spacing="-4">Employ<tspan fill="#F59E0B">ed</tspan></text>
+
+  <!-- Tagline -->
+  <text x="404" y="392" font-family="Inter, system-ui, sans-serif" font-weight="500" font-size="32" fill="#9CA3AF" letter-spacing="1.5">Local jobs · Moçambique · México</text>
+
+  <!-- Amber accent -->
+  <line x1="96" y1="540" x2="200" y2="540" stroke="#F59E0B" stroke-width="6" stroke-linecap="round"/>
+  <text x="96" y="582" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="22" fill="#9CA3AF" letter-spacing="0.5">employed.co.mz · employed.com.mx</text>
+</svg>

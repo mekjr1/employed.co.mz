@@ -1,12 +1,14 @@
 AutoForm.addHooks(['userProfileEdit'], {
   after: {
-    update: function(error, result) {
+    update: function(error /*, result */) {
       if (error) {
-        console.log(error);
-      } else {
-        // analytics.track("User Profile Edited");
-        Modal.hide("userProfile");
+        // Surface the failure to the user; AutoForm already shows
+        // field-level validation errors, but a top-of-form alert is
+        // useful for transport-level issues (offline, 5xx, etc.).
+        console.error('userProfileEdit update failed:', error && error.reason || error);
+        return;
       }
+      Modal.hide("userProfile");
     }
   }
 });

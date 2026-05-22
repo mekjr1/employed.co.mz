@@ -200,15 +200,19 @@ Profiles.helpers({
   }
 });
 
+// All Profiles UI is currently disabled (see commented routes/templates).
+// Until profiles are intentionally re-introduced, block every client-side
+// write so the collection can't be polluted from a browser console. Admins
+// retain read/write access via server methods and `adminSetProfileStatus`.
 Profiles.allow({
-  insert: function(userId, doc) {
-    return userId && doc && userId === doc.userId;
+  insert: function() {
+    return false;
   },
-  update: function(userId, doc, fieldNames, modifier) {
-    return Roles.userIsInRole(userId, ['admin']) || (!_.contains(fieldNames, 'randomSorter') && !_.contains(fieldNames, 'htmlDescription') && !_.contains(fieldNames, 'status') && userId && doc && userId === doc.userId);
+  update: function(userId) {
+    return Roles.userIsInRole(userId, ['admin']);
   },
-  remove: function(userId, doc) {
-    return Roles.userIsInRole(userId, ['admin']) || (userId && doc && userId === doc.userId);
+  remove: function(userId) {
+    return Roles.userIsInRole(userId, ['admin']);
   },
-  fetch: ['userId']
+  fetch: []
 });

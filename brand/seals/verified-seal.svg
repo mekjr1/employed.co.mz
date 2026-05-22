@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="verifiedSealTitle">
+  <title id="verifiedSealTitle">Verified</title>
+  <circle cx="50" cy="50" r="44" fill="#4F46E5"/>
+  <circle cx="50" cy="50" r="34" fill="none" stroke="#F59E0B" stroke-width="2" opacity="0.7"/>
+  <path d="M32 52 L44 64 L70 36" fill="none" stroke="#FAFAF7" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

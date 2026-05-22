@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Employed — Logo concepts (round 1)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink:        #111827;   /* gray-900 — headings */
+      --body:       #374151;   /* gray-700 — body text */
+      --muted:      #6B7280;   /* gray-500 — secondary */
+      --rule:       #E5E7EB;   /* gray-200 — borders */
+      --paper:      #F9FAFB;   /* gray-50  — page bg, light stage */
+      --paper-2:    #F3F4F6;   /* slightly warmer paper */
+      --indigo:     #4F46E5;   /* indigo-600 — primary */
+      --indigo-700: #4338CA;   /* indigo-700 — hover */
+      --indigo-100: #E0E7FF;   /* indigo-100 — tint */
+      --amber:      #F59E0B;   /* amber-500 — warm accent */
+      --amber-200:  #FDE68A;   /* amber-200 — soft accent */
+      --dark:       #27272B;   /* anchor dark — jumbotron, footer, dark stage */
+      --cream:      #FAFAF7;   /* off-white for dark-stage text */
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, Segoe UI, sans-serif;
+      color: var(--body);
+      background: var(--paper);
+      line-height: 1.55;
+    }
+    header.page {
+      padding: 48px 64px 32px;
+      border-bottom: 1px solid var(--rule);
+      background: #fff;
+    }
+    header.page h1 {
+      font-family: 'Montserrat', system-ui, sans-serif;
+      font-weight: 800;
+      font-size: 40px;
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    header.page p {
+      max-width: 72ch;
+      color: var(--muted);
+      margin: 4px 0;
+    }
+    header.page p code,
+    .notes code {
+      background: var(--paper-2);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--ink);
+    }
+    .palette {
+      display: flex;
+      gap: 8px;
+      margin-top: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .swatch {
+      width: 64px; height: 64px; border-radius: 10px;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
+      display: flex; align-items: flex-end; justify-content: center;
+      font-size: 10px; font-family: ui-monospace, Menlo, monospace;
+      color: rgba(255,255,255,0.85);
+      padding-bottom: 5px;
+      letter-spacing: 0.02em;
+    }
+    main { padding: 24px 64px 96px; }
+    section.concept {
+      border: 1px solid var(--rule);
+      border-radius: 14px;
+      background: #fff;
+      margin: 32px 0;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+    .concept header {
+      padding: 20px 28px;
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 24px;
+      background: #FCFCFB;
+    }
+    .concept header h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 22px;
+      margin: 0;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+    }
+    .concept header .tagline {
+      color: var(--muted);
+      font-size: 14px;
+      max-width: 56ch;
+    }
+    .concept .body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .stage {
+      padding: 36px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      align-items: center;
+      justify-content: center;
+      min-height: 320px;
+    }
+    .stage.light { background: var(--paper); border-right: 1px solid var(--rule); }
+    .stage.dark  { background: var(--dark); color: var(--cream); }
+    .stage .label {
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .stage.dark .label { color: rgba(250,250,247,0.55); }
+    .size-row {
+      display: flex;
+      gap: 24px;
+      align-items: flex-end;
+    }
+    .size-row > div {
+      display: flex; flex-direction: column; gap: 6px; align-items: center;
+    }
+    .size-row .size-label {
+      font-size: 10px; color: var(--muted); font-family: ui-monospace, Menlo, monospace;
+    }
+    .stage.dark .size-label { color: rgba(250,250,247,0.45); }
+    .lockup-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .notes {
+      padding: 18px 28px;
+      background: #FCFCFB;
+      border-top: 1px solid var(--rule);
+      font-size: 13px;
+      color: var(--body);
+    }
+    .notes strong { color: var(--ink); }
+    .footer-cta {
+      border: 1px dashed var(--rule);
+      border-radius: 14px;
+      padding: 24px 28px;
+      margin-top: 48px;
+      color: var(--body);
+      font-size: 14px;
+      background: #fff;
+    }
+    .footer-cta strong { color: var(--ink); }
+    .footer-cta ol { margin: 8px 0 0 18px; padding: 0; }
+    .footer-cta li { margin-bottom: 4px; }
+    .recommend {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--indigo-100);
+      color: var(--indigo-700);
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .wordmark-em {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+  </style>
+</head>
+<body>
+
+<header class="page">
+  <h1>Employed — logo concepts</h1>
+  <p>Five directions for a refreshed <strong style="color:var(--ink)">Employed</strong> brand mark. Each is rendered as an icon at 96 / 48 / 24 / 16&nbsp;px, plus a horizontal lockup, on both light (<code>#F9FAFB</code>) and dark (<code>#27272B</code>) surfaces.</p>
+  <p>Palette is anchored on the indigo system the redesign plan already proposes (<code>REDESIGN.md §4.1</code>), pairing the primary indigo with a warm amber accent so the brand has both <em>trust</em> and <em>energy</em> — a job board needs both.</p>
+  <div class="palette">
+    <div class="swatch" style="background:#4F46E5">#4F46E5</div>
+    <div class="swatch" style="background:#4338CA">#4338CA</div>
+    <div class="swatch" style="background:#E0E7FF;color:#3730A3">#E0E7FF</div>
+    <div class="swatch" style="background:#F59E0B;color:#78350F">#F59E0B</div>
+    <div class="swatch" style="background:#27272B">#27272B</div>
+    <div class="swatch" style="background:#F9FAFB;color:#374151">#F9FAFB</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============================================================== -->
+  <!-- CONCEPT 1 — Geometric "E" with spark                            -->
+  <!-- ============================================================== -->
+  <section class="concept">
+    <header>
+      <h2>01 · Geometric "E" with spark <span class="recommend">recommended</span></h2>
+      <div class="tagline">Rounded indigo badge holding a clean white "E" whose top bar extends slightly past the rest — a small forward push. An amber dot in the top-right corner suggests a spark / opportunity / signal. Modern, scalable, abstract.</div>
+    </header>
+    <div class="body">
+
+      <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+          <symbol id="c1-icon" viewBox="0 0 100 100">
+            <rect width="100" height="100" rx="22" fill="#4F46E5"/>
+            <g fill="#fff">
+              <rect x="22" y="22" width="10" height="56" rx="3"/>
+              <rect x="22" y="22" width="52" height="10" rx="3"/>
+              <rect x="22" y="45" width="36" height="10" rx="3"/>
+              <rect x="22" y="68" width="48" height="10" rx="3"/>
+            </g>
+            <circle cx="82" cy="27" r="6" fill="#F59E0B"/>
+          </symbol>
+          <symbol id="c1-icon-dark" viewBox="0 0 100 100">
+            <rect width="100" height="100" rx="22" fill="#F9FAFB"/>
+            <g fill="#4F46E5">
+              <rect x="22" y="22" width="10" height="56" rx="3"/>
+              <rect x="22" y="22" width="52" height="10" rx="3"/>
+              <rect x="22" y="45" width="36" height="10" rx="3"/>
+              <rect x="22" y="68" width="48" height="10" rx="3"/>
+            </g>
+            <circle cx="82" cy="27" r="6" fill="#F59E0B"/>
+          </symbol>
+        </defs>
+      </svg>
+
+      <div class="stage light">
+        <div class="label">Light surface</div>
+        <div class="size-row">
+          <div><div class="size-label">96</div><svg width="96" height="96" viewBox="0 0 100 100"><use href="#c1-icon"/></svg></div>
+          <div><div class="size-label">48</div><svg width="48" height="48" viewBox="0 0 100 100"><use href="#c1-icon"/></svg></div>
+          <div><div class="size-label">24</div><svg width="24" height="24" viewBox="0 0 100 100"><use href="#c1-icon"/></svg></div>
+          <div><div class="size-label">16</div><svg width="16" height="16" viewBox="0 0 100 100"><use href="#c1-icon"/></svg></div>
+        </div>
+        <div class="lockup-row">
+          <svg width="40" height="40" viewBox="0 0 100 100"><use href="#c1-icon"/></svg>
+          <span class="wordmark-em" style="font-size:30px;color:#111827;">Employ<span style="color:#4F46E5">ed</span></span>
+        </div>
+      </div>
+
+      <div class="stage dark">
+        <div class="label">Dark surface</div>
+        <div class="size-row">
+          <div><div class="size-label">96</div><svg width="96" height="96" viewBox="0 0 100 100"><use href="#c1-icon-dark"/></svg></div>
+          <div><div class="size-label">48</div><svg width="48" height="48" viewBox="0 0 100 100"><use href="#c1-icon-dark"/></svg></div>
+          <div><div class="size-label">24</div><svg width="24" height="24" viewBox="0 0 100 100"><use href="#c1-icon-dark"/></svg></div>
+          <div><div class="size-label">16</div><svg width="16" height="16" viewBox="0 0 100 100"><use href="#c1-icon-dark"/></svg></div>
+        </div>
+        <div class="lockup-row">
+          <svg width="40" height="40" viewBox="0 0 100 100"><use href="#c1-icon-dark"/></svg>
+          <span class="wordmark-em" style="font-size:30px;color:#FAFAF7;">Employ<span style="color:#F59E0B">ed</span></span>
+        </div>
+      </div>
+
+    </div>
+    <div class="notes">
+      <strong>Reads at 16 px?</strong> Yes — the E silhouette stays legible; the amber dot becomes a single bright pixel, which is actually a feature (it's distinctive in a list of favicons). <strong>Use case:</strong> favicon, PWA icon, navbar, social profile picture. <strong>Wordmark trick:</strong> the "ed" suffix flips to indigo (or amber on dark) — a subtle nod to the mark without needing a custom ligature.
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- CONCEPT 2 — Pin + Briefcase                                     -->
+  <!-- ============================================================== -->
+  <section class="concept">
+    <header>
+      <h2>02 · Pin + Briefcase</h2>
+      <div class="tagline">Map-pin silhouette holding a briefcase. The most literal possible reading of "local jobs" — instantly understandable for users in markets where the platform is brand-new (Mozambique, Mexico) and trust is built one obvious cue at a time.</div>
+    </header>
+    <div class="body">
+
+      <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+          <symbol id="c2-icon" viewBox="0 0 100 100">
+            <path d="M50 6 C28 6 14 22 14 42 C14 64 50 96 50 96 C50 96 86 64 86 42 C86 22 72 6 50 6 Z" fill="#4F46E5"/>
+            <!-- briefcase handle (open arch) -->
+            <path d="M40 38 L40 32 Q40 28 44 28 L56 28 Q60 28 60 32 L60 38" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- briefcase body -->
+            <rect x="30" y="38" width="40" height="22" rx="3" fill="#fff"/>
+            <!-- amber clasp -->
+            <circle cx="50" cy="49" r="2.5" fill="#F59E0B"/>
+          </symbol>
+          <symbol id="c2-icon-dark" viewBox="0 0 100 100">
+            <path d="M50 6 C28 6 14 22 14 42 C14 64 50 96 50 96 C50 96 86 64 86 42 C86 22 72 6 50 6 Z" fill="#F9FAFB"/>
+            <path d="M40 38 L40 32 Q40 28 44 28 L56 28 Q60 28 60 32 L60 38" fill="none" stroke="#4F46E5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="30" y="38" width="40" height="22" rx="3" fill="#4F46E5"/>
+            <circle cx="50" cy="49" r="2.5" fill="#F59E0B"/>
+          </symbol>
+        </defs>
+      </svg>
+
+      <div class="stage light">
+        <div class="label">Light surface</div>
+        <div class="size-row">
+          <div><div class="size-label">96</div><svg width="96" height="96" viewBox="0 0 100 100"><use href="#c2-icon"/></svg></div>
+          <div><div class="size-label">48</div><svg width="48" height="48" viewBox="0 0 100 100"><use href="#c2-icon"/></svg></div>
+          <div><div class="size-label">24</div><svg width="24" height="24" viewBox="0 0 100 100"><use href="#c2-icon"/></svg></div>
+          <div><div class="size-label">16</div><svg width="16" height="16" viewBox="0 0 100 100"><use href="#c2-icon"/></svg></div>
+        </div>
+        <div class="lockup-row">
+          <svg width="40" height="40" viewBox="0 0 100 100"><use href="#c2-icon"/></svg>
+          <span class="wordmark-em" style="font-size:30px;color:#111827;">Employed</span>
+        </div>
+      </div>
+
+      <div class="stage dark">
+        <div class="label">Dark surface</div>
+        <div class="size-row">
+          <div><div class="size-label">96</div><svg width="96" height="96" viewBox="0 0 100 100"><use href="#c2-icon-dark"/></svg></div>
+          <div><div class="size-label">48</div><svg width="48" height="48" viewBox="0 0 100 100"><use href="#c2-icon-dark"/></svg></div>
+          <div><div class="size-label">24</div><svg width="24" height="24" viewBox="0 0 100 100"><use href="#c2-icon-dark"/></svg></div>
+          <div><div class="size-label">16</div><svg width="16" height="16" viewBox="0 0 100 100"><use href="#c2-icon-dark"/></svg></div>
+        </div>
+        <div class="lockup-row">
+          <svg width="40" height="40" viewBox="0 0 100 100"><use href="#c2-icon-dark"/></svg>
+          <span class="wordmark-em" style="font-size:30px;color:#FAFAF7;">Employed</span>
+        </div>
+      </div>
+
+    </div>
+    <div class="notes">
+      <strong>Reads at 16 px?</strong> The pin silhouette survives; the briefcase becomes a blob. Add a flat alternate (just the pin, no briefcase) for the 16&nbsp;px favicon slot. <strong>Use case:</strong> homepage hero, app icon, social cards, OG images. <strong>Risk:</strong> map-pin marks are very common (Google Maps, Foursquare). Distinctiveness comes from the briefcase, which dies at 16&nbsp;px — so this concept needs a 2-icon system.
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- CONCEPT 3 — Open Door                                           -->
+  <!-- ============================================================== -->
+  <section class="concept">
+    <header>
+      <h2>03 · Open Door</h2>
+      <div class="tagline">A doorway slightly ajar, with warm light spilling through. Symbolises "opportunity opens here" without resorting to literal job-board imagery. Editorial, slightly cinematic — works especially well on the dark jumbotron.</div>
+    </header>
+    <div class="body">
+
+      <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+          <symbol id="c3-icon" viewBox="0 0 100 100">
+            <rect width="100" height="100" rx="22" fill="#4F46E5"/>
+            <!-- door frame -->
+            <path d="M30 86 L30 36 Q30 18 50 18 Q70 18 70 36 L70 86" fill="none" stroke="#FAFAF7" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- door (slightly open, indigo on cream) -->
+            <path d="M50 18 Q70 18 70 36 L70 86 L50 86 Z" fill="#FAFAF7"/>
+            <!-- warm light slice peeking out the gap -->
+            <path d="M48 18 L50 18 L50 86 L48 86 Z" fill="#F59E0B"/>
+            <!-- handle -->
+            <circle cx="56" cy="52" r="2.5" fill="#4F46E5"/>
+          </symbol>
+          <symbol id="c3-icon-dark" viewBox="0 0 100 100">
+            <rect width="100" height="100" rx="22" fill="#FAFAF7"/>
+            <path d="M30 86 L30 36 Q30 18 50 18 Q70 18 70 36 L70 86" fill="none" stroke="#27272B" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M50 18 Q70 18 70 36 L70 86 L50 86 Z" fill="#4F46E5"/>
+            <path d="M48 18 L50 18 L50 86 L48 86 Z" fill="#F59E0B"/>
+            <circle cx="56" cy="52" r="2.5" fill="#FAFAF7"/>
+          </symbol>
+        </defs>
+      </svg>
+
+      <div class="stage light">
+        <div class="label">Light surface</div>
+        <div class="size-row">
+          <div><div class="size-label">96</div><svg width="96" height="96" viewBox="0 0 100 100"><use href="#c3-icon"/></svg></div>
+          <div><div class="size-label">48</div><svg width="48" height="48" viewBox="0 0 100 100"><use href="#c3-icon"/></svg></div>
+          <div><div class="size-label">24</div><svg width="24" height="24" viewBox="0 0 100 100"><use href="#c3-icon"/></svg></div>
+          <div><div class="size-label">16</div><svg width="16" height="16" viewBox="0 0 100 100"><use href="#c3-icon"/></svg></div>
+        </div>
+        <div class="lockup-row">
+          <svg width="40" height="40" viewBox="0 0 100 100"><use href="#c3-icon"/></svg>
+          <span class="wordmark-em" style="font-size:30px;color:#111827;">Employed</span>
+        </div>
+      </div>
+
+      <div class="stage dark">
+        <div class="label">Dark surface</div>
+        <div class="size-row">
+          <div><div class="size-label">96</div><svg width="96" height="96" viewBox="0 0 100 100"><use href="#c3-icon-dark"/></svg></div>
+          <div><div class="size-label">48</div><svg width="48" height="48" viewBox="0 0 100 100"><use href="#c3-icon-dark"/></svg></div>
+          <div><div class="size-label">24</div><svg width="24" height="24" viewBox="0 0 100 100"><use href="#c3-icon-dark"/></svg></div>
+          <div><div class="size-label">16</div><svg width="16" height="16" viewBox="0 0 100 100"><use href="#c3-icon-dark"/></svg></div>
+        </div>
+        <div class="lockup-row">
+          <svg width="40" height="40" viewBox="0 0 100 100"><use href="#c3-icon-dark"/></svg>
+          <span class="wordmark-em" style="font-size:30px;color:#FAFAF7;">Employed</span>
+        </div>
+      </div>
+
+    </div>
+    <div class="notes">
+      <strong>Reads at 16 px?</strong> Marginal — the door arch survives, but the warm-light slice and handle disappear. The mark reads as a generic arched shape at favicon size. <strong>Use case:</strong> homepage hero, OG share images, marketing collateral, "Welcome / sign-up" flows. <strong>Pair with</strong> concept 1 or 4 for the favicon slot.
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- CONCEPT 4 — Editorial wordmark with target "o"                  -->
+  <!-- ============================================================== -->
+  <section class="concept">
+    <header>
+      <h2>04 · Editorial wordmark with target "o"</h2>
+      <div class="tagline">Type-led mark: a clean Montserrat extra-bold "Employed" with the lowercase <em>o</em> replaced by a small concentric target — the brand promise of "matching the right candidate to the right role" rendered in a single glyph swap.</div>
+    </header>
+    <div class="body">
+
+      <div class="stage light">
+        <div class="label">Light surface</div>
+
+        <svg width="380" height="80" viewBox="0 0 380 80" aria-label="Employed wordmark">
+          <text x="0" y="58" font-family="'Montserrat', sans-serif" font-weight="800" font-size="60" fill="#111827" letter-spacing="-2">Empl</text>
+          <g transform="translate(166 36)">
+            <circle r="20" fill="#4F46E5"/>
+            <circle r="12" fill="#F9FAFB"/>
+            <circle r="6" fill="#F59E0B"/>
+          </g>
+          <text x="194" y="58" font-family="'Montserrat', sans-serif" font-weight="800" font-size="60" fill="#111827" letter-spacing="-2">yed</text>
+        </svg>
+
+        <svg width="260" height="60" viewBox="0 0 380 80" aria-label="Employed wordmark small">
+          <text x="0" y="58" font-family="'Montserrat', sans-serif" font-weight="800" font-size="60" fill="#111827" letter-spacing="-2">Empl</text>
+          <g transform="translate(166 36)">
+            <circle r="20" fill="#4F46E5"/>
+            <circle r="9" fill="#F59E0B"/>
+          </g>
+          <text x="194" y="58" font-family="'Montserrat', sans-serif" font-weight="800" font-size="60" fill="#111827" letter-spacing="-2">yed</text>
+        </svg>
+
+        <div style="font-size:13px;color:var(--muted);text-align:center;max-width:36ch;">Market-localised lockup</div>
+        <svg width="320" height="100" viewBox="0 0 320 100">
+          <text x="0" y="56" font-family="'Montserrat', sans-serif" font-weight="800" font-size="48" fill="#111827" letter-spacing="-1.6">Empl</text>
+          <g transform="translate(132 36)">
+            <circle r="16" fill="#4F46E5"/>
+            <circle r="7" fill="#F59E0B"/>
+          </g>
+          <text x="154" y="56" font-family="'Montserrat', sans-serif" font-weight="800" font-size="48" fill="#111827" letter-spacing="-1.6">yed</text>
+          <text x="0" y="82" font-family="'Inter', sans-serif" font-weight="600" font-size="12" fill="#6B7280" letter-spacing="0.18em">LOCAL JOBS · MOÇAMBIQUE · MÉXICO</text>
+        </svg>
+      </div>
+
+      <div class="stage dark">
+        <div class="label">Dark surface</div>
+
+        <svg width="380" height="80" viewBox="0 0 380 80">
+          <text x="0" y="58" font-family="'Montserrat', sans-serif" font-weight="800" font-size="60" fill="#FAFAF7" letter-spacing="-2">Empl</text>
+          <g transform="translate(166 36)">
+            <circle r="20" fill="#F9FAFB"/>
+            <circle r="12" fill="#27272B"/>
+            <circle r="6" fill="#F59E0B"/>
+          </g>
+          <text x="194" y="58" font-family="'Montserrat', sans-serif" font-weight="800" font-size="60" fill="#FAFAF7" letter-spacing="-2">yed</text>
+        </svg>
+
+        <svg width="320" height="100" viewBox="0 0 320 100">
+          <text x="0" y="56" font-family="'Montserrat', sans-serif" font-weight="800" font-size="48" fill="#FAFAF7" letter-spacing="-1.6">Empl</text>
+          <g transform="translate(132 36)">
+            <circle r="16" fill="#F9FAFB"/>
+            <circle r="7" fill="#F59E0B"/>
+          </g>
+          <text x="154" y="56" font-family="'Montserrat', sans-serif" font-weight="800" font-size="48" fill="#FAFAF7" letter-spacing="-1.6">yed</text>
+          <text x="0" y="82" font-family="'Inter', sans-serif" font-weight="600" font-size="12" fill="rgba(250,250,247,0.6)" letter-spacing="0.18em">LOCAL JOBS · MOÇAMBIQUE · MÉXICO</text>
+        </svg>
+      </div>
+
+    </div>
+    <div class="notes">
+      <strong>Reads at 16 px?</strong> No — wordmark needs ≥120&nbsp;px width. <strong>Use case:</strong> site header (large screens), email signature, business cards, footer brand. <strong>Pair with</strong> the target "o" extracted as a standalone circle-in-circle mark for the favicon — gives you a unified visual system that scales from 16&nbsp;px to billboard.
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- CONCEPT 5 — Sunrise Horizon                                     -->
+  <!-- ============================================================== -->
+  <section class="concept">
+    <header>
+      <h2>05 · Sunrise Horizon</h2>
+      <div class="tagline">An amber sun rising over an indigo horizon. Optimistic, distinctly non-corporate. The metaphor — "a new opportunity starts here" — fits a platform whose primary value to the user is hope.</div>
+    </header>
+    <div class="body">
+
+      <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+          <clipPath id="c5-clip"><rect x="0" y="0" width="100" height="62"/></clipPath>
+          <symbol id="c5-icon" viewBox="0 0 100 100">
+            <rect width="100" height="100" rx="22" fill="#27272B"/>
+            <!-- rising sun -->
+            <circle cx="50" cy="62" r="22" fill="#F59E0B" clip-path="url(#c5-clip)"/>
+            <!-- horizon line -->
+            <line x1="14" y1="62" x2="86" y2="62" stroke="#FAFAF7" stroke-width="3" stroke-linecap="round"/>
+            <!-- rays -->
+            <line x1="50" y1="22" x2="50" y2="30" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+            <line x1="26" y1="34" x2="32" y2="40" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+            <line x1="74" y1="34" x2="68" y2="40" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+            <!-- a small indigo accent below the horizon (ground depth) -->
+            <rect x="14" y="78" width="72" height="6" rx="2" fill="#4F46E5" opacity="0.85"/>
+          </symbol>
+          <symbol id="c5-icon-light" viewBox="0 0 100 100">
+            <rect width="100" height="100" rx="22" fill="#F9FAFB"/>
+            <circle cx="50" cy="62" r="22" fill="#F59E0B" clip-path="url(#c5-clip)"/>
+            <line x1="14" y1="62" x2="86" y2="62" stroke="#27272B" stroke-width="3" stroke-linecap="round"/>
+            <line x1="50" y1="22" x2="50" y2="30" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+            <line x1="26" y1="34" x2="32" y2="40" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+            <line x1="74" y1="34" x2="68" y2="40" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+            <rect x="14" y="78" width="72" height="6" rx="2" fill="#4F46E5" opacity="0.85"/>
+          </symbol>
+        </defs>
+      </svg>
+
+      <div class="stage light">
+        <div class="label">Light surface</div>
+        <div class="size-row">
+          <div><div class="size-label">96</div><svg width="96" height="96" viewBox="0 0 100 100"><use href="#c5-icon-light"/></svg></div>
+          <div><div class="size-label">48</div><svg width="48" height="48" viewBox="0 0 100 100"><use href="#c5-icon-light"/></svg></div>
+          <div><div class="size-label">24</div><svg width="24" height="24" viewBox="0 0 100 100"><use href="#c5-icon-light"/></svg></div>
+          <div><div class="size-label">16</div><svg width="16" height="16" viewBox="0 0 100 100"><use href="#c5-icon-light"/></svg></div>
+        </div>
+        <div class="lockup-row">
+          <svg width="40" height="40" viewBox="0 0 100 100"><use href="#c5-icon-light"/></svg>
+          <span class="wordmark-em" style="font-size:30px;color:#111827;">Employed</span>
+        </div>
+      </div>
+
+      <div class="stage dark">
+        <div class="label">Dark surface</div>
+        <div class="size-row">
+          <div><div class="size-label">96</div><svg width="96" height="96" viewBox="0 0 100 100"><use href="#c5-icon"/></svg></div>
+          <div><div class="size-label">48</div><svg width="48" height="48" viewBox="0 0 100 100"><use href="#c5-icon"/></svg></div>
+          <div><div class="size-label">24</div><svg width="24" height="24" viewBox="0 0 100 100"><use href="#c5-icon"/></svg></div>
+          <div><div class="size-label">16</div><svg width="16" height="16" viewBox="0 0 100 100"><use href="#c5-icon"/></svg></div>
+        </div>
+        <div class="lockup-row">
+          <svg width="40" height="40" viewBox="0 0 100 100"><use href="#c5-icon"/></svg>
+          <span class="wordmark-em" style="font-size:30px;color:#FAFAF7;">Employed</span>
+        </div>
+      </div>
+
+    </div>
+    <div class="notes">
+      <strong>Reads at 16 px?</strong> Marginal — the half-sun + horizon line both survive; rays disappear. The shape is distinctive enough at small sizes despite the loss of detail. <strong>Use case:</strong> homepage hero, OG share images, "Welcome" emails, app launch screen. <strong>Risk:</strong> sunrise marks have been done (Pinterest's red-P-on-white isn't this but the concept space includes Capital One, Sunlife, Sun Microsystems). Differentiation comes from the high-contrast indigo+amber combination.
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- NEXT STEPS                                                      -->
+  <!-- ============================================================== -->
+  <section class="footer-cta">
+    <strong>Recommendation</strong> — <strong style="color:var(--indigo);">Concept 01 (Geometric "E" with spark)</strong> is the strongest single choice for Employed today:
+    <ol>
+      <li>It scales cleanly from 16 px favicon to 512 px PWA icon without needing a second mark.</li>
+      <li>It carries letterform recognition (instant "E = Employed") that pure-symbol marks lack on a brand-new platform.</li>
+      <li>The amber spark dot gives the mark a personality cue that's missing from the current flat red square — and it's literally a single circle, so it's almost free.</li>
+      <li>It pairs naturally with the wordmark from Concept 04 — same Montserrat 800, same indigo, same amber accent.</li>
+    </ol>
+    <strong>If you pick one or two directions, next step is:</strong>
+    <ol>
+      <li>Refine the chosen mark (custom paths for the letterform / pin / door / target / sun, tuned at every size, not parametric rects).</li>
+      <li>Export final standalone SVGs to <code>public/images/</code> — <code>logo.svg</code>, <code>logo-dark.svg</code>, <code>favicon.svg</code>.</li>
+      <li>Regenerate the PNG variants (<code>apple-touch-icon.png</code>, <code>favicon-16x16.png</code>, <code>favicon-32x32.png</code>, <code>icon-192x192.png</code>, <code>icon-512x512.png</code>, maskable variants).</li>
+      <li>Update <code>public/manifest.json</code> <code>theme_color</code> from the current red to <code>#4F46E5</code>.</li>
+      <li>Wire the new mark into [client/views/includes/header.html](../../client/views/includes/header.html) and [client/views/includes/footer.html](../../client/views/includes/footer.html) (already a lockup; just swap the SVG file).</li>
+    </ol>
+  </section>
+
+</main>
+</body>
+</html>

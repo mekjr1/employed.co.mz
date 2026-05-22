@@ -1,0 +1,21 @@
+<!-- 1584×396 — LinkedIn page banner. Avatar overlay sits bottom-left (~150px circle), keep copy clear of that zone. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1584 396" role="img" aria-labelledby="liBannerTitle">
+  <title id="liBannerTitle">Employed — LinkedIn banner</title>
+  <rect width="1584" height="396" fill="#27272B"/>
+  <defs>
+    <linearGradient id="liGlow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#27272B"/>
+      <stop offset="1" stop-color="#1f1d3a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1584" height="396" fill="url(#liGlow)"/>
+  <g fill="#4F46E5" opacity="0.14">
+    <circle cx="1200" cy="80" r="3"/><circle cx="1260" cy="80" r="3"/><circle cx="1320" cy="80" r="3"/>
+    <circle cx="1200" cy="140" r="3"/><circle cx="1260" cy="140" r="3"/>
+    <circle cx="1200" cy="200" r="3"/>
+  </g>
+  <!-- Right side wordmark (avoids bottom-left avatar zone) -->
+  <text x="700" y="200" font-family="Montserrat, sans-serif" font-weight="900" font-size="110" fill="#FAFAF7" letter-spacing="-3">Employ<tspan fill="#F59E0B">ed</tspan></text>
+  <text x="704" y="252" font-family="Inter, sans-serif" font-weight="500" font-size="22" fill="#9CA3AF" letter-spacing="1">Local jobs · Moçambique · México</text>
+  <line x1="704" y1="282" x2="780" y2="282" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+</svg>

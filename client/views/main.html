@@ -1,6 +1,18 @@
 <head>
-  <meta name="description" content="Employed is a job board for hiring across Mexico and Mozambique. Browse local, remote, contract, and full-time roles.">
-	<meta name="keywords" content="Jobs,Mexico,Mozambique,Remote,Full Time,Contract,Freelance,Hiring">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"> 
+  <meta name="description" content="Employed is a localized job board for local, remote, contract, and full-time roles.">
+	<meta name="keywords" content="Jobs,Remote,Full Time,Contract,Freelance,Hiring">
+	<!-- A9.17 — removed maximum-scale so users with low vision can pinch-zoom.
+         Locking the scale violates WCAG 2.1 SC 1.4.4 (Resize Text) and is an
+         iOS-specific anti-pattern that breaks accessibility for vanishingly
+         small layout benefit. -->
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+	<!-- A9.29 — full favicon set + PWA manifest + theme color. -->
+	<link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
 	<link rel="icon" type="image/png" href="/images/favicon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+	<link rel="manifest" href="/manifest.json">
+	<meta name="theme-color" content="#4F46E5">
 </head>

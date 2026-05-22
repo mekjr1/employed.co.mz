@@ -1,24 +1,33 @@
 // Journal 3.3.4
 // Variables
 // --------------------------------------------------
-
+// Redesign 2026 — updated design tokens (Phase 1)
+// Primary palette shifted to indigo; text contrast fixed for WCAG AA.
 
 //== Colors
 //
 //## Gray and brand colors for use across Bootstrap.
 
 @gray-base:              #000;
-@gray-darker:            lighten(@gray-base, 13.5%); // #222
-@gray-dark:              lighten(@gray-base, 20%);   // #333
-@gray:                   #777; // #555
-@gray-light:             lighten(@gray-base, 60%);   // #999
-@gray-lighter:           lighten(@gray-base, 93.5%); // #eee
+@gray-darker:            #111827; // Gray-900
+@gray-dark:              #374151; // Gray-700 — body text (8.6:1 contrast on white ✓)
+@gray:                   #6B7280; // Gray-500 — secondary text (4.6:1 ✓)
+@gray-light:             #9CA3AF; // Gray-400
+@gray-lighter:           #F3F4F6; // Gray-100 — page bg tint
 
-@brand-primary:         #de4f4f;
-@brand-success:         #22B24C;
-@brand-info:            #369;
-@brand-warning:         #F5E625;
-@brand-danger:          #F57A00;
+// Brand palette — Indigo
+@brand-primary:         #4F46E5; // Indigo-600
+@brand-primary-dark:    #4338CA; // Indigo-700 (hover)
+@brand-primary-light:   #E0E7FF; // Indigo-100 (tints, badges)
+
+// Semantic
+@brand-success:         #15803D; // Green-700 — WCAG AA on white pills (p3-fix-019)
+@brand-info:            #2563EB; // Blue-600
+@brand-warning:         #B45309; // Amber-700 — WCAG AA on white pills (p3-fix-019)
+@brand-danger:          #DC2626; // Red-600
+
+// Featured accent (preserved for chip backgrounds; text on it must use white)
+@brand-featured:        #F59E0B; // Amber-500
 
 
 //== Scaffolding
@@ -28,12 +37,12 @@
 //** Background color for `<body>`.
 @body-bg:               #fff;
 //** Global text color on `<body>`.
-@text-color:            @gray;
+@text-color:            @gray-dark; // #374151 — WCAG AA on white
 
 //** Global textual link color.
 @link-color:            @brand-primary;
 //** Link hover color set via `darken()` function.
-@link-hover-color:      darken(@link-color, 15%);
+@link-hover-color:      @brand-primary-dark;
 //** Link hover decoration.
 @link-hover-decoration: underline;
 
@@ -49,26 +58,26 @@
 @font-family-base:        @font-family-sans-serif;
 
 @font-size-base:          15px;
-@font-size-large:         ceil((@font-size-base * 1.25)); // ~18px
-@font-size-small:         ceil((@font-size-base * 0.85)); // ~12px
+@font-size-large:         ceil((@font-size-base * 1.2));  // ~18px
+@font-size-small:         ceil((@font-size-base * 0.867)); // ~13px
 
-@font-size-h1:            floor((@font-size-base * 2.6)); // ~36px
-@font-size-h2:            floor((@font-size-base * 2.15)); // ~30px
-@font-size-h3:            ceil((@font-size-base * 1.7)); // ~24px
-@font-size-h4:            ceil((@font-size-base * 1.25)); // ~18px
+@font-size-h1:            floor((@font-size-base * 2.4)); // ~36px
+@font-size-h2:            floor((@font-size-base * 1.87)); // ~28px
+@font-size-h3:            ceil((@font-size-base * 1.47));  // ~22px
+@font-size-h4:            ceil((@font-size-base * 1.2));   // ~18px
 @font-size-h5:            @font-size-base;
-@font-size-h6:            ceil((@font-size-base * 0.85)); // ~12px
+@font-size-h6:            ceil((@font-size-base * 0.867)); // ~13px
 
 //** Unit-less `line-height` for use in components like buttons.
-@line-height-base:        1.428571429; // 20/14
+@line-height-base:        1.6;
 //** Computed "line-height" (`font-size` * `line-height`) for use with `margin`, `padding`, etc.
-@line-height-computed:    floor((@font-size-base * @line-height-base)); // ~20px
+@line-height-computed:    floor((@font-size-base * @line-height-base)); // ~24px
 
 //** By default, this inherits from the `<body>`.
 @headings-font-family:    @font-family-sans-serif;
 @headings-font-weight:    700;
-@headings-line-height:    1.1;
-@headings-color:          #000;
+@headings-line-height:    1.2;
+@headings-color:          @gray-darker; // #111827
 
 
 //== Iconography
@@ -87,24 +96,24 @@
 //
 //## Define common padding and border radius sizes and more. Values based on 14px text and 1.428 line-height (~20px to start).
 
-@padding-base-vertical:     8px;
-@padding-base-horizontal:   12px;
+@padding-base-vertical:     9px;
+@padding-base-horizontal:   16px;
 
 @padding-large-vertical:    14px;
-@padding-large-horizontal:  16px;
+@padding-large-horizontal:  20px;
 
 @padding-small-vertical:    5px;
-@padding-small-horizontal:  10px;
+@padding-small-horizontal:  12px;
 
-@padding-xs-vertical:       1px;
-@padding-xs-horizontal:     5px;
+@padding-xs-vertical:       2px;
+@padding-xs-horizontal:     8px;
 
-@line-height-large:         1.3333333; // extra decimals for Win 8.1 Chrome
+@line-height-large:         1.4;
 @line-height-small:         1.5;
 
-@border-radius-base:        4px;
-@border-radius-large:       6px;
-@border-radius-small:       3px;
+@border-radius-base:        6px;
+@border-radius-large:       8px;
+@border-radius-small:       4px;
 
 //** Global color for active items (e.g., navs or dropdowns).
 @component-active-color:    #fff;
@@ -142,29 +151,29 @@
 //
 //## For each of Bootstrap's buttons, define text, background and border color.
 
-@btn-font-weight:                normal;
+@btn-font-weight:                600;
 
-@btn-default-color:              #fff;
-@btn-default-bg:                 @gray-light;
-@btn-default-border:             @btn-default-bg;
+@btn-default-color:              @gray-dark;
+@btn-default-bg:                 #fff;
+@btn-default-border:             #D1D5DB; // Gray-300
 
-@btn-primary-color:              @btn-default-color;
+@btn-primary-color:              #fff;
 @btn-primary-bg:                 @brand-primary;
 @btn-primary-border:             @btn-primary-bg;
 
-@btn-success-color:              @btn-default-color;
+@btn-success-color:              #fff;
 @btn-success-bg:                 @brand-success;
 @btn-success-border:             @btn-success-bg;
 
-@btn-info-color:                 @btn-default-color;
+@btn-info-color:                 #fff;
 @btn-info-bg:                    @brand-info;
 @btn-info-border:                @btn-info-bg;
 
-@btn-warning-color:              @btn-default-color;
+@btn-warning-color:              #fff;
 @btn-warning-bg:                 @brand-warning;
 @btn-warning-border:             @btn-warning-bg;
 
-@btn-danger-color:               @btn-default-color;
+@btn-danger-color:               #fff;
 @btn-danger-bg:                  @brand-danger;
 @btn-danger-border:              @btn-danger-bg;
 
@@ -352,35 +361,35 @@
 //##
 
 // Basics of a navbar
-@navbar-height:                    60px;
-@navbar-margin-bottom:             @line-height-computed;
-@navbar-border-radius:             @border-radius-base;
+@navbar-height:                    64px;
+@navbar-margin-bottom:             0;
+@navbar-border-radius:             0;
 @navbar-padding-horizontal:        floor((@grid-gutter-width / 2));
 @navbar-padding-vertical:          ((@navbar-height - @line-height-computed) / 2);
-@navbar-collapse-max-height:       340px;
+@navbar-collapse-max-height:       400px;
 
-@navbar-default-color:             #000;
+@navbar-default-color:             @gray-dark;
 @navbar-default-bg:                #fff;
-@navbar-default-border:            darken(@navbar-default-bg, 6.5%);
+@navbar-default-border:            #E5E7EB; // Gray-200 — subtle bottom border
 
 // Navbar links
-@navbar-default-link-color:                #000;
-@navbar-default-link-hover-color:          #000;
-@navbar-default-link-hover-bg:             darken(@navbar-default-bg, 6.5%);
-@navbar-default-link-active-color:         #000;
-@navbar-default-link-active-bg:            darken(@navbar-default-bg, 6.5%);
-@navbar-default-link-disabled-color:       #ccc;
+@navbar-default-link-color:                @gray-dark;
+@navbar-default-link-hover-color:          @brand-primary;
+@navbar-default-link-hover-bg:             transparent;
+@navbar-default-link-active-color:         @brand-primary;
+@navbar-default-link-active-bg:            transparent;
+@navbar-default-link-disabled-color:       @gray-light;
 @navbar-default-link-disabled-bg:          transparent;
 
 // Navbar brand label
-@navbar-default-brand-color:               @navbar-default-link-color;
-@navbar-default-brand-hover-color:         @navbar-default-link-hover-color;
-@navbar-default-brand-hover-bg:            darken(@navbar-default-bg, 6.5%);
+@navbar-default-brand-color:               @gray-darker;
+@navbar-default-brand-hover-color:         @brand-primary;
+@navbar-default-brand-hover-bg:            transparent;
 
 // Navbar toggle
-@navbar-default-toggle-hover-bg:           #ddd;
-@navbar-default-toggle-icon-bar-bg:        #ccc;
-@navbar-default-toggle-border-color:       #ddd;
+@navbar-default-toggle-hover-bg:           @gray-lighter;
+@navbar-default-toggle-icon-bar-bg:        @gray;
+@navbar-default-toggle-border-color:       #E5E7EB;
 
 
 // Inverted navbar
@@ -498,7 +507,7 @@
 @state-info-bg:                  #d9edf7;
 @state-info-border:              darken(spin(@state-info-bg, -10), 7%);
 
-@state-warning-text:             #c09853;
+@state-warning-text:             #5f4717;
 @state-warning-bg:               #fcf8e3;
 @state-warning-border:           darken(spin(@state-warning-bg, -10), 3%);
 
@@ -842,7 +851,7 @@
 //** Horizontal offset for forms and lists.
 @component-offset-horizontal: 180px;
 //** Text muted color
-@text-muted:                  @gray-light;
+@text-muted:                  @gray; // #6B7280 — 4.6:1 contrast ✓
 //** Abbreviations and acronyms border color
 @abbr-border-color:           @gray-light;
 //** Headings small color

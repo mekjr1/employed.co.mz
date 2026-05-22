@@ -1,37 +1,57 @@
 <template name="home">
-	<div class="jumbotron container-fluid">
-		<div class="container text-center">
-			<div class="row">
-				<h1>Employed</h1>
-			</div>
-			<div class="row">
-				<p>
-					Jobs and hiring opportunities for Mexico and Mozambique.
-					<br><br>
-					Browse active roles across both markets or post an opportunity for candidates in either country.
-          <!-- or <a href="{{pathFor 'profileNew'}}">create your profile</a> to join the <a href="{{pathFor 'profiles'}}">{{getCount 'developerCount'}} registered developers</a> -->
+    {{!-- Hero --}}
+    <div class="jumbotron container-fluid">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-8 col-md-7">
+                    <h1 class="hero-title">{{activeMarketSiteName}}</h1>
+                    <p class="hero-tagline">{{activeMarketTagline}}</p>
+                    <p class="hero-sub">{{t 'home.intro'}}</p>
+                    <div class="hero-ctas">
+                        <a class="btn btn-primary btn-lg hero-btn-primary" role="button" href="{{pathFor 'jobs'}}">
+                            {{t 'home.cta.browse_jobs'}} <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                        </a>
+                        <a class="btn btn-hero-ghost btn-lg" role="button" href="{{pathFor 'jobNew'}}">
+                            {{t 'home.cta.post_a_job'}}
+                        </a>
+                    </div>
+                    <div class="hero-trust-bar">
+                        <span><i class="fa fa-check-circle" aria-hidden="true"></i> {{t 'home.trust.free'}}</span>
+                        <span class="trust-sep" aria-hidden="true">·</span>
+                        <span><i class="fa fa-map-marker" aria-hidden="true"></i> {{t 'home.trust.local'}}</span>
+                        <span class="trust-sep" aria-hidden="true">·</span>
+                        <span><i class="fa fa-clock-o" aria-hidden="true"></i> {{t 'home.trust.duration'}}</span>
+                        {{#if activeJobCount}}
+                            <span class="trust-sep" aria-hidden="true">·</span>
+                            <span><i class="fa fa-briefcase" aria-hidden="true"></i> {{activeJobCount}} {{t 'home.trust.active_jobs'}}</span>
+                        {{/if}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-				</p>
-			</div>
+    {{!-- Recent Jobs --}}
+    <div class="container home-recent-jobs">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="recent-jobs-header">
+                    <h2 class="recent-jobs-title">{{t 'home.recent_jobs'}}</h2>
+                    <a href="/rss/jobs" class="rss-link" aria-label="RSS feed" title="RSS" target="_blank" rel="noopener noreferrer">
+                        <i class="fa fa-rss" aria-hidden="true"></i>
+                    </a>
+                </div>
+                {{>jobsRecent}}
+                <div class="recent-jobs-footer">
+                    <a href="{{pathFor 'jobs'}}" class="btn btn-default see-all-btn">
+                        {{t 'home.see_all_jobs'}} <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                    </a>
+                </div>
 
-			<div id="callToAction" class="row">
-				<a class="col-sm-4 col-sm-offset-2 col-xs-12 text-center btn btn-primary btn-md" role="button" href="{{pathFor 'jobs'}}">Browse Jobs</a>
-				<a class="col-sm-4 col-xs-12 text-center btn btn-success btn-md" role="button" href="{{pathFor 'jobNew'}}">Post a Job</a>
-				<!-- <a class="col-sm-4 col-sm-offset-2 col-xs-12 text-center btn btn-success btn-md" role="button" href="{{pathFor 'profileNew'}}">Create a Profile</a> -->
-			</div>
-		</div>
-	</div>
-	<div class="container">
-		<div class="row">
-			<div class="col-sm-12">
-				{{>jobsRecent}}
-			</div>
-		</div>
-		<hr>
-		<!-- <div class="row">
-			<div class="col-sm-12">
-				{{>profilesRecent}}
-			</div>
-		</div> -->
-	</div>
+                {{!-- A9.33 — Ads Phase 0 (mock). `home-spotlight` sits
+                     below the recent-jobs section. See docs/ads-strategy.md. --}}
+                {{> adSlot position="home-spotlight"}}
+            </div>
+        </div>
+    </div>
 </template>

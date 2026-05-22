@@ -1,0 +1,22 @@
+# Meteor build-system ignores. Works like .gitignore — matched paths
+# are NOT scanned by the bundler / templating-compiler.
+#
+# Why these need to be here:
+#   The brand/ and design/ folders hold standalone .html artefacts
+#   (preview pages, logo concept galleries, branded email mock-ups)
+#   that include their own <!DOCTYPE html> and <head>. Meteor's
+#   templating-compiler treats every top-level .html file as a Blaze
+#   template fragment and refuses to start when it sees <!DOCTYPE> or
+#   bare <head>/<body>/<style> in a non-template file:
+#     "Errors prevented startup… Can't set DOCTYPE here."
+#
+#   The right home for runtime markup is client/views/**. Everything
+#   under brand/ and design/ is documentation / handoff material that
+#   ships with the repo but never enters the bundle.
+brand/
+design/
+
+# scripts/ are devOps utilities (PNG regen, etc.). Already excluded
+# from prod by .dockerignore — also exclude from the Meteor bundle so
+# any future .js helper in here doesn't accidentally end up server-side.
+scripts/

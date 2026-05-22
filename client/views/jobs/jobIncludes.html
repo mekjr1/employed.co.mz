@@ -1,13 +1,13 @@
 <template name="jobLabels">
-    {{#if featured}}<span class="label label-primary"><i class="fa fa-trophy"></i> Featured</span>{{/if}}
-    {{#if remote}}<span class="label label-success"><i class="fa fa-globe"></i> Remote</span>{{/if}}
-    {{#if jobtype}}<span class="label label-default"><i class="fa fa-clock-o"></i> {{jobtype}}</span>{{/if}}
+    {{#if featured}}<span class="brand-pill brand-pill-featured" title="{{t 'jobs.label.featured'}}"><svg class="brand-pill-icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle cx="50" cy="50" r="46" fill="currentColor"/><path d="M50 22 L57 42 L78 42 L61 54 L67 74 L50 62 L33 74 L39 54 L22 42 L43 42 Z" fill="#F59E0B"/></svg> {{t 'jobs.label.featured'}}</span>{{/if}}
+    {{#if remote}}<span class="label label-success"><i class="fa fa-globe" aria-hidden="true"></i> {{t 'jobs.label.remote'}}</span>{{/if}}
+    {{#if jobtype}}<span class="label label-default"><i class="fa fa-clock-o" aria-hidden="true"></i> {{jobtype}}</span>{{/if}}
 </template>
 <template name="jobExpiredAlert">
     {{#if expired}}
         <div class="row">
             <div class="col-xs-10 col-xs-offset-1 alert alert-danger">
-                <strong>Uh oh!</strong> This job post expired.
+                <strong>{{t 'job.expired_uh_oh'}}</strong> {{t 'job.expired_body'}}
             </div>
         </div>
     {{/if}}
@@ -15,26 +15,67 @@
 <template name="jobStatusToggle">
     <div class="row">
         <div class="col-sm-12">
-            Current Status is <b>{{status}}</b> - Set status to
+            {{t 'admin.status.current'}} <b>{{statusLabel status}}</b>
+            {{#if isExpired}}
+                {{!-- B3.10: warn admins that flipping a 90+ day post back
+                      to active won’t surface it in the public listings
+                      (which all filter by `createdAt >= 90 days ago`). --}}
+                &mdash; <span class="label label-warning" title="Older than 90 days—reactivating won’t bring it back to public listings."><i class="fa fa-hourglass-end" aria-hidden="true"></i> {{t 'jobs.label.expired'}}</span>
+            {{/if}}
+            <br>
+            {{t 'admin.status.set_to'}}
             {{#each statuses}}
                 {{#unless $eq ../status this}}
-                    <button type="button" class="set-status">{{this}}</button>
+                    <button type="button" class="btn btn-default btn-xs set-status">{{this}}</button>
                 {{/unless}}
             {{/each}}
             <hr>
         </div>
     </div>
 </template>
+<template name="jobStatusHistory">
+    {{!-- B3.6: render the moderation audit trail for admins. --}}
+    {{#if hasHistory}}
+        <div class="row">
+            <div class="col-sm-12">
+                <h4>{{t 'admin.moderation_history'}}</h4>
+                <table class="table table-condensed table-bordered">
+                    <thead>
+                        <tr>
+                            <th>{{t 'admin.col.when'}}</th>
+                            <th>{{t 'admin.col.from'}}</th>
+                            <th>{{t 'admin.col.to'}}</th>
+                            <th>{{t 'admin.col.by'}}</th>
+                            <th>{{t 'admin.col.reason'}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each historyEntries}}
+                            <tr>
+                                <td>{{formatDate at}}</td>
+                                <td>{{from}}</td>
+                                <td><b>{{to}}</b></td>
+                                <td>{{by}}</td>
+                                <td>{{reason}}</td>
+                            </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+                <hr>
+            </div>
+        </div>
+    {{/if}}
+</template>
 <template name="jobAdminEditLink">
     <div class="pull-right">
-    	<a href="/admin/Jobs/{{_id}}/edit">Edit Job</a>
+        <a href="{{pathFor 'jobEdit'}}">{{t 'action.edit'}}</a>
     </div>
 </template>
 <template name="jobSuggestedTweet">
         <div class="row">
         <div class="col-sm-12">
             {{title}} -
-            {{#if remote}}#Remote {{jobtype}}{{else}}{{jobtype}} in {{location}}{{/if}} {{country}} {{urlFor 'job'}} #EmployedJobs #Mexico #Mozambique
+            {{#if remote}}#Remote {{jobtype}}{{else}}{{jobtype}} in {{location}}{{/if}} {{urlFor 'job'}} #EmployedJobs {{activeMarket.suggestedTag}}
             <hr>
         </div>
     </div>
@@ -42,22 +83,22 @@
 <template name="jobStatusAlert">
     {{#if $eq status 'pending'}}
         <div class="alert alert-info">
-            <i class="fa fa-exclamation-triangle fa-2x pull-left"></i> This post is awaiting admin approval. It will be reviewed shortly and then become live on the site.
+            <i class="fa fa-exclamation-triangle fa-2x pull-left" aria-hidden="true"></i> {{t 'job.status_pending'}}
         </div>
     {{else}}
         {{#if $eq status 'flagged'}}
             <div class="alert alert-danger">
-                <i class="fa fa-flag fa-2x pull-left"></i> This post has been flagged for content. Contact an admin if you believe this is in error.
+                <i class="fa fa-flag fa-2x pull-left" aria-hidden="true"></i> {{t 'job.status_flagged'}}
             </div>
         {{else}}
             {{#if $eq status 'inactive'}}
                 <div class="alert alert-warning">
-                    <i class="fa fa-flag-checkered fa-2x pull-left"></i> This job post has been deactivated.
+                    <i class="fa fa-flag-checkered fa-2x pull-left" aria-hidden="true"></i> {{t 'job.status_inactive'}}
                 </div>
             {{else}}
                 {{#if $eq status 'filled'}}
                     <div class="alert alert-success">
-                        <i class="fa fa-trophy fa-2x pull-left"></i> This job post has been filled.
+                        <svg class="alert-brand-icon pull-left" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle cx="50" cy="50" r="46" fill="#15803D"/><path d="M30 52 L44 66 L72 36" fill="none" stroke="#FAFAF7" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg> {{t 'job.status_filled'}}
                     </div>
                 {{/if}}
             {{/if}}
@@ -68,24 +109,20 @@
     {{#if $eq currentUser._id userId}}
         {{#unless featured}}
             {{#if featuredAllowed}}
-                <div class="row">
-                    <div class="col-sm-12">
-                        <div class="well">
-                            <h3 class="top-flush">Upgrade to a Featured Job Post</h3>
-                            <div class="row">
-                                <div class="col-sm-6">
-                                    <ul>
-                                        <li>Guaranteed to stay on home page</li>
-                                        <li>Highlighted job listing display</li>
-                                        <li>Priority placement in jobs listing</li>
-                                    </ul>
-                                </div>
-                                <div class="col-sm-6 text-center">
-                                    <a id="buy-featured" class="btn btn-primary btn-lg" role="button" href="#">Buy 30 Days for {{featuredJobPriceLabel}}</a>
-                                </div>
-                            </div>
-                        </div>
+                <div class="job-sidebar-card featured-upsell-card">
+                    <div class="featured-upsell-icon" aria-hidden="true">
+                        <svg viewBox="0 0 100 100" focusable="false"><circle cx="50" cy="50" r="46" fill="#4F46E5"/><circle cx="50" cy="50" r="38" fill="none" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="2 3" opacity="0.7"/><path d="M50 22 L57 42 L78 42 L61 54 L67 74 L50 62 L33 74 L39 54 L22 42 L43 42 Z" fill="#F59E0B"/></svg>
                     </div>
+                    <h4 class="featured-upsell-title">{{t 'job.featured.title'}}</h4>
+                    <ul class="featured-upsell-bullets">
+                        <li>{{t 'job.featured.bullet1'}}</li>
+                        <li>{{t 'job.featured.bullet2'}}</li>
+                        <li>{{t 'job.featured.bullet3'}}</li>
+                    </ul>
+                    <a id="buy-featured" class="btn btn-warning btn-block featured-upsell-btn" role="button" href="#">
+                        <i class="fa fa-star" aria-hidden="true"></i>
+                        {{t 'job.featured.buy_cta' price=featuredJobPriceLabel}}
+                    </a>
                 </div>
             {{/if}}
         {{/unless}}

@@ -1,34 +1,39 @@
 <template name="jobSmall">
-    <div class="jobSmall {{#if featured}}featured{{/if}} panel panel-default">
-        <div class="panel-body">
-            <div class="row">
-                <div class="col-sm-8">
-                    <h4>
-				<a href="{{pathFor 'job'}}">{{title}}</a>
-			</h4>
-                </div>
-                <div class="col-sm-4 text-right">
-                    {{>jobLabels}}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-3">
-                     
-                    <i class="fa fa-calendar"></i> {{formatDate createdAt}}
-                    {{!-- {{#if featured}} - Featured Until {{formatDate featuredThrough}}{{/if}}
-                     --}}
-                    
-                </div>
-                <div class="col-sm-9 text-right">
-                    {{#if company}}<i class="fa fa-building"></i> {{company}}{{/if}}
-                    {{#if country}}
-                        {{#if company}} - {{/if}}<i class="fa fa-flag"></i> {{country}}
+    {{!-- A9.35 — Tile-card layout. The whole tile is a single anchor
+         so the entire surface is clickable (matches mobile-first
+         expectations); inner spans keep semantics readable for
+         screen readers. --}}
+    <a href="{{pathFor 'job'}}" class="jobSmall {{#if featured}}featured{{/if}} job-tile">
+        <div class="job-tile-header">
+            <div class="job-avatar {{avatarColorClass}}" aria-hidden="true">{{companyInitial}}</div>
+            <div class="job-tile-heading">
+                <span class="job-title-link">{{title}}</span>
+                <div class="job-meta">
+                    {{#if company}}
+                        <span><i class="fa fa-building" aria-hidden="true"></i> {{company}}</span>
                     {{/if}}
+                    {{#if company}}{{#if location}}<span class="job-meta-sep" aria-hidden="true">·</span>{{/if}}{{/if}}
                     {{#if location}}
-                        {{#if company}} - {{else}}{{#if country}} - {{/if}}{{/if}}<i class="fa fa-map-marker"></i> {{location}}
+                        <span><i class="fa fa-map-marker" aria-hidden="true"></i> {{location}}</span>
                     {{/if}}
                 </div>
             </div>
         </div>
-    </div>
+
+        <div class="job-badges">
+            {{>jobLabels}}
+        </div>
+
+        {{#if salaryLabel}}
+            <div class="job-salary"><i class="fa fa-money" aria-hidden="true"></i> {{salaryLabel}}</div>
+        {{/if}}
+
+        {{#if descExcerpt}}
+            <p class="job-excerpt">{{descExcerpt}}</p>
+        {{/if}}
+
+        <div class="job-tile-footer">
+            <span class="job-date">{{formatDate createdAt}}</span>
+        </div>
+    </a>
 </template>

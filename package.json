@@ -1,17 +1,28 @@
 {
   "name": "employed",
-  "version": "1.0.0",
-  "description": "A job board for Mexico and Mozambique.",
+  "version": "1.1.0",
+  "description": "A localized job board for subdomain-based markets.",
   "main": "",
   "engines": {
-    "node": "= 8.11.4",
-    "npm": "= 6.3.0"
+    "node": ">= 14.0.0 < 16.0.0",
+    "npm": ">= 6.0.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "MONGO_URL=mongodb://mongo:27017/employed_test meteor test --full-app --once --driver-package meteortesting:mocha --settings settings-docker.json --port 3100",
     "lint": "eslint .",
     "pretest": "npm run lint --silent",
-    "start": "meteor --settings settings-example.json"
+    "regen-brand-pngs": "node scripts/regen-brand-pngs.js",
+    "start": "meteor --settings settings-docker.json",
+    "perf:build": "meteor build --debug --directory build/",
+    "perf:bundle": "node scripts/check-bundle-size.mjs build/bundle/programs/web.browser",
+    "perf:lighthouse": "node scripts/lighthouse-mobile.mjs",
+    "perf:all": "npm run perf:build && npm run perf:bundle && npm run perf:lighthouse"
+  },
+  "meteor": {
+    "testModule": {
+      "client": false,
+      "server": "tests/main.js"
+    }
   },
   "repository": {
     "type": "git",
@@ -25,7 +36,18 @@
   "homepage": "https://github.com/mekjr1/employed.co.mz#readme",
   "dependencies": {
     "@babel/runtime": "^7.17.2",
+    "@sentry/browser": "^7.119.0",
+    "@sentry/node": "^7.119.0",
     "babel-runtime": "^6.26.0",
-    "bcrypt": "^5.0.1"
+    "bcrypt": "^5.0.1",
+    "stripe": "^14.25.0"
+  },
+  "devDependencies": {
+    "@popperjs/core": "^2.11.8",
+    "@resvg/resvg-js": "^2.6.2",
+    "bootstrap": "^5.3.3",
+    "chai": "^4.3.10",
+    "eslint": "^8.57.1",
+    "eslint-plugin-security": "^1.7.1"
   }
 }

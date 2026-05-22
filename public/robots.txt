@@ -1,0 +1,21 @@
+# Block crawling of admin, auth, and machine-readable endpoints.
+# Public job listings remain crawlable.
+
+User-agent: *
+Disallow: /admin/
+Disallow: /sign-in
+Disallow: /sign-up
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /my-jobs
+Disallow: /user-profile
+Disallow: /post-a-job
+Disallow: /jobs/*/edit
+Disallow: /jobs/*/deactivate
+Disallow: /api/
+Disallow: /_stripe/
+Disallow: /healthz
+
+# Sitemap is generated per-host by gadicohen:sitemaps. Each market
+# subdomain (mx.*, mz.*, …) serves its own scoped listing.
+Sitemap: /sitemap.xml

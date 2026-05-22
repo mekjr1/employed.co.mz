@@ -1,0 +1,67 @@
+# Standalone UAT compose — does NOT extend docker-compose.yml.
+# Remaps all ports to avoid conflicts:
+#   Port 3000 → 3001  (another service owns 3000)
+#   Port 8025 → 8026  (selopro-mailpit owns 8025)
+#   Port 27017 → 27018 (safety; mongo is free but avoids surprise)
+#
+# Usage:
+#   docker compose -f docker-compose.uat.yml up -d
+#
+# App:     http://mz.lvh.me:3001  (Mozambique market)
+#          http://mx.lvh.me:3001  (Mexico market)
+# MailHog: http://localhost:8026
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      MAIL_URL: "smtp://mailhog:1025"
+      METEOR_ALLOW_SUPERUSER: "true"
+      MONGO_URL: "mongodb://mongo:27017/employed"
+      ROOT_URL: "http://localhost:3001"
+      STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY:-}"
+      STRIPE_WEBHOOK_SECRET: "${STRIPE_WEBHOOK_SECRET:-}"
+    ports:
+      - "3001:3000"
+    volumes:
+      - .:/app
+      - meteor-local:/app/.meteor/local
+      - node-modules:/app/node_modules
+    depends_on:
+      mongo:
+        condition: service_healthy
+      mailhog:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/healthz?readiness=1 | grep -q '\"ok\":true'"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 120s
+
+  mongo:
+    image: mongo:5
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 }).ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    ports:
+      - "8026:8025"
+      - "1026:1025"
+
+volumes:
+  meteor-local:
+  mongo-data:
+  node-modules:

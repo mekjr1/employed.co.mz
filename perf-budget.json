@@ -1,0 +1,47 @@
+{
+  "$schema": "https://example.com/perf-budget.schema.json",
+  "description": "Mobile-first performance budget for Employed. Read by scripts/check-bundle-size.mjs and scripts/lighthouse-mobile.mjs. Targets a low-end Android device on simulated Slow 3G — the realistic floor for Mozambique. Update with PR review when a budget shift is justified.",
+  "bundle": {
+    "comment": "Sizes are gzip-compressed bytes. Measured by walking the directory produced by `meteor build --debug --directory build/ ` and summing client assets matching the patterns below. Hard cap = CI fails. Soft cap = warning.",
+    "client": {
+      "javascript": {
+        "hardCapBytes": 280000,
+        "softCapBytes": 240000,
+        "patterns": ["**/*.js"]
+      },
+      "css": {
+        "hardCapBytes": 90000,
+        "softCapBytes": 70000,
+        "patterns": ["**/*.css"]
+      },
+      "html": {
+        "hardCapBytes": 30000,
+        "softCapBytes": 20000,
+        "patterns": ["**/*.html"]
+      }
+    }
+  },
+  "lighthouse": {
+    "comment": "Scores 0..100. Mobile preset, simulated Slow 4G + 4x CPU slowdown. Pass if every score >= minScore.",
+    "minScore": {
+      "performance": 70,
+      "accessibility": 90,
+      "bestPractices": 90,
+      "seo": 90,
+      "pwa": 50
+    },
+    "routes": [
+      { "path": "/", "host": "mz.lvh.me:3001" },
+      { "path": "/jobs", "host": "mz.lvh.me:3001" },
+      { "path": "/", "host": "mx.lvh.me:3001" },
+      { "path": "/jobs", "host": "mx.lvh.me:3001" }
+    ]
+  },
+  "vitals": {
+    "comment": "Field-style targets surfaced by Lighthouse mobile audit. These are advisory until we wire RUM via Sentry.",
+    "lcpMs": 2500,
+    "ttiMs": 3500,
+    "clsScore": 0.1,
+    "fcpMs": 1800
+  }
+}

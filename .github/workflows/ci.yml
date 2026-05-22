@@ -1,0 +1,61 @@
+name: ci
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    services:
+      mongo:
+        image: mongo:5
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand({ping:1})'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Meteor
+        run: |
+          curl https://install.meteor.com/ | sh
+          echo "$HOME/.meteor" >> $GITHUB_PATH
+
+      - name: Use repo-pinned Meteor release
+        run: meteor --version
+
+      - name: Cache Meteor packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.meteor
+            .meteor/local
+          key: ${{ runner.os }}-meteor-${{ hashFiles('.meteor/versions') }}
+          restore-keys: |
+            ${{ runner.os }}-meteor-
+
+      - name: Install npm dependencies
+        run: meteor npm ci
+
+      - name: Lint
+        run: meteor npm run lint --silent
+
+      - name: Run tests
+        env:
+          MONGO_URL: mongodb://localhost:27017/employed_test
+          ROOT_URL: http://localhost:3000
+        run: |
+          # S11: drives the suite in tests/. Requires meteortesting:mocha
+          # to be enabled in .meteor/packages.
+          meteor test --once \
+            --driver-package meteortesting:mocha \
+            --port 3000 \
+            --settings settings-example.json

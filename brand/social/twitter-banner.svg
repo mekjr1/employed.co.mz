@@ -1,0 +1,23 @@
+<!-- 1500×500 — Twitter / X profile banner. Center band stays clear of the avatar overlay (lower-left). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 500" role="img" aria-labelledby="twBannerTitle">
+  <title id="twBannerTitle">Employed — Twitter banner</title>
+  <rect width="1500" height="500" fill="#27272B"/>
+  <!-- Gradient accent on right -->
+  <defs>
+    <linearGradient id="rightGlow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4F46E5" stop-opacity="0"/>
+      <stop offset="1" stop-color="#4F46E5" stop-opacity="0.3"/>
+    </linearGradient>
+  </defs>
+  <rect x="900" width="600" height="500" fill="url(#rightGlow)"/>
+  <!-- Dot grid right -->
+  <g fill="#FAFAF7" opacity="0.08">
+    <circle cx="1100" cy="100" r="3"/><circle cx="1180" cy="100" r="3"/><circle cx="1260" cy="100" r="3"/><circle cx="1340" cy="100" r="3"/>
+    <circle cx="1100" cy="180" r="3"/><circle cx="1180" cy="180" r="3"/><circle cx="1260" cy="180" r="3"/>
+    <circle cx="1100" cy="260" r="3"/><circle cx="1180" cy="260" r="3"/>
+  </g>
+  <!-- Centered wordmark (avoids avatar zone bottom-left ~250px) -->
+  <text x="750" y="270" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="900" font-size="148" fill="#FAFAF7" letter-spacing="-4">Employ<tspan fill="#F59E0B">ed</tspan></text>
+  <text x="750" y="318" text-anchor="middle" font-family="Inter, sans-serif" font-weight="500" font-size="26" fill="#9CA3AF" letter-spacing="2">L O C A L · J O B S · M Z · M X</text>
+  <line x1="700" y1="350" x2="800" y2="350" stroke="#F59E0B" stroke-width="4" stroke-linecap="round"/>
+</svg>

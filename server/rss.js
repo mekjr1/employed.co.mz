@@ -1,13 +1,25 @@
 RssFeed.publish('jobs', function(query) {
   var self = this;
+  var request = self.request || {};
+  var market = marketFromHostname(request.headers && request.headers.host);
   var pubDate = new Date();
   var lastBuildDate = new Date();
-  var mostRecent = Jobs.findOne({}, {
+  var selector = {
+    country: market.country
+  };
+  var activeSelector = {
+    createdAt: {
+      $gte: daysUntilExpiration()
+    },
+    status: "active",
+    country: market.country
+  };
+  var mostRecent = Jobs.findOne(selector, {
     sort: {
       createdAt: -1
     }
   });
-  var secondMostRecent = Jobs.findOne({}, {
+  var secondMostRecent = Jobs.findOne(selector, {
     sort: {
       createdAt: -1
     },
@@ -18,77 +30,27 @@ RssFeed.publish('jobs', function(query) {
   if (secondMostRecent)
     lastBuildDate = secondMostRecent.createdAt;
 
-  self.setValue('title', self.cdata(APP_NAME + ' - Recent Jobs'));
-  self.setValue('description', self.cdata('This is a feed of recent jobs posted to ' + APP_NAME + '.'));
-  self.setValue('link', Meteor.absoluteUrl());
+  self.setValue('title', self.cdata(market.siteName + ' - Recent Jobs'));
+  self.setValue('description', self.cdata('This is a feed of recent jobs posted to ' + market.siteName + '.'));
+  self.setValue('link', absoluteUrlForHost('', request.headers && request.headers.host));
   self.setValue('lastBuildDate', lastBuildDate);
   self.setValue('pubDate', pubDate);
   self.setValue('ttl', 1);
 
-  Jobs.find({
-    createdAt: {
-      $gte: daysUntilExpiration()
-    },
-    status: "active"
-  }, {
+  Jobs.find(activeSelector, {
     sort: {
       createdAt: -1
-    }
+    },
+    // B5.1: cap the RSS feed at the same upper bound the JSON API uses
+    // so a single GET to /feed cannot dump the entire active dataset.
+    limit: 200
   }).forEach(function(job) {
     self.addItem({
       title: self.cdata(job.title),
       description: self.cdata(job.htmlDescription),
-      link: Meteor.absoluteUrl(job.path()),
-      guid: Meteor.absoluteUrl(job.path()),
+      link: absoluteUrlForHost(job.path(), request.headers && request.headers.host),
+      guid: absoluteUrlForHost(job.path(), request.headers && request.headers.host),
       pubDate: job.createdAt
     });
   });
 });
-
-// var profileRss = function(query) {
-//   var self = this;
-//   var pubDate = new Date();
-//   var lastBuildDate = new Date();
-//   var mostRecent = Profiles.findOne({}, {
-//     sort: {
-//       createdAt: -1
-//     }
-//   });
-//   var secondMostRecent = Profiles.findOne({}, {
-//     sort: {
-//       createdAt: -1
-//     },
-//     skip: 1
-//   });
-//   if (mostRecent)
-//     pubDate = mostRecent.createdAt;
-//   if (secondMostRecent)
-//     lastBuildDate = secondMostRecent.createdAt;
-
-//   self.setValue('title', self.cdata(APP_NAME + ' - Recent Profiles'));
-//   self.setValue('description', self.cdata('This is a feed of recent profiles listed on ' + APP_NAME + '.'));
-//   self.setValue('link', Meteor.absoluteUrl());
-//   self.setValue('lastBuildDate', lastBuildDate);
-//   self.setValue('pubDate', pubDate);
-//   self.setValue('ttl', 1);
-
-//   Profiles.find({
-//     status: "active"
-//   }, {
-//     sort: {
-//       createdAt: -1
-//     }
-//   }).forEach(function(profile) {
-//     self.addItem({
-//       title: self.cdata(profile.title),
-//       description: self.cdata(profile.htmlDescription),
-//       link: Meteor.absoluteUrl(profile.path()),
-//       guid: Meteor.absoluteUrl(profile.path()),
-//       pubDate: profile.createdAt
-//     });
-//   });
-// };
-
-// RssFeed.publish('profiles', profileRss)
-
-// RssFeed.publish('experts', profileRss);

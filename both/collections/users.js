@@ -60,6 +60,14 @@ UserSchema = new SimpleSchema({
   "roles.$": {
     type: String
   },
+  deletionRequestedAt: {
+    type: Date,
+    optional: true
+  },
+  deletionScheduledFor: {
+    type: Date,
+    optional: true
+  },
   // In order to avoid an 'Exception in setInterval callback' from Meteor
   heartbeat: {
     type: Date,
@@ -69,15 +77,23 @@ UserSchema = new SimpleSchema({
 
 Users.attachSchema(UserSchema);
 
+// Fields a non-admin user is never allowed to mutate on their own user doc.
+USER_PROTECTED_FIELDS = ['roles', 'services', 'emails', 'emailHash', 'createdAt', '_id'];
+
 Users.allow({
-  insert: function(userId, doc) {
+  insert: function() {
     return false;
   },
-  update: function(userId, doc, fieldNames, modifier) {
-    return Roles.userIsInRole(userId, ['admin']) || (!_.contains(fieldNames, 'roles') && userId && doc && userId === doc.userId);
+  update: function(userId, doc, fieldNames /*, modifier */) {
+    if (Roles.userIsInRole(userId, ['admin'])) return true;
+    // Meteor.users docs use _id for the user id; there is no `doc.userId` field.
+    // The old check (userId === doc.userId) was always false for non-admins,
+    // which silently broke the user profile edit modal.
+    if (!userId || !doc || userId !== doc._id) return false;
+    return !_.intersection(fieldNames, USER_PROTECTED_FIELDS).length;
   },
-  remove: function(userId, doc) {
+  remove: function() {
     return false;
   },
-  fetch: ['userId']
+  fetch: []
 });

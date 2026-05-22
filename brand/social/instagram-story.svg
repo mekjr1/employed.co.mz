@@ -1,0 +1,38 @@
+<!-- 1080×1920 — Instagram / WhatsApp story. Safe zone: keep all copy inside 80px margin top/bottom (avoid IG UI overlays). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" role="img" aria-labelledby="igStoryTitle">
+  <title id="igStoryTitle">Employed — Instagram story</title>
+  <defs>
+    <linearGradient id="storyBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#27272B"/>
+      <stop offset="0.6" stop-color="#27272B"/>
+      <stop offset="1"   stop-color="#1f1d3a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1920" fill="url(#storyBg)"/>
+  <!-- Dot grid scattered -->
+  <g fill="#4F46E5" opacity="0.18">
+    <circle cx="80" cy="280" r="4"/><circle cx="160" cy="280" r="4"/>
+    <circle cx="80" cy="360" r="4"/>
+    <circle cx="1000" cy="1600" r="4"/><circle cx="920" cy="1600" r="4"/>
+    <circle cx="1000" cy="1680" r="4"/>
+  </g>
+  <!-- Mark large center -->
+  <g transform="translate(360 420)">
+    <rect width="360" height="360" rx="78" fill="#4F46E5"/>
+    <g fill="#FFFFFF">
+      <rect x="78" y="78" width="36" height="204" rx="9"/>
+      <rect x="78" y="78" width="186" height="36" rx="9"/>
+      <rect x="78" y="162" width="130" height="36" rx="9"/>
+      <rect x="78" y="246" width="174" height="36" rx="9"/>
+    </g>
+    <circle cx="294" cy="96" r="22" fill="#F59E0B"/>
+  </g>
+  <!-- Wordmark -->
+  <text x="540" y="950" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="900" font-size="144" fill="#FAFAF7" letter-spacing="-4">Employ<tspan fill="#F59E0B">ed</tspan></text>
+  <!-- Headline placeholder -->
+  <text x="540" y="1180" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="56" fill="#FAFAF7">Replace with the hook.</text>
+  <text x="540" y="1260" text-anchor="middle" font-family="Inter, sans-serif" font-weight="500" font-size="36" fill="#9CA3AF">Story body line — keep it short.</text>
+  <!-- Bottom CTA -->
+  <rect x="240" y="1500" width="600" height="100" rx="50" fill="#F59E0B"/>
+  <text x="540" y="1564" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="36" fill="#27272B" letter-spacing="2">SWIPE UP TO POST</text>
+</svg>

@@ -1,0 +1,60 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      MAIL_URL: "smtp://mailhog:1025"
+      # A9.12 — METEOR_ALLOW_SUPERUSER stays in the dev compose only; it was
+      # removed from Dockerfile.dev so production images can't inherit it.
+      METEOR_ALLOW_SUPERUSER: "true"
+      MONGO_URL: "mongodb://mongo:27017/employed"
+      ROOT_URL: "http://localhost:3000"
+      STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY:-}"
+      STRIPE_WEBHOOK_SECRET: "${STRIPE_WEBHOOK_SECRET:-}"
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - meteor-local:/app/.meteor/local
+      - node-modules:/app/node_modules
+    depends_on:
+      mongo:
+        condition: service_healthy
+      mailhog:
+        condition: service_started
+    # A9.43 — readiness probe lets `docker compose up --wait` block until the
+    # app actually responds. Hits /healthz?readiness=1 which only returns 200
+    # after Meteor startup callbacks finish (A9.44).
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/healthz?readiness=1 | grep -q '\"ok\":true'"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 90s
+
+  mongo:
+    # A9.43 — bumped mongo:4.4 (EOL Feb 2024) → mongo:5. CI workflow already
+    # uses mongo:5; aligning dev avoids "works on CI, fails locally" surprises.
+    image: mongo:5
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 }).ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    ports:
+      - "8025:8025"
+
+volumes:
+  meteor-local:
+  mongo-data:
+  node-modules:

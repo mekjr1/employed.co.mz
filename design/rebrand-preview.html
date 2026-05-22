@@ -1,0 +1,1267 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Employed — Rebrand preview (current vs proposed)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Font Awesome 4 (matches what the app actually ships today) -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <style>
+    :root {
+      --ink:        #111827;
+      --body:       #374151;
+      --muted:      #6B7280;
+      --rule:       #E5E7EB;
+      --paper:      #F9FAFB;
+      --paper-2:    #F3F4F6;
+      --indigo:     #4F46E5;
+      --indigo-700: #4338CA;
+      --indigo-100: #E0E7FF;
+      --indigo-50:  #EEF2FF;
+      --amber:      #F59E0B;
+      --amber-50:   #FEF3C7;
+      --amber-700:  #B45309;
+      --green:      #15803D;
+      --green-50:   #DCFCE7;
+      --red:        #B91C1C;
+      --red-50:     #FEE2E2;
+      --gray-50:    #F9FAFB;
+      --gray-100:   #F3F4F6;
+      --gray-200:   #E5E7EB;
+      --gray-400:   #9CA3AF;
+      --gray-500:   #6B7280;
+      --gray-700:   #374151;
+      --gray-900:   #111827;
+      --dark:       #27272B;
+      --cream:      #FAFAF7;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, sans-serif;
+      color: var(--body);
+      background: var(--paper);
+      line-height: 1.55;
+    }
+
+    /* ============ PAGE HEADER ============ */
+    header.page {
+      padding: 48px 64px 28px;
+      border-bottom: 1px solid var(--rule);
+      background: #fff;
+    }
+    header.page h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 38px;
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    header.page p { max-width: 76ch; color: var(--muted); margin: 4px 0; }
+    header.page p code, .notes code {
+      background: var(--paper-2);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--ink);
+    }
+    .palette { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+    .swatch {
+      width: 56px; height: 56px; border-radius: 10px;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
+      display: flex; align-items: flex-end; justify-content: center;
+      font-size: 9px; font-family: ui-monospace, Menlo, monospace;
+      color: rgba(255,255,255,0.85);
+      padding-bottom: 4px;
+    }
+
+    /* ============ TOC ============ */
+    nav.toc {
+      padding: 16px 64px;
+      background: #FCFCFB;
+      border-bottom: 1px solid var(--rule);
+      font-size: 13px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(8px);
+      background: rgba(252,252,251,0.92);
+    }
+    nav.toc strong { color: var(--ink); margin-right: 12px; }
+    nav.toc a {
+      color: var(--indigo);
+      text-decoration: none;
+      margin-right: 14px;
+      font-weight: 500;
+    }
+    nav.toc a:hover { text-decoration: underline; }
+
+    /* ============ MAIN / SECTIONS ============ */
+    main { padding: 24px 64px 80px; }
+    section.tier {
+      margin: 32px 0 12px;
+    }
+    section.tier > h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 22px;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      margin: 32px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--indigo-100);
+    }
+    section.tier > h2 .tier-tag {
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 10px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      color: var(--indigo-700);
+      background: var(--indigo-100);
+      padding: 3px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+
+    .surface {
+      border: 1px solid var(--rule);
+      border-radius: 14px;
+      background: #fff;
+      margin: 16px 0;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+    .surface > h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 17px;
+      margin: 0;
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--rule);
+      color: var(--ink);
+      background: #FCFCFB;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .surface > h3 .file-hint {
+      font-family: ui-monospace, Menlo, monospace;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .col-current, .col-proposed {
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 140px;
+      align-items: flex-start;
+      justify-content: center;
+    }
+    .col-current { background: var(--paper); border-right: 1px solid var(--rule); }
+    .col-proposed { background: #fff; }
+    .col-label {
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .col-current .col-label { color: var(--muted); }
+    .col-proposed .col-label { color: var(--indigo-700); }
+
+    .notes {
+      padding: 14px 24px;
+      background: #FCFCFB;
+      border-top: 1px solid var(--rule);
+      font-size: 13px;
+      color: var(--body);
+    }
+    .notes strong { color: var(--ink); }
+
+    /* ============ BOOTSTRAP 3 INLINED (so "current" column renders right) ============ */
+    .label {
+      display: inline-block;
+      padding: .25em .6em;
+      font-size: 80%;
+      font-weight: 700;
+      line-height: 1;
+      color: #fff;
+      text-align: center;
+      white-space: nowrap;
+      vertical-align: baseline;
+      border-radius: .25em;
+    }
+    .label-warning { background-color: #f0ad4e; }
+    .label-success { background-color: #5cb85c; }
+    .label-primary { background-color: #337ab7; }
+    .label-default { background-color: #777; }
+    .badge-bs3 {
+      display: inline-block;
+      min-width: 10px;
+      padding: 3px 7px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1;
+      vertical-align: middle;
+      white-space: nowrap;
+      text-align: center;
+      background-color: #777;
+      border-radius: 10px;
+    }
+    .btn-bs3 {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 14px;
+      line-height: 1.42857;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 400;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 1px 1px rgba(0,0,0,0.075);
+    }
+    .btn-bs3-primary {
+      color: #fff;
+      background-color: #b73737;   /* Journal theme red (current) */
+      border-color: #a53131;
+    }
+    .btn-bs3-default {
+      color: #333;
+      background-color: #fff;
+      border-color: #ccc;
+    }
+    .panel-bs3 {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+    .panel-bs3 .panel-heading {
+      padding: 10px 15px;
+      background-color: #f5f5f5;
+      border-bottom: 1px solid #ddd;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .panel-bs3 .panel-body { padding: 15px; font-size: 14px; }
+    .alert-bs3 {
+      padding: 15px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .alert-bs3-warning {
+      color: #8a6d3b;
+      background-color: #fcf8e3;
+      border-color: #faebcc;
+    }
+    .form-group-bs3 { margin-bottom: 15px; max-width: 260px; }
+    .form-group-bs3 label {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 5px;
+      color: #333;
+    }
+    .form-control-bs3 {
+      display: block;
+      width: 100%;
+      padding: 6px 12px;
+      font-size: 14px;
+      line-height: 1.42857;
+      color: #555;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+      font-family: inherit;
+    }
+    .form-control-bs3:focus {
+      outline: 0;
+      border-color: #b73737;
+      box-shadow: inset 0 1px 1px rgba(0,0,0,0.075), 0 0 8px rgba(183,55,55,0.5);
+    }
+
+    /* ============ APP.LESS STATUS PILLS INLINED ============ */
+    .status-dot-bs3 {
+      display: inline-block;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .status-dot-bs3.status-active   { background-color: #16A34A; }
+    .status-dot-bs3.status-pending  { background-color: #D97706; }
+    .status-dot-bs3.status-inactive { background-color: #9CA3AF; }
+    .status-dot-bs3.status-filled   { background-color: #2563EB; }
+    .status-pill-bs3 {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .status-pill-bs3.status-active   { background: #DCFCE7; color: #15803D; }
+    .status-pill-bs3.status-pending  { background: #FEF3C7; color: #92400E; }
+    .status-pill-bs3.status-inactive { background: #F3F4F6; color: #6B7280; }
+    .status-pill-bs3.status-filled   { background: #DBEAFE; color: #1D4ED8; }
+
+    /* ============ PROPOSED — BOOTSTRAP 5 STYLE ============ */
+    .btn-bs5 {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.5;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .15s ease;
+    }
+    .btn-bs5-primary { color: #fff; background-color: var(--indigo); border-color: var(--indigo); }
+    .btn-bs5-primary:hover { background-color: var(--indigo-700); border-color: var(--indigo-700); }
+    .btn-bs5-outline {
+      color: var(--indigo); background: #fff; border-color: var(--indigo);
+    }
+    .btn-bs5-outline:hover { background: var(--indigo-50); }
+    .btn-bs5-ghost {
+      color: var(--gray-700); background: transparent; border-color: transparent;
+    }
+    .btn-bs5-ghost:hover { background: var(--gray-100); }
+    .card-bs5 {
+      background: #fff;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.04);
+      overflow: hidden;
+    }
+    .card-bs5 .card-header {
+      padding: 14px 18px;
+      background: transparent;
+      border-bottom: 1px solid var(--gray-200);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .card-bs5 .card-body { padding: 18px; font-size: 14px; }
+    .alert-bs5 {
+      padding: 14px 18px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      font-size: 14px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .alert-bs5-warning {
+      color: var(--amber-700);
+      background-color: var(--amber-50);
+      border-color: rgba(180, 83, 9, 0.2);
+    }
+    .form-floating-bs5 {
+      position: relative;
+      max-width: 260px;
+    }
+    .form-floating-bs5 input {
+      display: block;
+      width: 100%;
+      padding: 22px 12px 6px 12px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--ink);
+      background-color: #fff;
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      transition: all .15s;
+      font-family: inherit;
+    }
+    .form-floating-bs5 input:focus {
+      outline: 0;
+      border-color: var(--indigo);
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+    }
+    .form-floating-bs5 label {
+      position: absolute;
+      top: 6px; left: 12px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+
+    /* ============ PROPOSED — STATUS PILLS WITH CUSTOM GLYPHS ============ */
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .status-chip svg { width: 12px; height: 12px; flex-shrink: 0; }
+    .status-chip.active   { background: var(--green-50);  color: var(--green); }
+    .status-chip.pending  { background: var(--amber-50);  color: var(--amber-700); }
+    .status-chip.inactive { background: var(--gray-100);  color: var(--gray-500); }
+    .status-chip.filled   { background: var(--indigo-100);color: var(--indigo-700); }
+    .status-chip.flagged  { background: var(--red-50);    color: var(--red); }
+
+    .status-dot-token {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 500; color: var(--gray-700);
+    }
+    .status-dot-token .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      box-shadow: 0 0 0 3px currentColor;
+      opacity: 0.18;
+    }
+    .status-dot-token .dot-core {
+      position: absolute;
+      width: 8px; height: 8px; border-radius: 50%;
+    }
+
+    /* ============ PROPOSED — FEATURED & VERIFIED BADGES ============ */
+    .featured-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px 3px 4px;
+      background: var(--indigo);
+      color: #fff;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .featured-pill .seal {
+      width: 18px; height: 18px;
+    }
+    .verified-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px 3px 4px;
+      background: var(--indigo-100);
+      color: var(--indigo-700);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .verified-pill .seal {
+      width: 16px; height: 16px;
+    }
+    .unverified-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 3px 10px 3px 4px;
+      background: var(--amber-50);
+      color: var(--amber-700);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* ============ PHONE / OG MOCKUPS ============ */
+    .phone {
+      width: 200px; height: 360px;
+      border-radius: 22px;
+      border: 6px solid #1f1f23;
+      background: #fff;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    }
+    .phone .statusbar {
+      height: 32px;
+      width: 100%;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 12px;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      font-family: ui-monospace, Menlo, monospace;
+    }
+    .phone .app-area {
+      padding: 14px;
+      font-family: 'Inter', sans-serif;
+    }
+    .phone .app-area .title { font-weight: 700; font-size: 16px; color: var(--ink); }
+
+    .og-card {
+      width: 480px; height: 252px;
+      border-radius: 10px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+      overflow: hidden;
+      position: relative;
+      background: var(--dark);
+    }
+    .og-card.current {
+      background: #fff;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .og-card.current img.stretched {
+      width: 152px; height: 152px;
+      filter: blur(0); image-rendering: pixelated;
+    }
+
+    /* ============ EMAIL MOCKUPS ============ */
+    .email-mock {
+      width: 380px;
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      background: #fff;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .email-mock .from {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--gray-100);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .email-mock .from strong { color: var(--ink); }
+    .email-mock .subject {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--gray-100);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .email-mock .body {
+      padding: 14px;
+      font-size: 13px;
+      color: var(--body);
+      line-height: 1.55;
+    }
+    .email-mock .branded-header {
+      background: var(--dark);
+      padding: 18px 14px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .email-mock .branded-header .name {
+      color: var(--cream);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.01em;
+    }
+    .email-mock .branded-header .name span { color: var(--amber); }
+
+    /* ============ AVATAR MOCKUPS ============ */
+    .avatar-row { display: flex; gap: 10px; align-items: center; }
+    .avatar-default {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: var(--gray-200);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--gray-500);
+      font-size: 20px;
+    }
+    .avatar-init {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+    }
+    .avatar-init.a { background: var(--indigo); }
+    .avatar-init.b { background: #6366F1; }
+    .avatar-init.c { background: #818CF8; }
+    .avatar-init.d { background: var(--dark); }
+
+    /* ============ LOADING SPINNER (PROPOSED) ============ */
+    .spinner-proposed {
+      width: 32px; height: 32px;
+      animation: spin-orbit 1.4s linear infinite;
+    }
+    @keyframes spin-orbit { to { transform: rotate(360deg); } }
+
+    /* ============ ICON-SET PREVIEW ============ */
+    .iconset {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 14px 8px;
+      width: 100%;
+    }
+    .iconset > div {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      font-size: 10px; color: var(--muted); font-family: ui-monospace, Menlo, monospace;
+    }
+    .iconset .fa {
+      font-size: 18px; color: var(--gray-700);
+      width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+    }
+    .iconset .svg-icon {
+      width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ============ APPROVAL FOOTER ============ */
+    .approval {
+      border: 2px solid var(--indigo);
+      border-radius: 14px;
+      padding: 24px 28px;
+      background: var(--indigo-50);
+      margin-top: 48px;
+    }
+    .approval h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 22px;
+      color: var(--indigo-700);
+      margin: 0 0 12px;
+    }
+    .approval ol { margin: 8px 0 0 18px; }
+    .approval ol li { margin-bottom: 6px; font-size: 14px; }
+    .approval code {
+      background: #fff;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--ink);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ================================================================ -->
+<!-- SHARED SVG DEFS                                                    -->
+<!-- ================================================================ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- Logo mark (Concept 01 reduced) -->
+    <symbol id="logo-mark" viewBox="0 0 100 100">
+      <rect width="100" height="100" rx="22" fill="#4F46E5"/>
+      <g fill="#fff">
+        <rect x="22" y="22" width="10" height="56" rx="3"/>
+        <rect x="22" y="22" width="52" height="10" rx="3"/>
+        <rect x="22" y="45" width="36" height="10" rx="3"/>
+        <rect x="22" y="68" width="48" height="10" rx="3"/>
+      </g>
+      <circle cx="82" cy="27" r="6" fill="#F59E0B"/>
+    </symbol>
+
+    <!-- Featured seal medallion -->
+    <symbol id="seal-featured" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="46" fill="#4F46E5"/>
+      <circle cx="50" cy="50" r="38" fill="none" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="2 3" opacity="0.7"/>
+      <path d="M50 22 L57 42 L78 42 L61 54 L67 74 L50 62 L33 74 L39 54 L22 42 L43 42 Z" fill="#F59E0B"/>
+    </symbol>
+    <!-- Mini featured star (for inline pill) -->
+    <symbol id="seal-featured-mini" viewBox="0 0 18 18">
+      <circle cx="9" cy="9" r="9" fill="#F59E0B"/>
+      <path d="M9 4 L10.3 7.5 L14 7.5 L11 9.7 L12.1 13 L9 11 L5.9 13 L7 9.7 L4 7.5 L7.7 7.5 Z" fill="#fff"/>
+    </symbol>
+
+    <!-- Verified check seal -->
+    <symbol id="seal-verified" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="44" fill="#4F46E5"/>
+      <circle cx="50" cy="50" r="34" fill="none" stroke="#F59E0B" stroke-width="2" opacity="0.7"/>
+      <path d="M32 52 L44 64 L70 36" fill="none" stroke="#FAFAF7" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="seal-verified-mini" viewBox="0 0 16 16">
+      <circle cx="8" cy="8" r="8" fill="#4F46E5"/>
+      <path d="M4.5 8.2 L6.8 10.5 L11.5 5.5" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="seal-unverified-mini" viewBox="0 0 16 16">
+      <circle cx="8" cy="8" r="8" fill="#F59E0B"/>
+      <path d="M8 4.5 L8 8.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="8" cy="11" r="0.9" fill="#fff"/>
+    </symbol>
+
+    <!-- Status glyphs (14x14 viewBox) -->
+    <symbol id="g-check" viewBox="0 0 14 14"><path d="M3 7.5 L6 10.5 L11 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="g-clock" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7 4.2 L7 7 L9 8.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="g-archive" viewBox="0 0 14 14"><rect x="2.5" y="4.5" width="9" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="2.5" y1="6.5" x2="11.5" y2="6.5" stroke="currentColor" stroke-width="1.5"/><line x1="5.5" y1="8.5" x2="8.5" y2="8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="g-handshake" viewBox="0 0 14 14"><rect x="2" y="5" width="10" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5 5 L5 3.5 L9 3.5 L9 5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="7" cy="9" r="1.4" fill="currentColor"/></symbol>
+    <symbol id="g-flag" viewBox="0 0 14 14"><line x1="3" y1="2" x2="3" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M3 3 L11 3 L9 5.5 L11 8 L3 8 Z" fill="currentColor"/></symbol>
+
+    <!-- Job-card metadata icons (custom set, 24x24) -->
+    <symbol id="ic-building" viewBox="0 0 24 24">
+      <rect x="5" y="3" width="14" height="18" rx="1.5" fill="none" stroke="#4F46E5" stroke-width="1.6"/>
+      <rect x="8" y="6"  width="2.5" height="2.5" fill="#4F46E5"/>
+      <rect x="13.5" y="6"  width="2.5" height="2.5" fill="#4F46E5"/>
+      <rect x="8" y="10.5" width="2.5" height="2.5" fill="#4F46E5"/>
+      <rect x="13.5" y="10.5" width="2.5" height="2.5" fill="#4F46E5"/>
+      <rect x="10" y="15" width="4" height="6" fill="#4F46E5"/>
+    </symbol>
+    <symbol id="ic-pin" viewBox="0 0 24 24">
+      <path d="M12 2 C7.5 2 4 5.5 4 10 C4 16 12 22 12 22 C12 22 20 16 20 10 C20 5.5 16.5 2 12 2 Z" fill="none" stroke="#4F46E5" stroke-width="1.6" stroke-linejoin="round"/>
+      <circle cx="12" cy="10" r="3" fill="#F59E0B"/>
+    </symbol>
+    <symbol id="ic-clock" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="9" fill="none" stroke="#4F46E5" stroke-width="1.6"/>
+      <path d="M12 7 L12 12 L16 14.5" fill="none" stroke="#4F46E5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="ic-globe" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="9" fill="none" stroke="#4F46E5" stroke-width="1.6"/>
+      <path d="M3 12 L21 12" stroke="#4F46E5" stroke-width="1.6"/>
+      <path d="M12 3 C8 7 8 17 12 21 C16 17 16 7 12 3 Z" fill="none" stroke="#4F46E5" stroke-width="1.6"/>
+    </symbol>
+    <symbol id="ic-flag" viewBox="0 0 24 24">
+      <line x1="5" y1="3" x2="5" y2="21" stroke="#4F46E5" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M5 4 L19 4 L16 8 L19 12 L5 12 Z" fill="#F59E0B"/>
+    </symbol>
+    <symbol id="ic-briefcase" viewBox="0 0 24 24">
+      <rect x="3" y="7" width="18" height="13" rx="2" fill="none" stroke="#4F46E5" stroke-width="1.6"/>
+      <path d="M9 7 L9 5 Q9 4 10 4 L14 4 Q15 4 15 5 L15 7" fill="none" stroke="#4F46E5" stroke-width="1.6"/>
+      <line x1="3" y1="12" x2="21" y2="12" stroke="#4F46E5" stroke-width="1.6"/>
+      <circle cx="12" cy="12" r="1.6" fill="#F59E0B"/>
+    </symbol>
+    <symbol id="ic-envelope" viewBox="0 0 24 24">
+      <rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="#4F46E5" stroke-width="1.6"/>
+      <path d="M3 7 L12 13 L21 7" fill="none" stroke="#4F46E5" stroke-width="1.6" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="ic-external" viewBox="0 0 24 24">
+      <path d="M14 4 L20 4 L20 10" fill="none" stroke="#4F46E5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M20 4 L12 12" stroke="#4F46E5" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M18 14 L18 19 Q18 20 17 20 L5 20 Q4 20 4 19 L4 7 Q4 6 5 6 L10 6" fill="none" stroke="#4F46E5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<header class="page">
+  <h1>Rebrand preview — current vs proposed</h1>
+  <p>Every icon, badge, and brand-touchpoint surface in the app is shown side-by-side: <strong style="color:var(--ink)">left</strong> is what we ship today (Font&nbsp;Awesome 4 + Bootstrap 3 + the legacy red <code>#b73737</code>); <strong style="color:var(--ink)">right</strong> is the proposed direction using the indigo system (<code>#4F46E5</code> + <code>#F59E0B</code> + <code>#27272B</code>) plus custom SVG marks.</p>
+  <p>Section 12 at the bottom previews the Bootstrap 3 → 5 component-level shift — included because you've greenlit it as part of the rebrand pass.</p>
+  <div class="palette">
+    <div class="swatch" style="background:#4F46E5">#4F46E5</div>
+    <div class="swatch" style="background:#4338CA">#4338CA</div>
+    <div class="swatch" style="background:#E0E7FF;color:#3730A3">#E0E7FF</div>
+    <div class="swatch" style="background:#F59E0B;color:#78350F">#F59E0B</div>
+    <div class="swatch" style="background:#27272B">#27272B</div>
+    <div class="swatch" style="background:#F9FAFB;color:#374151">#F9FAFB</div>
+  </div>
+</header>
+
+<nav class="toc">
+  <strong>Jump to:</strong>
+  <a href="#s1">1. Featured</a>
+  <a href="#s2">2. Verified email</a>
+  <a href="#s3">3. Status pills</a>
+  <a href="#s4">4. PWA color</a>
+  <a href="#s5">5. Spinner</a>
+  <a href="#s6">6. 404</a>
+  <a href="#s7">7. No jobs</a>
+  <a href="#s8">8. OG card</a>
+  <a href="#s9">9. Email header</a>
+  <a href="#s10">10. Icon set</a>
+  <a href="#s11">11. Avatar</a>
+  <a href="#s12">12. Bootstrap 5</a>
+  <a href="#approve" style="color:var(--amber-700);font-weight:700;">Approve</a>
+</nav>
+
+<main>
+
+<!-- ============================================================== -->
+<!-- TIER 1                                                          -->
+<!-- ============================================================== -->
+<section class="tier">
+  <h2>Tier 1 — Brand-defining badges <span class="tier-tag">High ROI</span></h2>
+
+  <!-- 1. Featured -->
+  <div class="surface" id="s1">
+    <h3>1 · Featured badge <span class="file-hint">jobIncludes.html · job.html</span></h3>
+    <div class="row">
+      <div class="col-current">
+        <div class="col-label">Current — FA trophy + Bootstrap label</div>
+        <span class="label label-warning"><i class="fa fa-trophy"></i> Featured</span>
+        <span class="label label-primary"><i class="fa fa-trophy"></i> Featured</span>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);">
+          <i class="fa fa-trophy" style="color:#F59E0B;font-size:22px;"></i>
+          <span>Inline icon used in upsell CTA</span>
+        </div>
+      </div>
+      <div class="col-proposed">
+        <div class="col-label">Proposed — dedicated seal + inline pill</div>
+        <span class="featured-pill">
+          <svg class="seal" viewBox="0 0 18 18"><use href="#seal-featured-mini"/></svg>
+          Featured
+        </span>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <svg width="36" height="36" viewBox="0 0 100 100"><use href="#seal-featured"/></svg>
+          <span style="font-size:13px;color:var(--muted);">Standalone seal for hero / job-card corner ribbon</span>
+        </div>
+      </div>
+    </div>
+    <div class="notes"><strong>Why it matters.</strong> This is the only paid upgrade in the product. Today it looks identical to any Font&nbsp;Awesome trophy from any other site. The proposed seal is a dedicated mark — wax-stamp medallion with amber star — that signals "premium" the moment it's visible.</div>
+  </div>
+
+  <!-- 2. Verified -->
+  <div class="surface" id="s2">
+    <h3>2 · Verified email badge <span class="file-hint">userAccount.html</span></h3>
+    <div class="row">
+      <div class="col-current">
+        <div class="col-label">Current — Bootstrap label, text-only</div>
+        <span class="label label-success">Email verified</span>
+        <span class="label label-warning">Email not verified</span>
+      </div>
+      <div class="col-proposed">
+        <div class="col-label">Proposed — check-seal + supportive text</div>
+        <span class="verified-pill">
+          <svg class="seal" viewBox="0 0 16 16"><use href="#seal-verified-mini"/></svg>
+          Email verified
+        </span>
+        <span class="unverified-pill">
+          <svg class="seal" viewBox="0 0 16 16"><use href="#seal-unverified-mini"/></svg>
+          Verify your email
+        </span>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:6px;">
+          <svg width="32" height="32" viewBox="0 0 100 100"><use href="#seal-verified"/></svg>
+          <span style="font-size:13px;color:var(--muted);">Standalone seal for profile / trust surfaces</span>
+        </div>
+      </div>
+    </div>
+    <div class="notes"><strong>Why it matters.</strong> The only verification badge in the product. Replacing the generic green/yellow label with a custom seal pulls double duty — it's a brand surface AND a trust signal. Concentric geometry mirrors the target "o" from Concept&nbsp;04 wordmark, so the visual system stays coherent.</div>
+  </div>
+
+  <!-- 3. Status pills -->
+  <div class="surface" id="s3">
+    <h3>3 · Job status pills + dots <span class="file-hint">app.less status-* (lines 796–815)</span></h3>
+    <div class="row">
+      <div class="col-current">
+        <div class="col-label">Current — hand-picked hex, no glyphs</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <span class="status-pill-bs3 status-active">Active</span>
+          <span class="status-pill-bs3 status-pending">Pending</span>
+          <span class="status-pill-bs3 status-inactive">Inactive</span>
+          <span class="status-pill-bs3 status-filled">Filled</span>
+        </div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);align-items:center;">
+          <span><span class="status-dot-bs3 status-active"></span>active</span>
+          <span><span class="status-dot-bs3 status-pending"></span>pending</span>
+          <span><span class="status-dot-bs3 status-inactive"></span>inactive</span>
+          <span><span class="status-dot-bs3 status-filled"></span>filled</span>
+        </div>
+      </div>
+      <div class="col-proposed">
+        <div class="col-label">Proposed — chip + glyph + LESS tokens</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <span class="status-chip active"><svg><use href="#g-check"/></svg>Active</span>
+          <span class="status-chip pending"><svg><use href="#g-clock"/></svg>Pending review</span>
+          <span class="status-chip inactive"><svg><use href="#g-archive"/></svg>Inactive</span>
+          <span class="status-chip filled"><svg><use href="#g-handshake"/></svg>Filled</span>
+          <span class="status-chip flagged"><svg><use href="#g-flag"/></svg>Flagged</span>
+        </div>
+      </div>
+    </div>
+    <div class="notes"><strong>Why it matters.</strong> Today the colours are inline hex scattered across <code>app.less</code> — every palette tweak means find/replace. Proposed moves them into LESS variables (<code>@status-active</code>, <code>@status-pending</code>, …) and gives each state a 12&nbsp;px custom glyph for accessibility and recognition. Adds a <em>Flagged</em> state the codebase already implies but never visualised.</div>
+  </div>
+
+  <!-- 4. PWA theme color -->
+  <div class="surface" id="s4">
+    <h3>4 · PWA <code>theme_color</code> + splash <span class="file-hint">public/manifest.json</span></h3>
+    <div class="row">
+      <div class="col-current">
+        <div class="col-label">Current — <code>#b73737</code> red</div>
+        <div class="phone">
+          <div class="statusbar" style="background:#b73737;">
+            <span>9:41</span><span>📶 🔋</span>
+          </div>
+          <div class="app-area">
+            <div class="title">Employed</div>
+            <p style="font-size:11px;color:var(--muted);">Android task-switcher tints the chrome with this colour. Same on the "Add to Home Screen" splash.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-proposed">
+        <div class="col-label">Proposed — <code>#4F46E5</code> indigo</div>
+        <div class="phone">
+          <div class="statusbar" style="background:#4F46E5;">
+            <span>9:41</span><span>📶 🔋</span>
+          </div>
+          <div class="app-area">
+            <div class="title" style="display:flex;align-items:center;gap:8px;">
+              <svg width="22" height="22" viewBox="0 0 100 100"><use href="#logo-mark"/></svg>
+              Employed
+            </div>
+            <p style="font-size:11px;color:var(--muted);">Matches the new logo + brand system; no more visual whiplash between PWA chrome and in-app UI.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="notes"><strong>Why it matters.</strong> 1-line change in <code>public/manifest.json</code>. Blocked only on logo selection. Without it, every PWA install still feels like the old product.</div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- TIER 2                                                          -->
+<!-- ============================================================== -->
+<section class="tier">
+  <h2>Tier 2 — Brand moments <span class="tier-tag">High emotional impact</span></h2>
+
+  <!-- 5. Loading spinner -->
+  <div class="surface" id="s5">
+    <h3>5 · Loading spinner <span class="file-hint">loading.html · jobForms.js (form submit)</span></h3>
+    <div class="row">
+      <div class="col-current">
+        <div class="col-label">Current — generic FA spinner</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <i class="fa fa-spinner fa-pulse" style="font-size:24px;color:var(--gray-500);"></i>
+          <span style="font-size:13px;color:var(--muted);">Loading…</span>
+        </div>
+        <button class="btn-bs3 btn-bs3-primary"><i class="fa fa-spinner fa-spin"></i> Posting…</button>
+      </div>
+      <div class="col-proposed">
+        <div class="col-label">Proposed — animated brand mark</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <svg class="spinner-proposed" viewBox="0 0 100 100">
+            <rect width="100" height="100" rx="22" fill="#EEF2FF"/>
+            <g fill="#4F46E5">
+              <rect x="22" y="22" width="10" height="56" rx="3"/>
+              <rect x="22" y="22" width="52" height="10" rx="3"/>
+              <rect x="22" y="45" width="36" height="10" rx="3"/>
+              <rect x="22" y="68" width="48" height="10" rx="3"/>
+            </g>
+            <circle cx="82" cy="27" r="8" fill="#F59E0B"/>
+          </svg>
+          <span style="font-size:13px;color:var(--muted);">Loading…</span>
+        </div>
+        <button class="btn-bs5 btn-bs5-primary">
+          <svg class="spinner-proposed" width="14" height="14" viewBox="0 0 100 100"><circle cx="82" cy="27" r="14" fill="#F59E0B"/></svg>
+          Posting…
+        </button>
+      </div>
+    </div>
+    <div class="notes"><strong>Why it matters.</strong> The whole logo rotating is the cinema version. The button micro-spinner (just the amber spark orbiting an invisible centre) reuses the brand vocabulary at small sizes. Every page load and form submit becomes a tiny brand impression.</div>
+  </div>
+
+  <!-- 6. 404 -->
+  <div class="surface" id="s6">
+    <h3>6 · 404 / Not-found <span class="file-hint">includes/notFound.html</span></h3>
+    <div class="row">
+      <div class="col-current">
+        <div class="col-label">Current — FA frowny face</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:8px;">
+          <i class="fa fa-frown-o" style="font-size:60px;color:var(--gray-400);"></i>
+          <strong style="color:var(--ink);">Page not found</strong>
+          <small style="color:var(--muted);">It may have been deleted or removed by admins.</small>
+        </div>
+      </div>
+      <div class="col-proposed">
+        <div class="col-label">Proposed — closed door (Concept 03 inverted)</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:8px;">
+          <svg width="84" height="84" viewBox="0 0 100 100">
+            <rect width="100" height="100" rx="22" fill="#27272B"/>
+            <path d="M30 86 L30 36 Q30 18 50 18 Q70 18 70 36 L70 86" fill="none" stroke="#6B7280" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M30 86 L30 36 Q30 18 50 18 Q70 18 70 36 L70 86 Z" fill="#374151"/>
+            <circle cx="42" cy="52" r="2.5" fill="#27272B"/>
+            <text x="50" y="78" font-family="Montserrat" font-weight="900" font-size="13" fill="#F59E0B" text-anchor="middle">404</text>
+          </svg>
+          <strong style="color:var(--ink);">Page not found</strong>
+          <small style="color:var(--muted);">It may have been deleted or removed by admins.</small>
+        </div>
+      </div>
+    </div>
+    <div class="notes"><strong>Why it matters.</strong> Reuses a logo-concept (the door) but inverted — "the door is closed" reads instantly as "404 / blocked". Costs ~30 lines of SVG, swaps one moment of brand-absence for brand-presence.</div>
+  </div>
+
+  <!-- 7. No jobs -->
+  <div class="surface" id="s7">
+    <h3>7 · "No jobs found" empty state <span class="file-hint">jobs/jobs.html (.empty-icon)</span></h3>
+    <div class="row">
+      <div class="col-current">
+        <div class="col-label">Current — FA magnifying glass</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:8px;">
+          <i class="fa fa-search" style="font-size:48px;color:var(--gray-400);"></i>
+          <strong style="color:var(--ink);">No jobs match your filters.</strong>
+        </div>
+      </div>
+      <div class="col-proposed">
+        <div class="col-label">Proposed — empty briefcase + magnifier</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:8px;">
+          <svg width="120" height="80" viewBox="0 0 120 80">
+            <!-- briefcase greyed -->
+            <path d="M40 36 L40 32 Q40 28 44 28 L60 28 Q64 28 64 32 L64 36" fill="none" stroke="#D1D5DB" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="30" y="36" width="44" height="28" rx="3" fill="#F3F4F6" stroke="#D1D5DB" stroke-width="2"/>
+            <line x1="30" y1="48" x2="74" y2="48" stroke="#D1D5DB" stroke-width="2"/>
+            <!-- magnifier overlay -->
+            <circle cx="86" cy="56" r="13" fill="#fff" stroke="#4F46E5" stroke-width="2.5"/>
+            <circle cx="86" cy="56" r="6" fill="#EEF2FF"/>
+            <line x1="96" y1="66" x2="106" y2="76" stroke="#4F46E5" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+          <strong style="color:var(--ink);">No jobs match your filters.</strong>
+        </div>
+      </div>
+    </div>
+    <div class="notes"><strong>Why it matters.</strong> Picks up the pin+briefcase vocabulary from Concept 02. Even users who never see the logo will start to associate "briefcase + indigo + amber" with the brand.</div>
+  </div>
+
+  <!-- 8. OG card -->
+  <div class="surface" id="s8">
+    <h3>8 · OG / social share card <span class="file-hint">client/lib/seo.js (image: '/images/favicon.png')</span></h3>
+    <div class="row">
+      <div class="col-current">
+        <div class="col-label">Current — favicon stretched to OG</div>
+        <div class="og-card current">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+            <svg width="80" height="80" viewBox="0 0 100 100"><rect width="100" height="100" rx="14" fill="#b73737"/><text x="50" y="68" font-family="Arial" font-weight="900" font-size="56" fill="#fff" text-anchor="middle">E</text></svg>
+            <small style="color:var(--muted);font-family:ui-monospace,Menlo,monospace;">favicon.png · 152×152 → stretched to 1200×630</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-proposed">
+        <div class="col-label">Proposed — designed 1200×630 dark card</div>
+        <div class="og-card">
+          <svg width="100%" height="100%" viewBox="0 0 480 252" preserveAspectRatio="xMidYMid slice">
+            <rect width="480" height="252" fill="#27272B"/>
+            <!-- subtle dot grid -->
+            <g fill="#4F46E5" opacity="0.12">
+              <circle cx="40" cy="40" r="1.5"/><circle cx="80" cy="40" r="1.5"/><circle cx="120" cy="40" r="1.5"/><circle cx="160" cy="40" r="1.5"/>
+              <circle cx="40" cy="80" r="1.5"/><circle cx="80" cy="80" r="1.5"/>
+              <circle cx="40" cy="120" r="1.5"/>
+            </g>
+            <!-- big logo mark -->
+            <g transform="translate(40 78)">
+              <rect width="96" height="96" rx="20" fill="#4F46E5"/>
+              <g fill="#fff">
+                <rect x="22" y="22" width="10" height="56" rx="3"/>
+                <rect x="22" y="22" width="52" height="10" rx="3"/>
+                <rect x="22" y="45" width="36" height="10" rx="3"/>
+                <rect x="22" y="68" width="48" height="10" rx="3"/>
+              </g>
+              <circle cx="82" cy="27" r="6" fill="#F59E0B"/>
+            </g>
+            <!-- wordmark + tagline -->
+            <text x="160" y="138" font-family="Montserrat" font-weight="800" font-size="48" fill="#FAFAF7" letter-spacing="-1.5">Employ<tspan fill="#F59E0B">ed</tspan></text>
+            <text x="162" y="170" font-family="Inter" font-weight="500" font-size="15" fill="#9CA3AF" letter-spacing="0.04em">Local jobs · Moçambique · México</text>
+            <!-- amber underline accent -->
+            <line x1="40" y1="220" x2="80" y2="220" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="notes"><strong>Why it matters.</strong> This is the single biggest brand surface on the open web — every WhatsApp / Facebook / X / LinkedIn link expansion. Today it's literally the 152&nbsp;px favicon stretched. The proposed designed card converts every shared link into a brand impression.</div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- TIER 3                                                          -->
+<!-- ============================================================== -->
+<section class="tier">
+  <h2>Tier 3 — System polish <span class="tier-tag">Deeper / longer-tail</span></h2>
+
+  <!-- 9. Email header -->
+  <div class="surface" id="s9">
+    <h3>9 · Transactional email header <span class="file-hint">server/methods.js · server/accounts.js</span></h3>
+    <div class="row">
+      <div class="col-current">
+        <div class="col-label">Current — no header, plain HTML body</div>
+        <div class="email-mock">
+          <div class="from"><strong>Employed</strong> &lt;noreply@employed.co.mz&gt;</div>
+          <div class="subject">Verify your email</div>
+          <div class="body">
+            Hello,<br><br>
+            To verify your email address click the link below:<br>
+            <a href="#" style="color:#b73737;">Verify email</a><br><br>
+            Thanks.
+          </div>
+        </div>
+      </div>
+      <div class="col-proposed">
+        <div class="col-label">Proposed — branded dark header partial</div>
+        <div class="email-mock">
+          <div class="from"><strong>Employed</strong> &lt;noreply@employed.co.mz&gt;</div>
+          <div class="subject">Verify your email</div>
+          <div class="branded-header">
+            <svg width="28" height="28" viewBox="0 0 100 100"><use href="#logo-mark"/></svg>
+            <span class="name">Employ<span>ed</span></span>
+          </div>
+          <div class="body">
+            Hello,<br><br>
+            To verify your email address click the link below:<br>
+            <a href="#" style="color:#4F46E5;font-weight:600;">Verify email →</a><br><br>
+            Thanks,<br>
+            The Employed team
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="notes"><strong>Why it matters.</strong> Verify / password-reset / admin-notification emails are often the <em>first</em> employer-side touchpoint. A shared HTML partial added to the 4 <code>Email.send</code> call-sites in <code>server/methods.js</code> + the Accounts-package templates means every system email looks like Employed instead of like Mailtrap default.</div>
+  </div>
+
+  <!-- 10. Icon set -->
+  <div class="surface" id="s10">
+    <h3>10 · Job-card metadata icon set <span class="file-hint">~30 occurrences across job templates</span></h3>
+    <div class="row">
+      <div class="col-current">
+        <div class="col-label">Current — Font Awesome 4 (mixed weights)</div>
+        <div class="iconset">
+          <div><span class="fa"><i class="fa fa-building"></i></span>building</div>
+          <div><span class="fa"><i class="fa fa-map-marker"></i></span>map-marker</div>
+          <div><span class="fa"><i class="fa fa-clock-o"></i></span>clock-o</div>
+          <div><span class="fa"><i class="fa fa-globe"></i></span>globe</div>
+          <div><span class="fa"><i class="fa fa-flag"></i></span>flag</div>
+          <div><span class="fa"><i class="fa fa-briefcase"></i></span>briefcase</div>
+          <div><span class="fa"><i class="fa fa-envelope"></i></span>envelope</div>
+          <div><span class="fa"><i class="fa fa-external-link"></i></span>external-link</div>
+        </div>
+      </div>
+      <div class="col-proposed">
+        <div class="col-label">Proposed — custom SVG set, indigo + amber accent</div>
+        <div class="iconset">
+          <div><span class="svg-icon"><svg width="22" height="22" viewBox="0 0 24 24"><use href="#ic-building"/></svg></span>building</div>
+          <div><span class="svg-icon"><svg width="22" height="22" viewBox="0 0 24 24"><use href="#ic-pin"/></svg></span>pin</div>
+          <div><span class="svg-icon"><svg width="22" height="22" viewBox="0 0 24 24"><use href="#ic-clock"/></svg></span>clock</div>
+          <div><span class="svg-icon"><svg width="22" height="22" viewBox="0 0 24 24"><use href="#ic-globe"/></svg></span>globe</div>
+          <div><span class="svg-icon"><svg width="22" height="22" viewBox="0 0 24 24"><use href="#ic-flag"/></svg></span>flag</div>
+          <div><span class="svg-icon"><svg width="22" height="22" viewBox="0 0 24 24"><use href="#ic-briefcase"/></svg></span>briefcase</div>
+          <div><span class="svg-icon"><svg width="22" height="22" viewBox="0 0 24 24"><use href="#ic-envelope"/></svg></span>envelope</div>
+          <div><span class="svg-icon"><svg width="22" height="22" viewBox="0 0 24 24"><use href="#ic-external"/></svg></span>external</div>
+        </div>
+      </div>
+    </div>
+    <div class="notes"><strong>Why it matters.</strong> Largest scope (~30 template sites) but quietly transforms every card. Custom set is 1.6&nbsp;px stroke, rounded joins, occasional amber accent on the "matter" pixel (pin tip, briefcase clasp, flag fill). Ship in the BS5 migration window so we touch the icon system once. Side-benefit: lets us drop the Font&nbsp;Awesome 4 dependency entirely (~70&nbsp;KB CSS + font files).</div>
+  </div>
+
+  <!-- 11. Avatar fallback -->
+  <div class="surface" id="s11">
+    <h3>11 · Avatar fallback <span class="file-hint">both/avatar.js (defaultImageUrl)</span></h3>
+    <div class="row">
+      <div class="col-current">
+        <div class="col-label">Current — static avatar.png</div>
+        <div class="avatar-row">
+          <div class="avatar-default"><i class="fa fa-user"></i></div>
+          <div class="avatar-default"><i class="fa fa-user"></i></div>
+          <div class="avatar-default"><i class="fa fa-user"></i></div>
+        </div>
+      </div>
+      <div class="col-proposed">
+        <div class="col-label">Proposed — initials-on-indigo SVG (per-user deterministic)</div>
+        <div class="avatar-row">
+          <div class="avatar-init a">AM</div>
+          <div class="avatar-init b">JC</div>
+          <div class="avatar-init c">SP</div>
+          <div class="avatar-init d">RT</div>
+        </div>
+      </div>
+    </div>
+    <div class="notes"><strong>Why it matters.</strong> User-generated surfaces (admin moderation, my-jobs, reports) look dead today because every avatar is the same grey placeholder. Deterministic hashing of the user's <code>_id</code> into an indigo-shade palette gives every user a unique tile while keeping the brand locked. Pure SVG, no asset hosting.</div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- BOOTSTRAP 5                                                     -->
+<!-- ============================================================== -->
+<section class="tier">
+  <h2>Bootstrap 3 → 5 upgrade preview <span class="tier-tag">Framework shift</span></h2>
+
+  <div class="surface" id="s12">
+    <h3>12 · Component visual shift</h3>
+
+    <div class="row">
+      <div class="col-current">
+        <div class="col-label">Bootstrap 3 (current, Journal theme)</div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-bs3 btn-bs3-primary">Post a job</button>
+          <button class="btn-bs3 btn-bs3-default">Cancel</button>
+        </div>
+
+        <div class="form-group-bs3">
+          <label>Email address</label>
+          <input class="form-control-bs3" placeholder="you@example.com" type="email">
+        </div>
+
+        <div class="panel-bs3" style="width:280px;">
+          <div class="panel-heading">Featured job</div>
+          <div class="panel-body">Senior backend engineer at Acme.</div>
+        </div>
+
+        <div class="alert-bs3 alert-bs3-warning" style="width:280px;">
+          <strong>Heads up.</strong> This job will expire in 7 days.
+        </div>
+      </div>
+
+      <div class="col-proposed">
+        <div class="col-label">Bootstrap 5 (proposed, custom theme)</div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-bs5 btn-bs5-primary">Post a job</button>
+          <button class="btn-bs5 btn-bs5-outline">Cancel</button>
+          <button class="btn-bs5 btn-bs5-ghost">Skip</button>
+        </div>
+
+        <div class="form-floating-bs5">
+          <label>Email address</label>
+          <input placeholder="you@example.com" type="email" value="">
+        </div>
+
+        <div class="card-bs5" style="width:280px;">
+          <div class="card-header">Featured job
+            <span class="featured-pill" style="margin-left:6px;font-size:9px;">
+              <svg class="seal" viewBox="0 0 18 18"><use href="#seal-featured-mini"/></svg>
+              Featured
+            </span>
+          </div>
+          <div class="card-body">Senior backend engineer at Acme.</div>
+        </div>
+
+        <div class="alert-bs5 alert-bs5-warning" style="width:280px;">
+          <svg width="16" height="16" viewBox="0 0 14 14" style="color:var(--amber-700);flex-shrink:0;margin-top:2px;"><use href="#g-clock"/></svg>
+          <div><strong>Heads up.</strong> This job will expire in 7 days.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes" style="padding-bottom:8px;">
+      <strong>Visual shift summary.</strong>
+      <ul style="margin:8px 0 0 18px;padding:0;">
+        <li><strong>Buttons:</strong> 4&nbsp;px radius + inset shadow → 8&nbsp;px radius + flat, 3 variants (primary / outline / ghost), focus ring uses indigo 4&nbsp;px halo instead of inset red glow.</li>
+        <li><strong>Inputs:</strong> top-aligned labels → floating labels; red focus glow → indigo halo; <code>.form-group</code> → <code>.form-floating</code>.</li>
+        <li><strong>Cards:</strong> <code>.panel</code> (grey heading bar, 4&nbsp;px radius) → <code>.card</code> (transparent header, 12&nbsp;px radius, soft drop-shadow).</li>
+        <li><strong>Alerts:</strong> beige <code>alert-warning</code> → amber-tinted with leading glyph for accessibility.</li>
+        <li><strong>Modals:</strong> BS5 modals are accessibility-clean by default (correct focus trap, ESC handling, ARIA) — replaces the <code>peppelg:bootstrap-3-modal</code> shim that <code>client/lib/dialog.js</code> wraps today.</li>
+        <li><strong>Navbar:</strong> dropdowns become Popper-based; <code>navbar-default</code> → <code>navbar navbar-expand-lg</code>; mobile toggle uses <code>navbar-toggler-icon</code> (SVG) instead of three <code>icon-bar</code> spans.</li>
+        <li><strong>Grid:</strong> <code>.col-md-6</code> stays; the named <code>.col-sm-*</code> stack reflows slightly because BS5 breakpoints shifted (576 / 768 / 992 / 1200 / 1400). Some layouts may need a single column override.</li>
+        <li><strong>JS coupling:</strong> BS5 drops jQuery requirement → can drop <code>$('.modal').modal('show')</code> jQuery calls in <code>jobForms.js</code>, <code>job.js</code>, <code>header.js</code>, <code>dialog.js</code>. Replace with <code>new bootstrap.Modal(el).show()</code>.</li>
+        <li><strong>Glyphicons:</strong> removed in BS4+. The <code>icon-bar</code>, <code>glyphicon-chevron-*</code> references in <code>custom.bootstrap.less</code> become dead code and are deleted.</li>
+        <li><strong>LESS → SASS:</strong> BS5 ships SASS only. The two <code>custom.bootstrap.*.less</code> files get rebuilt as SASS variable overrides (<code>$primary: #4F46E5; $border-radius: 8px;</code> etc.). The Less-based <code>journal.theme.import.less</code> can be deleted.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- APPROVAL                                                         -->
+<!-- ============================================================== -->
+<section class="approval" id="approve">
+  <h2>Approval — what happens when you say go</h2>
+  <p>If you greenlight this preview, the rebrand pass executes in this order so each PR is independently shippable:</p>
+  <ol>
+    <li><strong>Step 0 — pick a logo concept</strong> from [design/logos/concepts.html](design/logos/concepts.html). The recommendation is Concept&nbsp;01 (Geometric E with spark).</li>
+    <li><strong>Step 1 — logo production assets</strong>: refine the chosen concept; export <code>logo.svg</code>, <code>logo-dark.svg</code>, <code>favicon.svg</code>; regenerate the 5 PNG variants; flip <code>manifest.json</code> <code>theme_color</code> to <code>#4F46E5</code>. <em>(closes surfaces 1–4 manifest portion + brand foundation)</em></li>
+    <li><strong>Step 2 — Tier 1 badges</strong>: Featured seal + Verified seal + status-pill LESS tokenisation. <em>(closes surfaces 1, 2, 3)</em></li>
+    <li><strong>Step 3 — Tier 2 brand moments</strong>: spinner + 404 + no-jobs + designed OG card. <em>(closes surfaces 5–8)</em></li>
+    <li><strong>Step 4 — Tier 3 system polish</strong>: email header partial + avatar SVG fallback. <em>(closes surfaces 9, 11)</em></li>
+    <li><strong>Step 5 — Bootstrap 5 + custom icon set</strong>, paired together because both touch every template. Replaces FA4 with the custom SVG set (surface&nbsp;10), rewrites the LESS overrides as SASS, swaps <code>panel</code> → <code>card</code> / <code>label</code> → <code>badge</code> / floating-label forms, drops jQuery modal calls, regenerates the visual regression baseline. <em>(closes surface 10 + framework upgrade)</em></li>
+    <li><strong>Step 6 — full test battery</strong> on fresh Docker stack (Meteor unit + smoke chromium + journeys chromium + journeys firefox) to confirm no UAT regression.</li>
+  </ol>
+  <p style="margin-top:14px;">Reply <code>go</code> + your logo-concept pick to start at Step&nbsp;1. Reply with concept-level objections to refine this preview first.</p>
+</section>
+
+</main>
+</body>
+</html>

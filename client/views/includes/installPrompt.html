@@ -1,0 +1,18 @@
+<template name="installPromptBanner">
+  {{#if visible}}
+    <div class="pwa-install-banner" role="region" aria-label="{{t 'pwa.install.title'}}">
+      <div class="pwa-install-banner__copy">
+        <div class="pwa-install-banner__title">{{t "pwa.install.title"}}</div>
+        <div class="pwa-install-banner__detail">{{t "pwa.install.detail"}}</div>
+      </div>
+      <div class="pwa-install-banner__actions">
+        <button type="button" class="btn btn-link pwa-install-banner__dismiss" data-action="dismiss">
+          {{t "pwa.install.dismiss"}}
+        </button>
+        <button type="button" class="btn btn-primary pwa-install-banner__install" data-action="install">
+          {{t "pwa.install.cta"}}
+        </button>
+      </div>
+    </div>
+  {{/if}}
+</template>

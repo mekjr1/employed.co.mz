@@ -1,0 +1,42 @@
+<!--
+    A9.33 / docs/ads-strategy.md
+
+    Single chokepoint for any ad slot in the app. Call sites pass:
+        {{> adSlot position="home-spotlight"}}
+        {{> adSlot position="feed-sponsor"}}
+        {{> adSlot position="empty-state" suppress=isAdmin}}
+
+    The template enforces the route allowlist (AD_ALLOWED_ROUTES) itself --
+    do NOT rely on the call site remembering `suppress` for forbidden
+    routes. Mock mode renders the visual placeholder; AdSense JS does NOT
+    ship until Phase 3.
+-->
+<template name="adSlot">
+    {{#if shouldRender}}
+        <aside class="ad-slot ad-slot--{{slotPosition}}" data-ad-slot="{{slotPosition}}"
+               role="complementary" aria-label="{{t 'ads.label'}}">
+            {{#if mockMode}}
+                {{> mockAd position=slotPosition}}
+            {{else}}
+                {{!-- Phase 3 hook: real <ins class="adsbygoogle"> goes here,
+                     lazy-mounted via IntersectionObserver and gated on
+                     consent. Until then we render an empty container so
+                     the CLS budget (200px) is still reserved.            --}}
+            {{/if}}
+        </aside>
+    {{/if}}
+</template>
+
+<template name="mockAd">
+    <div class="mock-ad panel panel-default">
+        <span class="mock-ad__label">{{t 'ads.label'}}</span>
+        <div class="mock-ad__body">
+            <h4 class="mock-ad__title">{{t 'ads.mock.title'}}</h4>
+            <p class="mock-ad__subtitle">{{t 'ads.mock.subtitle'}}</p>
+            <a class="mock-ad__cta" href="{{pathFor 'jobNew'}}">{{t 'ads.mock.cta'}}</a>
+        </div>
+        <div class="mock-ad__meta">
+            <code>position={{position}}</code> · phase 0 mock
+        </div>
+    </div>
+</template>

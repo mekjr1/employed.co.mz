@@ -1,0 +1,33 @@
+<!--
+  T-shirt front print. Two zones:
+    - Center chest: small mark (~80mm wide rendered)
+    - Optional back: large mark + wordmark
+  Print artwork uses simplified geometry — no dashed circles, no thin strokes — so embroidery and DTG both reproduce cleanly.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 700" role="img" aria-labelledby="tshirtTitle">
+  <title id="tshirtTitle">Employed t-shirt front</title>
+
+  <!-- Shirt silhouette -->
+  <path d="M120 80 L220 50 Q300 120 380 50 L480 80 L540 160 L460 200 L460 640 L140 640 L140 200 L60 160 Z"
+        fill="#27272B" stroke="#1f1f23" stroke-width="2"/>
+  <!-- Neckline -->
+  <path d="M260 60 Q300 100 340 60" fill="#1f1f23"/>
+
+  <!-- Print area (centered chest) -->
+  <g transform="translate(240 240)">
+    <rect width="120" height="120" rx="26" fill="#4F46E5"/>
+    <g fill="#FFFFFF">
+      <rect x="26" y="26" width="12" height="68" rx="3"/>
+      <rect x="26" y="26" width="62" height="12" rx="3"/>
+      <rect x="26" y="54" width="44" height="12" rx="3"/>
+      <rect x="26" y="82" width="58" height="12" rx="3"/>
+    </g>
+    <circle cx="98" cy="32" r="7" fill="#F59E0B"/>
+  </g>
+
+  <!-- Wordmark below mark -->
+  <text x="300" y="430" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="900" font-size="44" fill="#FAFAF7" letter-spacing="-1.5">Employ<tspan fill="#F59E0B">ed</tspan></text>
+
+  <!-- Small care tag URL at bottom -->
+  <text x="300" y="610" text-anchor="middle" font-family="Inter, sans-serif" font-weight="500" font-size="12" fill="#9CA3AF" letter-spacing="2">EMPLOYED.CO.MZ</text>
+</svg>

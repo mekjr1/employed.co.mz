@@ -1,0 +1,24 @@
+<!--
+  Die-cut sticker. 70mm × 70mm. Includes a 3mm bleed margin (light outer halo).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 280" role="img" aria-labelledby="stickerTitle">
+  <title id="stickerTitle">Employed sticker</title>
+  <!-- Bleed halo -->
+  <rect x="6" y="6" width="268" height="268" rx="64" fill="#FAFAF7" stroke="#E5E7EB" stroke-width="2" stroke-dasharray="4 4"/>
+  <!-- Sticker body (cream) -->
+  <rect x="14" y="14" width="252" height="252" rx="56" fill="#FAFAF7"/>
+  <!-- Mark centered -->
+  <g transform="translate(82 60)">
+    <rect width="116" height="116" rx="25" fill="#4F46E5"/>
+    <g fill="#FFFFFF">
+      <rect x="26" y="26" width="12" height="64" rx="3"/>
+      <rect x="26" y="26" width="60" height="12" rx="3"/>
+      <rect x="26" y="52" width="42" height="12" rx="3"/>
+      <rect x="26" y="78" width="56" height="12" rx="3"/>
+    </g>
+    <circle cx="95" cy="31" r="7" fill="#F59E0B"/>
+  </g>
+  <!-- Wordmark -->
+  <text x="140" y="216" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="900" font-size="40" fill="#111827" letter-spacing="-1">Employ<tspan fill="#F59E0B">ed</tspan></text>
+  <line x1="120" y1="234" x2="160" y2="234" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+</svg>
