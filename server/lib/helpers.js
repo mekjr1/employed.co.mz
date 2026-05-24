@@ -7,7 +7,7 @@ var nodeCrypto = Npm.require('crypto');
 hashIdentifier = function(value) {
   if (!value) return null;
   var salt = (Meteor.settings.private && Meteor.settings.private.ipSalt) || '';
-  return nodeCrypto.createHash('sha256').update(String(value) + salt).digest('hex').slice(0, 12);
+  return nodeCrypto.createHash('sha256').update(String(value) + salt).digest('hex').slice(0, 16);
 };
 
 // S3: throw if a signed-in user has not verified their email. OAuth-only

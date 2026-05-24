@@ -22,8 +22,10 @@ Markets selected by subdomain (`mx.*`, `mz.*`).
 - `both/lib/constants.js` — markets, pricing, app name
 - `both/lib/i18n.js` — translations (`en`, `es`, `pt`)
 - `server/lib/log.js` — structured JSON logger
+- `server/lib/payments.js` — payment provider registry (Stripe, M-Pesa, e-Mola)
 - `server/error-reporter.js` — Sentry server-side
 - `server/healthz.js` — liveness/readiness probe
+- `server/security-headers.js` — CSP and HTTP security headers
 - `settings-example.json` — all Meteor settings documented
 
 ## Commands
@@ -31,6 +33,7 @@ Markets selected by subdomain (`mx.*`, `mz.*`).
 ```bash
 meteor npm install
 meteor --settings settings-docker.json
+meteor npm test
 npm run lint
 docker compose up --build
 ```

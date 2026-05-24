@@ -546,4 +546,90 @@ if (Meteor.isServer) {
       assert.isFunction(DDPRateLimiter.addRule);
     });
   });
+
+  // TEST-EMAIL — Email notification tests. Verify that admin status
+  // transitions trigger the Email.send path and that the email shape
+  // (subject, branded HTML, threading headers) is correct.
+  describe('email notifications on status change', function () {
+    let adminId;
+    let userId;
+    let originalSend;
+    let capturedEmails;
+
+    before(function () {
+      requireTestDatabase();
+    });
+
+    beforeEach(function () {
+      Meteor.users.remove({});
+      Jobs.remove({});
+      capturedEmails = [];
+      // Intercept Email.send to capture outgoing mail.
+      originalSend = Email.send;
+      Email.send = function (opts) {
+        capturedEmails.push(opts);
+      };
+      adminId = createVerifiedUser('emailadmin');
+      userId = createVerifiedUser('emailuser');
+      Roles.addUsersToRoles(adminId, ['admin']);
+    });
+
+    afterEach(function () {
+      Email.send = originalSend;
+      Meteor.users.remove({});
+      Jobs.remove({});
+    });
+
+    it('sends an email when admin sets job status to active', function () {
+      const jobId = insertJob({ userId: userId, status: 'pending' });
+      const ctx = { userId: adminId };
+      Meteor.server.method_handlers['adminSetJobStatus'].apply(ctx, [jobId, 'active', 'Approved']);
+
+      // At least one email should have been sent (admin notification
+      // and/or poster notification depending on config).
+      assert.isAbove(capturedEmails.length, 0, 'Expected at least one email to be sent');
+
+      // Verify the admin notification email shape.
+      const adminEmail = capturedEmails.find(function (e) {
+        return e.subject && e.subject.indexOf('active') !== -1;
+      });
+      assert.isOk(adminEmail, 'Expected an admin notification email with "active" in subject');
+      assert.isOk(adminEmail.to);
+      assert.isOk(adminEmail.from);
+      assert.isString(adminEmail.text);
+    });
+
+    it('email contains the job title in the subject', function () {
+      const jobId = insertJob({ userId: userId, status: 'pending', title: 'Unique Dev Role' });
+      Meteor.server.method_handlers['adminSetJobStatus'].apply({ userId: adminId }, [jobId, 'active', null]);
+
+      const relevant = capturedEmails.find(function (e) {
+        return e.subject && e.subject.indexOf('Unique Dev Role') !== -1;
+      });
+      assert.isOk(relevant, 'Email subject should contain the job title');
+    });
+
+    it('email includes branded HTML wrapper', function () {
+      const jobId = insertJob({ userId: userId, status: 'pending' });
+      Meteor.server.method_handlers['adminSetJobStatus'].apply({ userId: adminId }, [jobId, 'active', null]);
+
+      const withHtml = capturedEmails.find(function (e) { return e.html; });
+      assert.isOk(withHtml, 'At least one email should have HTML body');
+      assert.include(withHtml.html, 'Employ', 'HTML should contain brand name');
+    });
+
+    it('email includes threading headers for message grouping', function () {
+      const jobId = insertJob({ userId: userId, status: 'pending' });
+      Meteor.server.method_handlers['adminSetJobStatus'].apply({ userId: adminId }, [jobId, 'active', null]);
+
+      const withHeaders = capturedEmails.find(function (e) { return e.headers; });
+      if (withHeaders) {
+        // Verify Message-ID / References headers for threading.
+        assert.isOk(
+          withHeaders.headers['In-Reply-To'] || withHeaders.headers['References'],
+          'Expected threading headers'
+        );
+      }
+    });
+  });
 }

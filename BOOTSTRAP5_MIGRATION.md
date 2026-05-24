@@ -1,8 +1,12 @@
 # Bootstrap 5 + Font Awesome 6 migration plan
 
-> **Status:** documentation-only. No code changes shipped under
-> **A9.28**. This file scopes the migration so a future tier can pick
-> it up without a fresh audit.
+> **Status (May 2026):** PR 1 (Foundation) and PR 2 (useraccounts
+> replacement) are **complete**. PR 3 (template sweep + BS3 removal)
+> is pending. See [`brand/BS5-MIGRATION.md`](brand/BS5-MIGRATION.md)
+> for the canonical progress tracker.
+>
+> This file preserves the original migration audit and rationale.
+> For current status, always refer to `brand/BS5-MIGRATION.md`.
 
 ## Why
 

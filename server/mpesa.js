@@ -37,6 +37,56 @@
 if (Meteor.isServer) {
   var crypto = Npm.require('crypto');
 
+  /* global verifyMpesaWebhookSignature:true */
+  /**
+   * Verify the HMAC-SHA256 signature on an inbound M-Pesa webhook callback.
+   * The provider POSTs a JSON body and signs it with the shared secret
+   * configured in settings.private.mpesa.webhookSecret. When no secret is
+   * configured (simulator mode), verification is skipped and a log warning
+   * is emitted so operators see it in production monitoring.
+   *
+   * @param {Object} req  — incoming HTTP request (Node IncomingMessage)
+   * @returns {Boolean}   — true when the signature is valid (or skipped)
+   * @throws {Meteor.Error} when the signature is present but invalid
+   */
+  verifyMpesaWebhookSignature = function(req, rawBody) {
+    var secret = Meteor.settings.private &&
+                 Meteor.settings.private.mpesa &&
+                 Meteor.settings.private.mpesa.webhookSecret;
+
+    if (!secret) {
+      log.warn('mpesa.webhook.no_secret', {
+        hint: 'Set Meteor.settings.private.mpesa.webhookSecret to enable signature verification.'
+      });
+      return true; // allow in dev/simulator
+    }
+
+    var signature = req.headers['x-mpesa-signature'] ||
+                    req.headers['x-callback-signature'] || '';
+    if (!signature) {
+      throw new Meteor.Error('mpesa-webhook-unsigned',
+        'Missing webhook signature header.');
+    }
+
+    var expected = crypto
+      .createHmac('sha256', secret)
+      .update(rawBody || '')
+      .digest('hex');
+
+    var valid = crypto.timingSafeEqual
+      ? crypto.timingSafeEqual(Buffer.from(signature, 'hex'), Buffer.from(expected, 'hex'))
+      : (signature === expected);
+
+    if (!valid) {
+      log.warn('mpesa.webhook.bad_signature', {
+        receivedPrefix: signature.slice(0, 8) + '…'
+      });
+      throw new Meteor.Error('mpesa-webhook-invalid-signature',
+        'Webhook signature verification failed.');
+    }
+    return true;
+  };
+
   /**
    * Normalize a Mozambique MSISDN. Accepts:
    *   84xxxxxxx, 85xxxxxxx          (9 digits, no country code)

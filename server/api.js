@@ -113,11 +113,25 @@ Meteor.startup(function () {
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('Content-Type', 'application/json');
 
-    // Token from query string (?token=) or header.
+    // Token from header (preferred) or query string (deprecated — leaks in
+    // server logs, Referrer headers, and browser history).
     var url = req.url || '';
     var tokenMatch = url.match(/[?&]token=([^&]+)/);
-    var rawToken = (tokenMatch && decodeURIComponent(tokenMatch[1])) ||
-      req.headers['x-auth-token'] || req.headers['X-Auth-Token'];
+    var rawToken = req.headers['x-auth-token'] || req.headers['X-Auth-Token'] || null;
+    var tokenSource = 'header';
+
+    if (!rawToken && tokenMatch) {
+      rawToken = decodeURIComponent(tokenMatch[1]);
+      tokenSource = 'query';
+      log.warn('api.me_export.token_in_url', {
+        hint: 'Token-in-URL is deprecated. Use the X-Auth-Token header instead.',
+        deprecatedSince: '2026-05-24',
+        tokenSource: tokenSource
+      });
+      // Signal deprecation to the client so integrations notice.
+      res.setHeader('Deprecation', 'true');
+      res.setHeader('Sunset', 'Sat, 01 Nov 2026 00:00:00 GMT');
+    }
 
     if (!rawToken) {
       res.statusCode = 401;

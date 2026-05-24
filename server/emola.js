@@ -22,6 +22,54 @@
 if (Meteor.isServer) {
   var crypto = Npm.require('crypto');
 
+  /* global verifyEmolaWebhookSignature:true */
+  /**
+   * Verify the HMAC-SHA256 signature on an inbound e-Mola webhook callback.
+   * Mirrors the M-Pesa verifier — same pattern, different settings key.
+   *
+   * @param {Object} req      — incoming HTTP request (Node IncomingMessage)
+   * @param {String} rawBody  — raw request body as a string
+   * @returns {Boolean}       — true when the signature is valid (or skipped)
+   * @throws {Meteor.Error}   when the signature is present but invalid
+   */
+  verifyEmolaWebhookSignature = function(req, rawBody) {
+    var secret = Meteor.settings.private &&
+                 Meteor.settings.private.emola &&
+                 Meteor.settings.private.emola.webhookSecret;
+
+    if (!secret) {
+      log.warn('emola.webhook.no_secret', {
+        hint: 'Set Meteor.settings.private.emola.webhookSecret to enable signature verification.'
+      });
+      return true; // allow in dev/simulator
+    }
+
+    var signature = req.headers['x-emola-signature'] ||
+                    req.headers['x-callback-signature'] || '';
+    if (!signature) {
+      throw new Meteor.Error('emola-webhook-unsigned',
+        'Missing webhook signature header.');
+    }
+
+    var expected = crypto
+      .createHmac('sha256', secret)
+      .update(rawBody || '')
+      .digest('hex');
+
+    var valid = crypto.timingSafeEqual
+      ? crypto.timingSafeEqual(Buffer.from(signature, 'hex'), Buffer.from(expected, 'hex'))
+      : (signature === expected);
+
+    if (!valid) {
+      log.warn('emola.webhook.bad_signature', {
+        receivedPrefix: signature.slice(0, 8) + '…'
+      });
+      throw new Meteor.Error('emola-webhook-invalid-signature',
+        'Webhook signature verification failed.');
+    }
+    return true;
+  };
+
   function normalizeMsisdn(raw) {
     if (!raw || typeof raw !== 'string') return null;
     var digits = raw.replace(/\D+/g, '');

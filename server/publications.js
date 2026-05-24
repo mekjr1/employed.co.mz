@@ -274,6 +274,10 @@ Meteor.publish("my_jobs", function (marketKey) {
 // and a limit, cap the latter, and project away large/sensitive fields
 // (descriptions and Stripe charge ids). statusHistory ships so the
 // admin timeline can render without an extra round-trip.
+//
+// POSTER-N1: also publish the minimal user docs for the job owners so
+// the client-side posterName() helper resolves from MiniMongo without
+// triggering an N+1 query per row.
 Meteor.publish("adminJobs", function (status, limit) {
   check(status, Match.OneOf(null, undefined, Match.Where(function (s) {
     return _.contains(STATUSES, s);
@@ -288,7 +292,7 @@ Meteor.publish("adminJobs", function (status, limit) {
   var selector = status ? { status: status } : {};
   var capped = Math.min(Math.max(Number(limit) || 50, 1), 200);
 
-  return Jobs.find(selector, {
+  var jobsCursor = Jobs.find(selector, {
     sort: { createdAt: -1 },
     limit: capped,
     fields: {
@@ -297,6 +301,16 @@ Meteor.publish("adminJobs", function (status, limit) {
       featuredChargeHistory: 0
     }
   });
+
+  // Collect distinct userIds from the matched jobs and publish a
+  // lightweight user cursor so posterName() resolves locally.
+  var userIds = _.uniq(jobsCursor.fetch().map(function (j) { return j.userId; }).filter(Boolean));
+  var usersCursor = Meteor.users.find(
+    { _id: { $in: userIds } },
+    { fields: { 'profile.name': 1, 'emails.address': 1, username: 1 } }
+  );
+
+  return [jobsCursor, usersCursor];
 });
 
 // B3.7: publish the small list of users that currently hold the admin

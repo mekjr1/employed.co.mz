@@ -13,6 +13,47 @@ on-call can trace any single behaviour back to its rationale.
 
 ### Added
 
+- **Quality gate fixes** — 11 code fixes applied from the automated
+  quality pipeline:
+  - Auth flow tests, payment registry tests, email notification tests,
+    client helper tests (`tests/`)
+  - Webhook signature verification stubs for M-Pesa and e-Mola
+    (`server/mpesa.js`, `server/emola.js`)
+  - Compound MongoDB index for featured-exclusion query
+    (`both/collections/jobs.js`)
+
+### Changed
+
+- **Docs refresh (May 2026)** — reviewed and updated all project
+  documentation for accuracy:
+  - `README.md` — fixed Node version (14→18), added Testing section
+    with full test inventory, refreshed upstream note
+  - `tests/README.md` — full rewrite listing all 8 test files + E2E,
+    removed stale "uncomment mocha" setup step
+  - `BOOTSTRAP5_MIGRATION.md` — added status header (PR 1+2 complete),
+    cross-referenced `brand/BS5-MIGRATION.md` as canonical tracker
+  - `REDESIGN.md` — added archive notice (historical audit, not
+    current spec)
+  - `imports/styles/README.md` — updated PR 2 status to complete
+  - `.github/copilot-instructions.md` — added `meteor npm test` to
+    commands, added `payments.js` and `security-headers.js` to key files
+
+### Fixed
+
+- `/healthz` E2E test — assertion now matches actual response shape
+  (`time` not `uptime`)
+- `/api/jobs` E2E test — assertion matches envelope structure
+  (`{ status, data }`)
+- N+1 `posterName()` in admin — publication now returns user cursor
+  alongside jobs cursor
+- IP hash truncation increased from 12→16 hex chars (collision
+  reduction)
+- Data export endpoint (`/api/me/export`) — header-based auth
+  preferred over token-in-URL (deprecation warning + `Sunset` header
+  added)
+
+### Added
+
 - **A10.0** — **Mobile-first foundations: multi-provider checkout,
   dynamic PWA manifest, service worker, install prompt, WhatsApp
   apply.** Closes the gap between "site that works on a phone" and

@@ -93,6 +93,110 @@ if (Meteor.isServer) {
     });
   });
 
+  // ── Auth flow tests ──────────────────────────────────────────────
+
+  describe('auth: registration', function () {
+    before(function () { requireTestDatabase(); });
+
+    afterEach(function () {
+      Meteor.users.remove({});
+    });
+
+    it('creates a user with email and password', function () {
+      const email = 'register-' + Random.id(6) + '@test.local';
+      const userId = Accounts.createUser({ email: email, password: 'test1234' });
+      assert.isString(userId);
+      const user = Meteor.users.findOne(userId);
+      assert.isOk(user);
+      assert.equal(user.emails[0].address, email);
+    });
+
+    it('rejects duplicate email registration', function () {
+      const email = 'dup-' + Random.id(6) + '@test.local';
+      Accounts.createUser({ email: email, password: 'test1234' });
+      assert.throws(function () {
+        Accounts.createUser({ email: email, password: 'other5678' });
+      });
+    });
+
+    it('new users start with unverified email', function () {
+      const email = 'unverified-' + Random.id(6) + '@test.local';
+      const userId = Accounts.createUser({ email: email, password: 'test1234' });
+      const user = Meteor.users.findOne(userId);
+      assert.isFalse(user.emails[0].verified);
+    });
+  });
+
+  describe('auth: login token validation', function () {
+    let userId;
+
+    before(function () { requireTestDatabase(); });
+
+    beforeEach(function () {
+      Meteor.users.remove({});
+      userId = createVerifiedUser('login');
+    });
+
+    afterEach(function () {
+      Meteor.users.remove({});
+    });
+
+    it('generates a valid login token via _generateLoginToken', function () {
+      // Accounts._generateLoginToken is an internal but stable API
+      // used by the data-export endpoint. Verify it round-trips.
+      const stampedToken = Accounts._generateStampedLoginToken();
+      assert.isString(stampedToken.token);
+      assert.instanceOf(stampedToken.when, Date);
+    });
+
+    it('hashed token resolves back to the user', function () {
+      const stampedToken = Accounts._generateStampedLoginToken();
+      Accounts._insertLoginToken(userId, stampedToken);
+      const hashed = Accounts._hashLoginToken(stampedToken.token);
+      const user = Meteor.users.findOne(
+        { 'services.resume.loginTokens.hashedToken': hashed },
+        { fields: { _id: 1 } }
+      );
+      assert.isOk(user);
+      assert.equal(user._id, userId);
+    });
+
+    it('invalid token does not resolve to any user', function () {
+      const hashed = Accounts._hashLoginToken('bogus-token-value');
+      const user = Meteor.users.findOne(
+        { 'services.resume.loginTokens.hashedToken': hashed },
+        { fields: { _id: 1 } }
+      );
+      assert.isNotOk(user);
+    });
+  });
+
+  describe('auth: password reset flow', function () {
+    let userId;
+
+    before(function () { requireTestDatabase(); });
+
+    beforeEach(function () {
+      Meteor.users.remove({});
+      userId = createVerifiedUser('resetpw');
+    });
+
+    afterEach(function () {
+      Meteor.users.remove({});
+    });
+
+    it('generates a reset token for an existing user', function () {
+      const user = Meteor.users.findOne(userId);
+      const email = user.emails[0].address;
+      // Accounts.generateResetToken stamps the user doc
+      const tokenRecord = Accounts.generateResetToken(userId, email, 'resetPassword');
+      assert.isString(tokenRecord.token);
+      // Verify the token is on the user document
+      const updated = Meteor.users.findOne(userId);
+      assert.isOk(updated.services.password.reset);
+    });
+  });
+
   describe('users.exportData', function () {
     let userId;
 

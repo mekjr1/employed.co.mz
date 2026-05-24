@@ -154,12 +154,14 @@ test.describe('API Response Shape', () => {
     const body = await res.json();
     expect(body).toHaveProperty('ok');
     expect(body).toHaveProperty('ready');
-    expect(body).toHaveProperty('uptime');
+    expect(body).toHaveProperty('time');
   });
 
-  test('/api/jobs returns an array', async ({ request }) => {
+  test('/api/jobs returns success envelope with data array', async ({ request }) => {
     const res = await request.get('/api/jobs');
     const body = await res.json();
-    expect(Array.isArray(body)).toBeTruthy();
+    expect(body).toHaveProperty('status', 'success');
+    expect(body).toHaveProperty('data');
+    expect(Array.isArray(body.data)).toBeTruthy();
   });
 });

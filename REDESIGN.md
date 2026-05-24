@@ -1,5 +1,15 @@
 # Employed — UI/UX Redesign Plan
 
+> **Status (May 2026):** This document is a **point-in-time audit and
+> design plan** captured from the live Docker dev environment. Many of
+> the visual issues noted here have been addressed by the brand refresh
+> (logo, colours, seals, status pills) and the BS5 migration progress
+> (PR 1 + PR 2 complete). The remaining items (floating labels, BS5
+> template surgery, mobile form improvements) are tracked in
+> [`brand/BS5-MIGRATION.md`](brand/BS5-MIGRATION.md) under PR 3.
+>
+> Treat this document as **historical context**, not a current spec.
+
 > Audit conducted May 2026 against the live Docker dev environment.  
 > Screenshots captured at 1440×900 (desktop) and 390×844 (iPhone 14 proxy).
 

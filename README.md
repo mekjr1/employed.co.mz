@@ -66,9 +66,9 @@ Build a self-contained production image (multi-stage build defined in `Dockerfil
 docker build -f Dockerfile.prod -t employed:latest .
 ```
 
-Meteor 2.7.1 still builds and runs its server bundle on Node 14. The Docker
-runtime and Galaxy manifest intentionally stay on Node 14 until the app is
-upgraded to a newer Meteor release.
+Meteor 2.7.1 builds its server bundle on Node 14 by default, but the runtime
+has been bumped to **Node 18 LTS** (A9.11). The Dockerfile and CI are pinned to
+Node 18; Galaxy deploys should match.
 
 Run it. **Settings and secrets are passed at runtime; never bake them into the image.**
 
@@ -144,19 +144,36 @@ Hit the home page in both browser locales (`Accept-Language: pt`, `Accept-Langua
 
 ### Log collection (A9.14)
 
-The structured logger (`server/lib/log.js`) emits JSON to stdout. The container host or PaaS is responsible for forwarding it to a collector. Tested-compatible options:
+The structured logger (`server/lib/log.js`) emits JSON to stdout. Error tracking is handled by Sentry (`server/error-reporter.js`). The container host or PaaS is responsible for forwarding stdout to a collector. Tested-compatible options:
 
 - **Datadog / Logtail / Loki:** stdout → host agent → backend, no app code change.
 - **Self-hosted ELK:** use `filebeat` on the host with the `json.keys_under_root: true` decoder.
 
-Error tracking is wired through Sentry (see A9.14 in `FIXES_PLAN.md`). The DSN is read from `settings.private.sentry.dsn` and `settings.public.sentry.dsn`. If absent, the reporter is a no-op so local development is unaffected.
+The Sentry DSN is read from `settings.private.sentry.dsn` and `settings.public.sentry.dsn`. If absent, the reporter is a no-op so local development is unaffected.
+
+## Testing
+
+The test suite uses `meteortesting:mocha` (already enabled in `.meteor/packages`).
+
+```bash
+meteor npm test                          # Mocha unit + integration tests
+npx playwright test tests/e2e/           # Playwright E2E smoke tests
+npm run lint                             # ESLint
+```
+
+Test files:
+
+| File | Scope |
+| --- | --- |
+| `tests/accounts.tests.js` | Auth flows (login, registration, password reset) |
+| `tests/methods.tests.js` | DDP methods (jobs CRUD, admin actions, email notifications) |
+| `tests/publications.tests.js` | Pub/sub data shape |
+| `tests/helpers.tests.js` | Pure-function client helpers |
+| `tests/cron.tests.js` | Scheduled job expiration |
+| `tests/payments.tests.js` | Payment provider registry |
+| `tests/stripe-webhook.tests.js` | Stripe webhook signature verification |
+| `tests/e2e/smoke.spec.js` | Playwright smoke (healthz, jobs API, sitemap) |
 
 ## Upstream
 
-This project was originally imported from `nate-strauser/wework`. The original upstream has been added as:
-
-```bash
-git remote add upstream https://github.com/nate-strauser/wework.git
-```
-
-The current codebase includes upstream updates through `upstream/master` as of commit `ebdc55c`.
+This project was originally forked from `nate-strauser/wework`. The codebase has diverged significantly — subdomain markets, Stripe payments, mobile-money providers, BS5 migration, rebrand, and i18n are all post-fork additions.

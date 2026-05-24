@@ -313,6 +313,11 @@ if (Meteor.isServer) {
       Jobs._ensureIndex({ status: 1, createdAt: -1 });
       // H3 expiry cron's selector.
       Jobs._ensureIndex({ status: 1, createdAt: 1 });
+      // COMPOUND-IDX: the `jobs` publication's featured-exclusion query
+      // filters on { status, country, createdAt, featuredThrough }. This
+      // compound index covers that access pattern so Mongo can satisfy it
+      // with an index scan instead of a collection scan + in-memory sort.
+      Jobs._ensureIndex({ status: 1, country: 1, featuredThrough: 1, createdAt: -1 });
       // M4: text index for keyword search. Enables future migration from
       // regex-based search to MongoDB $text queries. Weights prioritize
       // title matches over company/location.

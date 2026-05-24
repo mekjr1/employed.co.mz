@@ -167,6 +167,74 @@ if (Meteor.isServer) {
     });
   });
 
+  describe('Payments registry', function () {
+    before(function () { requireTestDatabase(); });
+
+    afterEach(function () {
+      // Restore the registry for other tests — _reset clears it, so we
+      // must re-register the providers that other describe blocks depend
+      // on. In practice the payment modules re-register on Meteor
+      // startup, but we use _reset only within this block.
+    });
+
+    it('exposes the registry API surface', function () {
+      assert.isFunction(Payments.register);
+      assert.isFunction(Payments.get);
+      assert.isFunction(Payments.listForMarket);
+      assert.isFunction(Payments.snapshotForMarket);
+      assert.isFunction(Payments.isAvailable);
+      assert.isFunction(Payments._reset);
+    });
+
+    it('lists providers registered for a market', function () {
+      var mzProviders = Payments.listForMarket('mz');
+      assert.isArray(mzProviders);
+      // M-Pesa and e-Mola should be registered for mz
+      var keys = mzProviders.map(function (p) { return p.key; });
+      assert.include(keys, 'mpesa');
+      assert.include(keys, 'emola');
+    });
+
+    it('snapshotForMarket returns serializable objects without functions', function () {
+      var snapshot = Payments.snapshotForMarket('mz');
+      assert.isArray(snapshot);
+      snapshot.forEach(function (entry) {
+        assert.isString(entry.key);
+        assert.isString(entry.name);
+        assert.isOk(entry.ui);
+        // Should not expose the initiate/status functions
+        assert.isUndefined(entry.initiate);
+        assert.isUndefined(entry.status);
+      });
+    });
+
+    it('isAvailable returns true for registered market providers', function () {
+      assert.isTrue(Payments.isAvailable('mpesa', 'mz'));
+      assert.isTrue(Payments.isAvailable('emola', 'mz'));
+    });
+
+    it('isAvailable returns false for unknown providers', function () {
+      assert.isFalse(Payments.isAvailable('bitcoin', 'mz'));
+    });
+
+    it('isAvailable returns false for wrong market', function () {
+      // mpesa is only registered for 'mz'
+      assert.isFalse(Payments.isAvailable('mpesa', 'mx'));
+    });
+
+    it('get throws for unknown provider key', function () {
+      assert.throws(function () {
+        Payments.get('nonexistent');
+      }, Meteor.Error);
+    });
+
+    it('get returns provider object for valid key', function () {
+      var provider = Payments.get('mpesa');
+      assert.equal(provider.key, 'mpesa');
+      assert.isFunction(provider.initiate);
+    });
+  });
+
   describe('payment.cancel', function () {
     let userId;
 

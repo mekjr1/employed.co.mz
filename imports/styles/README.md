@@ -2,14 +2,14 @@
 
 > Files under `imports/` are **lazy-loaded** by Meteor. Nothing in this folder is bundled into the running app unless another module explicitly `import`s it.
 >
-> The Bootstrap 5 migration is checked in here so the rebrand PR can ship a foundation without changing a single rendered pixel. PR 2 and PR 3 will move these files into `client/` (or import them from a new client entry) to actually flip the framework.
+> The Bootstrap 5 migration is checked in here so the rebrand PR can ship a foundation without changing a single rendered pixel. **PR 2 is complete** — the useraccounts replacement shipped as A9.32 (see [CHANGELOG](../../CHANGELOG.md)). PR 3 will move these files into `client/` (or import them from a new client entry) to actually flip the framework.
 
 ## Files
 
 | File | Purpose | Activated in |
 | --- | --- | --- |
 | [_app-bs5.scss](./_app-bs5.scss) | BS5 SCSS variable overrides for the brand palette, geometry, typography. Imports the full Bootstrap 5 SCSS bundle once uncommented. | PR 3 |
-| [_useraccounts-bs5.scss](./_useraccounts-bs5.scss) | Auth-flow specific styling for the hand-rolled sign-in / sign-up / password-reset templates that replace `useraccounts:bootstrap`. | PR 2 |
+| [_useraccounts-bs5.scss](./_useraccounts-bs5.scss) | Auth-flow specific styling for the hand-rolled sign-in / sign-up / password-reset templates that replaced `useraccounts:bootstrap` (A9.32). | PR 2 ✅ |
 
 ## How to activate (cheatsheet)
 

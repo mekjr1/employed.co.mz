@@ -66,6 +66,101 @@ describe('helpers', function () {
       it('produces different hashes for different inputs', function () {
         assert.notEqual(hashIdentifier('a'), hashIdentifier('b'));
       });
+
+      it('returns at least 16 hex characters', function () {
+        const hash = hashIdentifier('192.168.1.1');
+        assert.isAtLeast(hash.length, 16);
+      });
+
+      it('returns null for empty/null input', function () {
+        assert.isNull(hashIdentifier(null));
+        assert.isNull(hashIdentifier(''));
+        assert.isNull(hashIdentifier(undefined));
+      });
     });
   }
+
+  describe('getUserName', function () {
+    it('returns empty string for null/undefined user', function () {
+      assert.equal(getUserName(null), '');
+      assert.equal(getUserName(undefined), '');
+    });
+
+    it('returns profile.name when available', function () {
+      assert.equal(getUserName({ profile: { name: 'Ana Silva' } }), 'Ana Silva');
+    });
+
+    it('falls back to firstName + lastName', function () {
+      assert.equal(
+        getUserName({ profile: { firstName: 'João', lastName: 'Costa' } }),
+        'João Costa'
+      );
+    });
+
+    it('falls back to username', function () {
+      assert.equal(getUserName({ username: 'jcosta' }), 'jcosta');
+    });
+
+    it('falls back to email address', function () {
+      assert.equal(
+        getUserName({ emails: [{ address: 'a@b.test' }] }),
+        'a@b.test'
+      );
+    });
+  });
+
+  describe('getUserEmail', function () {
+    it('returns primary email address', function () {
+      assert.equal(
+        getUserEmail({ emails: [{ address: 'user@example.test' }] }),
+        'user@example.test'
+      );
+    });
+
+    it('returns undefined for user without email sources', function () {
+      assert.isUndefined(getUserEmail({}));
+    });
+
+    it('returns undefined for null user', function () {
+      assert.isUndefined(getUserEmail(null));
+    });
+
+    it('falls back to OAuth provider email', function () {
+      assert.equal(
+        getUserEmail({ services: { google: { email: 'oauth@gmail.test' } } }),
+        'oauth@gmail.test'
+      );
+    });
+  });
+
+  describe('marketFromKey', function () {
+    it('returns the correct market for mx', function () {
+      const market = marketFromKey('mx');
+      assert.equal(market.key, 'mx');
+      assert.equal(market.country, 'Mexico');
+    });
+
+    it('returns default market for unknown key', function () {
+      const market = marketFromKey('xx');
+      assert.isOk(market);
+      assert.isOk(market.key);
+    });
+  });
+
+  describe('marketFromCountry', function () {
+    it('resolves Mexico to mx market', function () {
+      const market = marketFromCountry('Mexico');
+      assert.equal(market.key, 'mx');
+    });
+
+    it('resolves Mozambique to mz market', function () {
+      const market = marketFromCountry('Mozambique');
+      assert.equal(market.key, 'mz');
+    });
+
+    it('returns default for unknown country', function () {
+      const market = marketFromCountry('Antarctica');
+      assert.isOk(market);
+    });
+  });
 });
