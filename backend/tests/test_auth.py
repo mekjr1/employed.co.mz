@@ -13,19 +13,21 @@ def test_register_with_valid_email_password(client):
 
     assert response.status_code == 201
     body = response.json()
-    assert body["access_token"]
-    assert body["refresh_token"]
-    assert body["user"]["email"] == "new@example.com"
-    assert body["user"]["email_verified"] is False
+    # Registration returns a generic response to prevent email enumeration
+    assert body["message"] == "Check your email to complete registration"
+    assert body["token_type"] == "bearer"
 
 
-def test_register_with_duplicate_email_returns_409(client):
+def test_register_with_duplicate_email_returns_same_response(client):
+    """Duplicate registration returns 201 with identical shape to prevent email enumeration."""
     payload = {"email": "dup@example.com", "password": "password123", "name": "Dup User"}
-    assert client.post("/auth/register", json=payload).status_code == 201
+    first = client.post("/auth/register", json=payload)
+    assert first.status_code == 201
 
-    response = client.post("/auth/register", json=payload)
+    second = client.post("/auth/register", json=payload)
 
-    assert response.status_code == 409
+    assert second.status_code == 201
+    assert second.json()["message"] == "Check your email to complete registration"
 
 
 def test_login_with_correct_credentials_returns_tokens(client, test_user):

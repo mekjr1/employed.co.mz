@@ -11,6 +11,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 from app.models.enums import MarketKey, PaymentProviderKey, PaymentStatus, pg_enum
 
+# Recommended indexes for common query patterns:
+# - ix_payment_intents_provider_ref(provider_ref) for webhook provider reference lookups.
+
 if TYPE_CHECKING:
     from uuid import UUID
 
@@ -20,6 +23,9 @@ if TYPE_CHECKING:
 
 class PaymentIntent(Base):
     __tablename__ = "payment_intents"
+    __table_args__ = (
+        sa.Index("ix_payment_intents_provider_ref", "provider_ref"),
+    )
 
     job_id: Mapped[UUID] = mapped_column(
         PGUUID(as_uuid=True),

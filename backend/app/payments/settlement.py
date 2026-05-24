@@ -103,40 +103,41 @@ async def settle_intent(db, intent_id: str, provider_ref: str | None = None):
         return intent
 
     settled_at = utcnow()
-    intent.status = "completed"
-    intent.settled_at = settled_at
-    if hasattr(intent, "updated_at"):
-        intent.updated_at = settled_at
-    if provider_ref:
-        intent.provider_ref = provider_ref
+    with db.begin_nested():
+        intent.status = "completed"
+        intent.settled_at = settled_at
+        if hasattr(intent, "updated_at"):
+            intent.updated_at = settled_at
+        if provider_ref:
+            intent.provider_ref = provider_ref
 
-    job_id = getattr(intent, "job_id", None)
-    job = db.get(Job, coerce_pk(job_id)) if job_id is not None else None
-    if job is None:
-        logger.warning("payments.settle.job_missing intent_id=%s job_id=%s", intent_id, job_id)
-        db.commit()
-        return intent
+        job_id = getattr(intent, "job_id", None)
+        job = db.get(Job, coerce_pk(job_id)) if job_id is not None else None
+        if job is None:
+            logger.warning("payments.settle.job_missing intent_id=%s job_id=%s", intent_id, job_id)
+            db.add(intent)
+        else:
+            if hasattr(job, "featured_through") and getattr(intent, "extended_through", None) is not None:
+                job.featured_through = intent.extended_through
+            if hasattr(job, "updated_at"):
+                job.updated_at = settled_at
 
-    if hasattr(job, "featured_through") and getattr(intent, "extended_through", None) is not None:
-        job.featured_through = intent.extended_through
-    if hasattr(job, "updated_at"):
-        job.updated_at = settled_at
+            existing_history = list(getattr(job, "featured_charge_history", None) or [])
+            existing_history.append(_json_history_entry(intent, settled_at, provider_ref))
+            if len(existing_history) > 50:
+                existing_history = existing_history[-50:]
+            if hasattr(job, "featured_charge_history"):
+                job.featured_charge_history = existing_history
 
-    existing_history = list(getattr(job, "featured_charge_history", None) or [])
-    existing_history.append(_json_history_entry(intent, settled_at, provider_ref))
-    if len(existing_history) > 50:
-        existing_history = existing_history[-50:]
-    if hasattr(job, "featured_charge_history"):
-        job.featured_charge_history = existing_history
+            db.add(job)
+            db.add(intent)
 
-    db.add(intent)
-    db.add(job)
     db.commit()
 
     logger.info(
         "payments.settle.completed intent_id=%s job_id=%s provider_key=%s provider_ref=%s",
         intent_id,
-        job_id,
+        getattr(intent, "job_id", None),
         getattr(intent, "provider_key", None),
         getattr(intent, "provider_ref", None),
     )

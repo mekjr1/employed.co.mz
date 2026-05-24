@@ -6,6 +6,7 @@ from uuid import UUID
 
 from sqlalchemy import MetaData, create_engine, event, func, text
 from sqlalchemy.engine import Engine
+from sqlalchemy.engine.url import make_url
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 from sqlalchemy.types import DateTime
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
@@ -57,11 +58,25 @@ def set_updated_timestamp(_mapper, _connection, target: Base) -> None:
     target.updated_at = datetime.now(timezone.utc)
 
 
-engine: Engine = create_engine(
-    settings.sync_database_url,
-    future=True,
-    pool_pre_ping=True,
-)
+def _engine_options() -> dict[str, object]:
+    options: dict[str, object] = {
+        "future": True,
+        "pool_pre_ping": True,
+    }
+    url = make_url(settings.sync_database_url)
+    if not url.drivername.startswith("sqlite"):
+        options.update(
+            {
+                "pool_size": settings.database_pool_size,
+                "max_overflow": settings.database_max_overflow,
+                "pool_timeout": settings.database_pool_timeout,
+                "pool_recycle": settings.database_pool_recycle,
+            }
+        )
+    return options
+
+
+engine: Engine = create_engine(settings.sync_database_url, **_engine_options())
 
 SessionLocal = sessionmaker(
     bind=engine,

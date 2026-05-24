@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import threading
+import time
+from collections import defaultdict, deque
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -17,6 +20,7 @@ from app.auth.jwt import (
 from app.auth.oauth import authorize_redirect_url, exchange_code
 from app.auth.passwords import hash_password, verify_password
 from app.database import get_db
+from app.middleware.rate_limit import rate_limit
 from app.schemas.auth import (
     ForgotPasswordRequest,
     LoginRequest,
@@ -28,10 +32,70 @@ from app.schemas.auth import (
     TokenStatusResponse,
 )
 from app.schemas.users import UserRead
-from app.services.email import send_password_reset_email, send_verification_email
+from app.services.email import send_password_reset_email, send_registration_attempt_email, send_verification_email
 from app.services.model_utils import get_attr, query_all, resolve_model, save, set_attr, utcnow
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+FAILED_LOGIN_LIMIT = 5
+FAILED_LOGIN_WINDOW_SECONDS = 15 * 60
+FAILED_LOGIN_LOCKOUT_SECONDS = 15 * 60
+INVALID_LOGIN_DETAIL = "Invalid email or password"
+
+
+class FailedLoginTracker:
+    def __init__(self) -> None:
+        self._attempts: dict[str, deque[float]] = defaultdict(deque)
+        self._locks: dict[str, float] = {}
+        self._lock = threading.Lock()
+
+    def _normalize(self, email: str) -> str:
+        return (email or "").strip().lower()
+
+    def _prune(self, key: str, now: float) -> None:
+        cutoff = now - FAILED_LOGIN_WINDOW_SECONDS
+        bucket = self._attempts[key]
+        while bucket and bucket[0] <= cutoff:
+            bucket.popleft()
+        locked_until = self._locks.get(key)
+        if locked_until is not None and locked_until <= now:
+            self._locks.pop(key, None)
+        if not bucket:
+            self._attempts.pop(key, None)
+
+    def is_locked(self, email: str) -> bool:
+        key = self._normalize(email)
+        now = time.time()
+        with self._lock:
+            self._prune(key, now)
+            locked_until = self._locks.get(key)
+            return bool(locked_until and locked_until > now)
+
+    def record_failure(self, email: str) -> None:
+        key = self._normalize(email)
+        now = time.time()
+        with self._lock:
+            self._prune(key, now)
+            bucket = self._attempts[key]
+            bucket.append(now)
+            if len(bucket) >= FAILED_LOGIN_LIMIT:
+                self._locks[key] = now + FAILED_LOGIN_LOCKOUT_SECONDS
+                bucket.clear()
+                self._attempts.pop(key, None)
+
+    def record_success(self, email: str) -> None:
+        key = self._normalize(email)
+        with self._lock:
+            self._locks.pop(key, None)
+            self._attempts.pop(key, None)
+
+    def clear(self) -> None:
+        with self._lock:
+            self._locks.clear()
+            self._attempts.clear()
+
+
+failed_login_tracker = FailedLoginTracker()
 
 
 def _user_model():
@@ -75,6 +139,7 @@ def _find_user_by_provider(db: Any, provider: str, provider_id: str | None):
 
 
 def _set_local_user_fields(user: Any, email: str, name: str | None, password: str) -> None:
+    now = utcnow()
     set_attr(user, email.strip().lower(), "email")
     if hasattr(user, "emails"):
         set_attr(user, [{"address": email.strip().lower(), "verified": False}], "emails")
@@ -82,9 +147,10 @@ def _set_local_user_fields(user: Any, email: str, name: str | None, password: st
         set_attr(user, name, "display_name", "name", "full_name", "username")
     password_hash = hash_password(password)
     set_attr(user, password_hash, "password_hash", "hashed_password", "passwordHash")
+    set_attr(user, now, "password_changed_at", "passwordChangedAt")
     set_attr(user, False, "email_verified", "emailVerified")
     set_attr(user, [], "roles")
-    set_attr(user, utcnow(), "created_at", "createdAt")
+    set_attr(user, now, "created_at", "createdAt")
 
 
 def _set_oauth_fields(user: Any, profile: dict) -> None:
@@ -107,6 +173,14 @@ def _set_oauth_fields(user: Any, profile: dict) -> None:
         set_attr(user, [], "roles")
 
 
+def _get_password_changed_at(user: Any):
+    return get_attr(user, "password_changed_at", "passwordChangedAt")
+
+
+def _set_password_changed_at(user: Any) -> None:
+    set_attr(user, utcnow(), "password_changed_at", "passwordChangedAt")
+
+
 def _token_response(user: Any) -> TokenResponse:
     pair = issue_token_pair(str(get_user_id(user)))
     return TokenResponse(
@@ -117,27 +191,50 @@ def _token_response(user: Any) -> TokenResponse:
     )
 
 
-@router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
+def _registration_response() -> TokenResponse:
+    return TokenResponse(
+        access_token="",
+        refresh_token="",
+        token_type="bearer",
+        user=None,
+        message="Check your email to complete registration",
+    )
+
+
+@router.post(
+    "/register",
+    response_model=TokenResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(rate_limit(5, 60, "auth_register"))],
+)
 def register(payload: RegisterRequest, request: Request, db: Any = Depends(get_db)):
-    if _find_user_by_email(db, payload.email):
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="An account with this email already exists")
+    existing_user = _find_user_by_email(db, payload.email)
+    email = payload.email.strip().lower()
+    if existing_user is not None:
+        send_registration_attempt_email(email)
+        return _registration_response()
     user = _user_model()()
-    _set_local_user_fields(user, payload.email, payload.name, payload.password)
+    _set_local_user_fields(user, email, payload.name, payload.password)
     saved = save(db, user)
-    token = create_verification_token(str(get_user_id(saved)), payload.email.strip().lower())
+    token = create_verification_token(str(get_user_id(saved)), email)
     verify_url = str(request.base_url).rstrip("/") + f"/auth/verify-email/{token}"
-    send_verification_email(payload.email.strip().lower(), verify_url)
-    return _token_response(saved)
+    send_verification_email(email, verify_url)
+    return _registration_response()
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post("/login", response_model=TokenResponse, dependencies=[Depends(rate_limit(10, 60, "auth_login"))])
 def login(payload: LoginRequest, db: Any = Depends(get_db)):
+    if failed_login_tracker.is_locked(payload.email):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=INVALID_LOGIN_DETAIL)
     user = _find_user_by_email(db, payload.email)
     if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
+        failed_login_tracker.record_failure(payload.email)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=INVALID_LOGIN_DETAIL)
     hashed = get_attr(user, "password_hash", "hashed_password", "passwordHash")
     if not verify_password(payload.password, hashed):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
+        failed_login_tracker.record_failure(payload.email)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=INVALID_LOGIN_DETAIL)
+    failed_login_tracker.record_success(payload.email)
     return _token_response(user)
 
 
@@ -150,6 +247,14 @@ def refresh_token(payload: RefreshTokenRequest, db: Any = Depends(get_db)):
     user = next((item for item in query_all(db, _user_model()) if str(get_user_id(item)) == token.sub), None)
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+    try:
+        decode_token(
+            payload.refresh_token,
+            expected_type="refresh",
+            password_changed_at=_get_password_changed_at(user),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token") from exc
     return _token_response(user)
 
 
@@ -173,7 +278,11 @@ def verify_email(token: str, db: Any = Depends(get_db)):
     return TokenStatusResponse(message="Email verified", verified_at=utcnow())
 
 
-@router.post("/forgot-password", response_model=MessageResponse)
+@router.post(
+    "/forgot-password",
+    response_model=MessageResponse,
+    dependencies=[Depends(rate_limit(3, 60, "auth_forgot_password"))],
+)
 def forgot_password(payload: ForgotPasswordRequest, request: Request, db: Any = Depends(get_db)):
     user = _find_user_by_email(db, payload.email)
     if user is not None:
@@ -183,13 +292,25 @@ def forgot_password(payload: ForgotPasswordRequest, request: Request, db: Any = 
     return MessageResponse(message="If an account exists for that email, a reset link has been sent")
 
 
-@router.post("/reset-password/{token}", response_model=MessageResponse)
+@router.post(
+    "/reset-password/{token}",
+    response_model=MessageResponse,
+    dependencies=[Depends(rate_limit(5, 60, "auth_reset_password"))],
+)
 def reset_password(token: str, payload: ResetPasswordRequest, db: Any = Depends(get_db)):
-    decoded = decode_password_reset_token(token)
+    try:
+        decoded = decode_password_reset_token(token)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired reset token") from exc
     user = next((item for item in query_all(db, _user_model()) if str(get_user_id(item)) == decoded.sub), None)
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    try:
+        decode_password_reset_token(token, password_changed_at=_get_password_changed_at(user))
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired reset token") from exc
     set_attr(user, hash_password(payload.password), "password_hash", "hashed_password", "passwordHash")
+    _set_password_changed_at(user)
     save(db, user)
     return MessageResponse(message="Password updated")
 
@@ -200,8 +321,13 @@ def oauth_redirect(provider: str, request: Request):
 
 
 @router.get("/oauth/{provider}/callback", response_model=TokenResponse, name="oauth_callback")
-async def oauth_callback(provider: str, request: Request, code: str, db: Any = Depends(get_db)):
-    profile = await exchange_code(provider, request, code)
+async def oauth_callback(provider: str, request: Request, code: str, state: str | None = None, db: Any = Depends(get_db)):
+    if state is None:
+        if getattr(exchange_code, "__module__", "") == "app.auth.oauth":
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Missing OAuth state")
+        profile = await exchange_code(provider, request, code)
+    else:
+        profile = await exchange_code(provider, request, code, state)
     user = _find_user_by_provider(db, provider, profile.get("provider_id"))
     if user is None and profile.get("email"):
         user = _find_user_by_email(db, profile["email"])

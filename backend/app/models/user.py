@@ -50,6 +50,7 @@ class User(Base):
     )
     deletion_requested_at: Mapped[datetime | None] = mapped_column(sa.DateTime(timezone=True))
     deletion_scheduled_for: Mapped[datetime | None] = mapped_column(sa.DateTime(timezone=True))
+    password_changed_at: Mapped[datetime | None] = mapped_column(sa.DateTime(timezone=True))
 
     jobs: Mapped[list[Job]] = relationship(back_populates="user", passive_deletes=True)
     profile: Mapped[Profile | None] = relationship(

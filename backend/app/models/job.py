@@ -13,6 +13,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 from app.models.enums import Country, JobStatus, JobType, SalaryCurrency, SalaryPeriod, pg_enum
 
+# Recommended indexes for common query patterns:
+# - ix_jobs_status_country_created_at(status, country, created_at) for the primary jobs listing query.
+
 if TYPE_CHECKING:
     from uuid import UUID
 
@@ -23,6 +26,9 @@ if TYPE_CHECKING:
 
 class Job(Base):
     __tablename__ = "jobs"
+    __table_args__ = (
+        sa.Index("ix_jobs_status_country_created_at", "status", "country", "created_at"),
+    )
 
     user_id: Mapped[UUID | None] = mapped_column(
         PGUUID(as_uuid=True),

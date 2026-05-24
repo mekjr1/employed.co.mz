@@ -4,6 +4,7 @@ import hashlib
 import hmac
 import json
 import logging
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import desc, select
@@ -12,9 +13,16 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.database import get_db
 from app.payments.settlement import coerce_pk, resolve_model, settle_intent, utcnow
+from app.webhooks.replay_cache import ReplayCache
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["webhooks"])
+
+CALLBACK_REPLAY_WINDOW = timedelta(minutes=5)
+PROCESSED_CALLBACK_EVENTS = ReplayCache(ttl_seconds=int(CALLBACK_REPLAY_WINDOW.total_seconds()), max_entries=10000)
+TIMESTAMP_FIELDS = ("timestamp", "created_at", "createdAt", "sent_at", "sentAt")
+EVENT_ID_FIELDS = ("event_id", "eventId", "nonce", "nonce_id", "nonceId", "callback_id", "callbackId", "request_id", "requestId")
+EVENT_TYPE_FIELDS = ("event_type", "eventType", "type")
 
 
 def _setting(name: str, default=None):
@@ -67,16 +75,101 @@ def _find_intent(db: Session, provider_ref: str | None, intent_id: str | None):
     return None
 
 
+def _parse_timestamp(value) -> datetime | None:
+    if value in (None, ""):
+        return None
+    if isinstance(value, (int, float)):
+        return datetime.fromtimestamp(float(value), tz=timezone.utc)
+    text = str(value).strip()
+    if not text:
+        return None
+    try:
+        numeric = float(text)
+    except ValueError:
+        numeric = None
+    if numeric is not None and text.replace(".", "", 1).isdigit():
+        return datetime.fromtimestamp(numeric, tz=timezone.utc)
+    parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+def _extract_timestamp(payload: dict) -> tuple[str | None, datetime | None]:
+    for field in TIMESTAMP_FIELDS:
+        if field not in payload:
+            continue
+        try:
+            return field, _parse_timestamp(payload.get(field))
+        except (TypeError, ValueError) as exc:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="invalid-webhook-timestamp") from exc
+    return None, None
+
+
+def _validate_timestamp(payload: dict) -> tuple[str | None, datetime | None]:
+    field, timestamp_value = _extract_timestamp(payload)
+    if timestamp_value is None:
+        return field, timestamp_value
+    if timestamp_value < utcnow() - CALLBACK_REPLAY_WINDOW:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="stale-webhook-payload")
+    return field, timestamp_value
+
+
+def _event_identifier(payload: dict, raw_body: bytes) -> str:
+    for field in EVENT_ID_FIELDS:
+        value = payload.get(field)
+        if value:
+            return f"{field}:{value}"
+    return f"body:{hashlib.sha256(raw_body).hexdigest()}"
+
+
+def _event_type(payload: dict) -> str:
+    for field in EVENT_TYPE_FIELDS:
+        value = payload.get(field)
+        if value:
+            return str(value)
+    return "callback"
+
+
 async def _handle_callback(provider: str, request: Request, db: Session, secret: str | None) -> dict:
     raw_body = await request.body()
     signature = request.headers.get(f"x-{provider}-signature") or request.headers.get("x-callback-signature")
     _verify_signature(raw_body, signature, secret, provider)
 
     payload = json.loads(raw_body.decode("utf-8") or "{}")
+    timestamp_field, timestamp_value = _validate_timestamp(payload)
+    replay_key = _event_identifier(payload, raw_body)
+    event_type = _event_type(payload)
     provider_ref, intent_id, status_value, reason = _extract_payload_fields(payload)
+
+    logger.info(
+        "%s.webhook.received event_type=%s replay_key=%s provider_ref=%s intent_id=%s status=%s timestamp_field=%s timestamp=%s",
+        provider,
+        event_type,
+        replay_key,
+        provider_ref,
+        intent_id,
+        status_value,
+        timestamp_field,
+        timestamp_value.isoformat() if timestamp_value else None,
+    )
+
+    cache_key = f"{provider}:{replay_key}"
+    if PROCESSED_CALLBACK_EVENTS.contains(cache_key):
+        logger.info("%s.webhook.duplicate replay_key=%s event_type=%s", provider, replay_key, event_type)
+        return {"ok": True, "updated": False}
+
     intent = _find_intent(db, provider_ref, intent_id)
     if intent is None:
-        logger.warning("%s.webhook.intent_not_found provider_ref=%s intent_id=%s", provider, provider_ref, intent_id)
+        logger.warning(
+            "%s.webhook.intent_not_found event_type=%s replay_key=%s provider_ref=%s intent_id=%s",
+            provider,
+            event_type,
+            replay_key,
+            provider_ref,
+            intent_id,
+        )
+        PROCESSED_CALLBACK_EVENTS.add(cache_key)
         return {"ok": True, "updated": False}
 
     if provider_ref:
@@ -94,7 +187,16 @@ async def _handle_callback(provider: str, request: Request, db: Session, secret:
         db.add(intent)
         db.commit()
 
-    logger.info("%s.webhook.processed intent_id=%s provider_ref=%s status=%s", provider, intent.id, provider_ref, status_value)
+    logger.info(
+        "%s.webhook.processed event_type=%s replay_key=%s intent_id=%s provider_ref=%s status=%s",
+        provider,
+        event_type,
+        replay_key,
+        intent.id,
+        provider_ref,
+        status_value,
+    )
+    PROCESSED_CALLBACK_EVENTS.add(cache_key)
     return {"ok": True, "updated": True}
 
 

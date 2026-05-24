@@ -24,7 +24,7 @@ class JobStatusUpdate(BaseModel):
 
 
 class BulkStatusUpdate(BaseModel):
-    job_ids: list[str] = Field(min_items=1, max_items=200)
+    job_ids: list[str] = Field(min_length=1, max_length=200)
     status: str
     reason: str | None = None
 
@@ -99,6 +99,7 @@ def bulk_set_status(
 ):
     if payload.status not in VALID_STATUSES:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid status")
+    payload.job_ids = list(dict.fromkeys(payload.job_ids))
     updated = 0
     for job_id in payload.job_ids[:200]:
         job = get_by_id(db, resolve_model("Job", "Jobs"), job_id)

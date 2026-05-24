@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from datetime import timedelta
 import hashlib
 import hmac
 import json
+
+from tests.conftest import utcnow
 
 
 class FakeStripeModule:
@@ -48,13 +51,16 @@ def test_stripe_checkout_session_completed_settles_intent(client, monkeypatch, p
             @staticmethod
             def construct_event(payload, signature, secret):
                 return {
+                    "id": "evt_complete_1",
                     "type": "checkout.session.completed",
                     "data": {"object": {"id": "cs_complete_1", "metadata": {"intentId": intent.id}}},
                 }
 
     monkeypatch.setattr("app.webhooks.stripe_webhook._setting", lambda name, default=None: "whsec_test")
     monkeypatch.setattr("app.webhooks.stripe_webhook._stripe_module", lambda: SettlingStripeModule)
+    from app.webhooks.stripe_webhook import PROCESSED_STRIPE_EVENTS
 
+    PROCESSED_STRIPE_EVENTS.clear()
     response = client.post("/_stripe/webhook", content=b"{}", headers={"stripe-signature": "sig_ok"})
     db_session.refresh(intent)
     db_session.refresh(job)
@@ -62,6 +68,41 @@ def test_stripe_checkout_session_completed_settles_intent(client, monkeypatch, p
     assert response.status_code == 200
     assert intent.status == "completed"
     assert job.featured_through == intent.extended_through
+
+
+def test_stripe_duplicate_event_is_ignored(client, monkeypatch):
+    calls = {"count": 0}
+
+    class DuplicateStripeModule:
+        class Webhook:
+            @staticmethod
+            def construct_event(payload, signature, secret):
+                return {
+                    "id": "evt_duplicate_1",
+                    "type": "checkout.session.completed",
+                    "data": {"object": {"id": "cs_duplicate_1", "metadata": {"intentId": "intent-1"}}},
+                }
+
+    class DummyIntent:
+        id = "intent-1"
+
+    async def fake_settle_intent(db, intent_id, provider_ref=None):
+        calls["count"] += 1
+        return {"intent_id": intent_id, "provider_ref": provider_ref}
+
+    monkeypatch.setattr("app.webhooks.stripe_webhook._setting", lambda name, default=None: "whsec_test")
+    monkeypatch.setattr("app.webhooks.stripe_webhook._stripe_module", lambda: DuplicateStripeModule)
+    monkeypatch.setattr("app.webhooks.stripe_webhook._find_intent_from_session", lambda db, payload: DummyIntent())
+    monkeypatch.setattr("app.webhooks.stripe_webhook.settle_intent", fake_settle_intent)
+    from app.webhooks.stripe_webhook import PROCESSED_STRIPE_EVENTS
+
+    PROCESSED_STRIPE_EVENTS.clear()
+    first = client.post("/_stripe/webhook", content=b"{}", headers={"stripe-signature": "sig_ok"})
+    second = client.post("/_stripe/webhook", content=b"{}", headers={"stripe-signature": "sig_ok"})
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert calls["count"] == 1
 
 
 def test_mpesa_callback_with_valid_hmac_returns_200(client, monkeypatch, payment_intent_factory, sample_job, test_user):
@@ -90,3 +131,61 @@ def test_mpesa_callback_with_invalid_hmac_returns_400(client, monkeypatch):
     )
 
     assert response.status_code == 400
+
+
+def test_mpesa_callback_rejects_stale_timestamp(client, monkeypatch):
+    secret = "mpesa-secret"
+    payload = {
+        "provider_ref": "ref-stale",
+        "status": "successful",
+        "event_id": "mpesa-stale-1",
+        "timestamp": (utcnow() - timedelta(minutes=10)).isoformat(),
+    }
+    raw = json.dumps(payload).encode("utf-8")
+    signature = hmac.new(secret.encode("utf-8"), raw, hashlib.sha256).hexdigest()
+
+    monkeypatch.setattr("app.webhooks.mobile_money._setting", lambda name, default=None: secret)
+    from app.webhooks.mobile_money import PROCESSED_CALLBACK_EVENTS
+
+    PROCESSED_CALLBACK_EVENTS.clear()
+    response = client.post("/_mpesa/callback", content=raw, headers={"x-mpesa-signature": signature})
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "stale-webhook-payload"
+
+
+def test_mpesa_duplicate_callback_is_ignored(client, monkeypatch):
+    secret = "mpesa-secret"
+    calls = {"count": 0}
+    payload = {
+        "provider_ref": "ref-duplicate",
+        "intent_id": "intent-duplicate",
+        "status": "successful",
+        "event_id": "mpesa-duplicate-1",
+        "timestamp": utcnow().isoformat(),
+    }
+    raw = json.dumps(payload).encode("utf-8")
+    signature = hmac.new(secret.encode("utf-8"), raw, hashlib.sha256).hexdigest()
+
+    class DummyIntent:
+        id = "intent-duplicate"
+        provider_ref = "ref-duplicate"
+
+    async def fake_settle_intent(db, intent_id, provider_ref=None):
+        calls["count"] += 1
+        return {"intent_id": intent_id, "provider_ref": provider_ref}
+
+    monkeypatch.setattr("app.webhooks.mobile_money._setting", lambda name, default=None: secret)
+    monkeypatch.setattr("app.webhooks.mobile_money._find_intent", lambda db, provider_ref, intent_id: DummyIntent())
+    monkeypatch.setattr("app.webhooks.mobile_money.settle_intent", fake_settle_intent)
+    from app.webhooks.mobile_money import PROCESSED_CALLBACK_EVENTS
+
+    PROCESSED_CALLBACK_EVENTS.clear()
+    first = client.post("/_mpesa/callback", content=raw, headers={"x-mpesa-signature": signature})
+    second = client.post("/_mpesa/callback", content=raw, headers={"x-mpesa-signature": signature})
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert first.json()["updated"] is True
+    assert second.json()["updated"] is False
+    assert calls["count"] == 1

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import secrets
+from datetime import datetime, timedelta, timezone
+from threading import Lock
 from urllib.parse import urlencode
 
 import httpx
@@ -36,9 +38,38 @@ PROVIDERS = {
     },
 }
 
+_STATE_TTL = timedelta(minutes=10)
+_state_cache: dict[str, tuple[str, datetime]] = {}
+_state_lock = Lock()
+
 
 def _setting(provider: str, suffix: str):
     return getattr(settings, f"{provider.upper()}_{suffix}", None)
+
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def _purge_expired_states(now: datetime | None = None) -> None:
+    current = now or _utcnow()
+    expired = [key for key, (_, expires_at) in _state_cache.items() if expires_at <= current]
+    for key in expired:
+        _state_cache.pop(key, None)
+
+
+def _store_state(provider: str, state: str) -> None:
+    with _state_lock:
+        _purge_expired_states()
+        _state_cache[state] = (provider, _utcnow() + _STATE_TTL)
+
+
+def validate_state(provider: str, state: str) -> None:
+    with _state_lock:
+        _purge_expired_states()
+        cached = _state_cache.pop(state, None)
+    if cached is None or cached[0] != provider:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid OAuth state")
 
 
 def provider_config(provider: str) -> dict:
@@ -59,6 +90,7 @@ def callback_url(request: Request, provider: str) -> str:
 def authorize_redirect_url(request: Request, provider: str) -> str:
     config = provider_config(provider)
     state = secrets.token_urlsafe(24)
+    _store_state(provider, state)
     params = {
         "client_id": config["client_id"],
         "redirect_uri": callback_url(request, provider),
@@ -69,8 +101,9 @@ def authorize_redirect_url(request: Request, provider: str) -> str:
     return f"{config['authorize_url']}?{urlencode(params)}"
 
 
-async def exchange_code(provider: str, request: Request, code: str) -> dict:
+async def exchange_code(provider: str, request: Request, code: str, state: str) -> dict:
     config = provider_config(provider)
+    validate_state(provider, state)
     async with httpx.AsyncClient(timeout=15) as client:
         token_response = await client.post(
             config["token_url"],

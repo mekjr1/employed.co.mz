@@ -38,6 +38,7 @@ import app.models as app_models
 from app.auth.jwt import create_access_token
 from app.main import create_app
 from app.middleware.rate_limit import rate_limiter
+from app.routers.auth import failed_login_tracker
 from app.services.market import MARKETS
 from app.webhooks import mobile_money, stripe_webhook
 
@@ -225,6 +226,7 @@ def _patch_models(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("app.webhooks.stripe_webhook.coerce_pk", lambda value: str(value) if value is not None else None)
     monkeypatch.setattr("app.webhooks.mobile_money.coerce_pk", lambda value: str(value) if value is not None else None)
     rate_limiter._buckets.clear()
+    failed_login_tracker.clear()
 
 
 @pytest.fixture()

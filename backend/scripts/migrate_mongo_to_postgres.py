@@ -333,21 +333,19 @@ def flush_batch(
     if dry_run:
         return len(batch), 0
     try:
-        session.execute(build_upsert_statement(model, batch))
-        session.commit()
+        with session.begin_nested():
+            session.execute(build_upsert_statement(model, batch))
         return len(batch), 0
     except Exception as exc:  # noqa: BLE001
-        session.rollback()
         logger.warning("Batch upsert failed for %s (%s rows): %s; retrying row-by-row", collection_name, len(batch), exc)
         migrated = 0
         errored = 0
         for row in batch:
             try:
-                session.execute(build_upsert_statement(model, [row]))
-                session.commit()
+                with session.begin_nested():
+                    session.execute(build_upsert_statement(model, [row]))
                 migrated += 1
             except Exception as row_exc:  # noqa: BLE001
-                session.rollback()
                 errored += 1
                 logger.exception(
                     "Failed to upsert %s row %s: %s",
@@ -446,20 +444,32 @@ def main() -> int:
     summary = {spec.source_collection: dict(SUMMARY_TEMPLATE) for spec in migration_order}
 
     logger.info("Starting migration dry_run=%s batch_size=%s", args.dry_run, args.batch_size)
-    with SessionLocal() as session:
-        for spec in migration_order:
-            migrate_collection(
-                source_db,
-                session,
-                spec,
-                batch_size=args.batch_size,
-                dry_run=args.dry_run,
-                summary=summary,
-            )
+    try:
+        with SessionLocal() as session:
+            transaction = session.begin()
+            try:
+                for spec in migration_order:
+                    migrate_collection(
+                        source_db,
+                        session,
+                        spec,
+                        batch_size=args.batch_size,
+                        dry_run=args.dry_run,
+                        summary=summary,
+                    )
+                if args.dry_run:
+                    transaction.rollback()
+                    logger.info("Dry run complete; rolled back transaction")
+                else:
+                    transaction.commit()
+            except Exception:
+                transaction.rollback()
+                raise
+    finally:
+        mongo_client.close()
+        engine.dispose()
 
     print_summary(summary)
-    mongo_client.close()
-    engine.dispose()
     return 0
 
 

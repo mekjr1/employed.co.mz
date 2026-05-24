@@ -62,6 +62,15 @@ def send_password_reset_email(to_email: str, reset_url: str) -> bool:
     )
 
 
+def send_registration_attempt_email(to_email: str) -> bool:
+    return send_email(
+        to_email=to_email,
+        subject="[Employed] Registration attempt detected",
+        text_body="Someone tried to register with this email address. If this was you, you can sign in or reset your password.",
+        html_body="<p>Someone tried to register with this email address.</p><p>If this was you, you can sign in or reset your password.</p>",
+    )
+
+
 def send_job_submitted_email(to_email: str, job_title: str, job_url: str) -> bool:
     return send_email(
         to_email=to_email,

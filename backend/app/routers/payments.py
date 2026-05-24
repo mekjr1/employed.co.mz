@@ -10,7 +10,7 @@ from app.database import get_db
 from app.middleware.market import get_current_market
 from app.schemas.payments import PaymentInitiate, PaymentInitiateResponse, PaymentProviderRead, PaymentStatusResponse, ProvidersResponse
 from app.services.market import MARKETS
-from app.services.model_utils import get_attr, get_by_id, query_all, resolve_model, save, set_attr, utcnow
+from app.services.model_utils import get_attr, get_by_id, get_model_field, query_all, resolve_model, save, set_attr, utcnow
 
 router = APIRouter(prefix="/payments", tags=["payments"])
 
@@ -44,6 +44,50 @@ def _find_owned_intent(db: Any, intent_id: str, user_id: str):
     return intent
 
 
+def _build_initiate_response(intent: Any) -> PaymentInitiateResponse:
+    provider_key = get_attr(intent, "provider_key", "providerKey", default="")
+    is_stripe = provider_key == "stripe"
+    return PaymentInitiateResponse(
+        intent_id=str(get_attr(intent, "id", "_id", default="")),
+        provider_key=provider_key,
+        status=get_attr(intent, "status", default="pending"),
+        kind="redirect" if is_stripe else "await",
+        redirect_url=None if is_stripe else None,
+        provider_ref=None if is_stripe else get_attr(intent, "provider_ref", "providerRef"),
+    )
+
+
+def _find_existing_open_intent(db: Any, job_id: str, user_id: str):
+    intent_model = _intent_model()
+    open_statuses = {"pending", "awaiting_user"}
+    job_field = get_model_field(intent_model, "job_id", "jobId")
+    user_field = get_model_field(intent_model, "user_id", "userId")
+    status_field = get_model_field(intent_model, "status")
+    created_field = get_model_field(intent_model, "created_at", "createdAt")
+
+    if all(field is not None for field in (job_field, user_field, status_field)) and hasattr(db, "query"):
+        query = db.query(intent_model).filter(
+            job_field == job_id,
+            user_field == user_id,
+            status_field.in_(tuple(open_statuses)),
+        )
+        if created_field is not None:
+            query = query.order_by(created_field.desc())
+        existing = query.first()
+        if existing is not None:
+            return existing
+
+    existing = [
+        intent
+        for intent in query_all(db, intent_model)
+        if get_attr(intent, "job_id", "jobId") == job_id
+        and get_attr(intent, "user_id", "userId") == user_id
+        and get_attr(intent, "status", default="pending") in open_statuses
+    ]
+    existing.sort(key=lambda intent: get_attr(intent, "created_at", "createdAt") or utcnow(), reverse=True)
+    return existing[0] if existing else None
+
+
 @router.post("/initiate", response_model=PaymentInitiateResponse, status_code=status.HTTP_201_CREATED)
 def initiate_payment(
     payload: PaymentInitiate,
@@ -63,6 +107,10 @@ def initiate_payment(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You can only pay for your own job")
     if get_attr(job, "status") not in {"pending", "active"}:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This job cannot be featured")
+
+    existing_intent = _find_existing_open_intent(db, payload.job_id, get_user_id(current_user))
+    if existing_intent is not None:
+        return _build_initiate_response(existing_intent)
 
     intent = _intent_model()()
     price = market["featured_job"]
@@ -86,13 +134,7 @@ def initiate_payment(
     saved = save(db, intent)
 
     if payload.provider_key == "stripe":
-        return PaymentInitiateResponse(
-            intent_id=str(get_attr(saved, "id", "_id", default="")),
-            provider_key=payload.provider_key,
-            status=get_attr(saved, "status", default="pending"),
-            kind="redirect",
-            redirect_url=None,
-        )
+        return _build_initiate_response(saved)
     provider_ref = f"pending-{get_attr(saved, 'id', '_id', default='intent')}"
     set_attr(saved, provider_ref, "provider_ref", "providerRef")
     save(db, saved)

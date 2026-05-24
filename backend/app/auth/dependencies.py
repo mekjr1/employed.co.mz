@@ -83,11 +83,22 @@ def _unauthorized(detail: str = "Not authenticated") -> HTTPException:
     return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)
 
 
-def _decode_bearer(credentials: HTTPAuthorizationCredentials | None) -> TokenPayload:
+def _get_password_changed_at(user: Any):
+    return getattr(user, "password_changed_at", None) or getattr(user, "passwordChangedAt", None)
+
+
+def _decode_bearer(
+    credentials: HTTPAuthorizationCredentials | None,
+    password_changed_at = None,
+) -> TokenPayload:
     if credentials is None or credentials.scheme.lower() != "bearer":
         raise _unauthorized()
     try:
-        return decode_token(credentials.credentials, expected_type="access")
+        return decode_token(
+            credentials.credentials,
+            expected_type="access",
+            password_changed_at=password_changed_at,
+        )
     except ValueError as exc:
         raise _unauthorized("Invalid access token") from exc
 
@@ -100,6 +111,7 @@ def get_current_user(
     user = load_user_by_id(db, payload.sub)
     if user is None:
         raise _unauthorized("User not found")
+    _decode_bearer(credentials, password_changed_at=_get_password_changed_at(user))
     return user
 
 
@@ -110,7 +122,11 @@ def get_optional_current_user(
     if credentials is None:
         return None
     payload = _decode_bearer(credentials)
-    return load_user_by_id(db, payload.sub)
+    user = load_user_by_id(db, payload.sub)
+    if user is None:
+        return None
+    _decode_bearer(credentials, password_changed_at=_get_password_changed_at(user))
+    return user
 
 
 def require_admin(user: Any = Depends(get_current_user)):
