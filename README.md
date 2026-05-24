@@ -27,7 +27,10 @@ step required.
 
 ## Settings
 
-This app needs a settings file to run. See `settings-example.json` for the supported values, including Stripe, reCAPTCHA, and admin email settings.
+This app needs a settings file to run. See `settings-example.json` for the
+supported values and [`docs/settings-reference.md`](docs/settings-reference.md)
+for a complete key-by-key reference, including which keys are required in
+production.
 
 For local development, `settings-example.json` enables the reCAPTCHA development bypass.
 
@@ -150,6 +153,21 @@ The structured logger (`server/lib/log.js`) emits JSON to stdout. Error tracking
 - **Self-hosted ELK:** use `filebeat` on the host with the `json.keys_under_root: true` decoder.
 
 The Sentry DSN is read from `settings.private.sentry.dsn` and `settings.public.sentry.dsn`. If absent, the reporter is a no-op so local development is unaffected.
+
+## Documentation
+
+| Document | Description |
+| --- | --- |
+| [`CLAUDE.md`](CLAUDE.md) | Architecture overview, stack, standards alignment |
+| [`docs/api-reference.md`](docs/api-reference.md) | REST API endpoints — request/response schemas |
+| [`docs/payment-flows.md`](docs/payment-flows.md) | Payment providers — Stripe, M-Pesa, e-Mola lifecycle |
+| [`docs/markets-and-locales.md`](docs/markets-and-locales.md) | Subdomain → market → locale → pricing flow |
+| [`docs/settings-reference.md`](docs/settings-reference.md) | Every settings key documented |
+| [`docs/operations-runbook.md`](docs/operations-runbook.md) | Incident response, log triage, deploy/rollback |
+| [`docs/backup-strategy.md`](docs/backup-strategy.md) | Backup schedule, restore, DR runbook |
+| [`docs/decisions/`](docs/decisions/) | Architecture Decision Records (ADRs) |
+| [`brand/`](brand/) | Brand kit — logo, colours, typography, usage |
+| [`CHANGELOG.md`](CHANGELOG.md) | Version history |
 
 ## Testing
 

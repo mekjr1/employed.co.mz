@@ -1,0 +1,13 @@
+# ADR-006: Subdomain-based market selection
+
+**Status:** Accepted  
+**Date:** Inherited from early development  
+**Context:** Employed serves multiple countries (Mozambique, Mexico) with different languages, currencies, and payment providers. Options considered: path-based (`/mz/jobs`), query-param-based (`?market=mz`), or subdomain-based (`mz.employed.co.mz`).  
+**Decision:** Use subdomain-based market selection. The first label of the hostname determines the active market. `lvh.me` is used for local development (resolves to 127.0.0.1).  
+**Consequences:**
+- Clean URLs — no market prefix cluttering paths
+- SEO-friendly — each market gets its own crawlable subdomain
+- Server-side market resolution works in both DDP (via connection headers) and HTTP (via `Host` header)
+- Job creation is server-locked to the connection's market — prevents cross-market posting
+- Adding a market requires a DNS entry + a `MARKETS` constant update
+- Local dev requires `mz.lvh.me:3000` / `mx.lvh.me:3000` instead of plain `localhost`

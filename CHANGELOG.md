@@ -27,7 +27,8 @@ on-call can trace any single behaviour back to its rationale.
 - **Docs refresh (May 2026)** — reviewed and updated all project
   documentation for accuracy:
   - `README.md` — fixed Node version (14→18), added Testing section
-    with full test inventory, refreshed upstream note
+    with full test inventory, refreshed upstream note, added
+    Documentation index table
   - `tests/README.md` — full rewrite listing all 8 test files + E2E,
     removed stale "uncomment mocha" setup step
   - `BOOTSTRAP5_MIGRATION.md` — added status header (PR 1+2 complete),
@@ -37,6 +38,28 @@ on-call can trace any single behaviour back to its rationale.
   - `imports/styles/README.md` — updated PR 2 status to complete
   - `.github/copilot-instructions.md` — added `meteor npm test` to
     commands, added `payments.js` and `security-headers.js` to key files
+
+### Added (documentation)
+
+- **`docs/api-reference.md`** — REST API reference with request/response
+  schemas for all HTTP endpoints (`/api/jobs`, `/healthz`, `/sitemap.xml`,
+  `/feed`, `/api/me/export`, webhooks)
+- **`docs/payment-flows.md`** — complete payment provider documentation
+  covering Stripe, M-Pesa, e-Mola; simulator vs live mode; test MSISDNs;
+  settlement lifecycle; error handling
+- **`docs/markets-and-locales.md`** — end-to-end market resolution flow
+  (hostname → market → country → locale → pricing → UI language)
+- **`docs/settings-reference.md`** — key-by-key settings documentation
+  with production requirements and env var overrides
+- **`docs/operations-runbook.md`** — incident response, severity levels,
+  log triage, deploy/rollback procedures, escalation matrix
+- **`docs/decisions/`** — 6 Architecture Decision Records:
+  - 001: Node 18 on Meteor 2
+  - 002: MongoDB (not PostgreSQL)
+  - 003: Meteor Accounts (not JWT)
+  - 004: Bootstrap 5 phased migration
+  - 005: Payment provider registry pattern
+  - 006: Subdomain-based market selection
 
 ### Fixed
 
