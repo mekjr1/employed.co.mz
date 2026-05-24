@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+python-jose[cryptography]
+bcrypt
+python-slugify
+bleach
+httpx
+python-multipart

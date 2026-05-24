@@ -2,21 +2,64 @@ name: ci
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
 
 jobs:
-  lint-and-test:
+  backend-lint:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install backend dependencies
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          requirements = []
+          for path in sorted(Path('backend').glob('requirements*.txt')):
+              for line in path.read_text(encoding='utf-8').splitlines():
+                  stripped = line.strip()
+                  if stripped and not stripped.startswith('#') and stripped not in requirements:
+                      requirements.append(stripped)
+          Path('backend/requirements-ci.txt').write_text('\n'.join(requirements) + '\n', encoding='utf-8')
+          PY
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements-ci.txt ruff
+
+      - name: Ruff check
+        run: ruff check backend
+
+      - name: Ruff format check
+        run: ruff format --check backend
+
+  backend-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        python-version: ["3.12"]
 
     services:
-      mongo:
-        image: mongo:5
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: employed
+          POSTGRES_PASSWORD: employed_dev
+          POSTGRES_DB: employed_test
         ports:
-          - 27017:27017
+          - 5432:5432
         options: >-
-          --health-cmd "mongosh --eval 'db.runCommand({ping:1})'"
+          --health-cmd "pg_isready -U employed -d employed_test"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -24,81 +67,103 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Meteor
-        run: |
-          curl https://install.meteor.com/ | sh
-          echo "$HOME/.meteor" >> $GITHUB_PATH
-
-      - name: Use repo-pinned Meteor release
-        run: meteor --version
-
-      - name: Cache Meteor packages
-        uses: actions/cache@v4
+      - uses: actions/setup-python@v5
         with:
-          path: |
-            ~/.meteor
-            .meteor/local
-          key: ${{ runner.os }}-meteor-${{ hashFiles('.meteor/versions') }}
-          restore-keys: |
-            ${{ runner.os }}-meteor-
+          python-version: ${{ matrix.python-version }}
 
-      - name: Install npm dependencies
-        run: meteor npm ci
-
-      - name: Lint
-        run: meteor npm run lint --silent
-
-      - name: Run tests
-        env:
-          MONGO_URL: mongodb://localhost:27017/employed_test
-          ROOT_URL: http://localhost:3000
+      - name: Install backend dependencies
+        shell: bash
         run: |
-          # S11: drives the suite in tests/. Requires meteortesting:mocha
-          # to be enabled in .meteor/packages.
-          meteor test --once \
-            --driver-package meteortesting:mocha \
-            --port 3000 \
-            --settings settings-example.json
+          python - <<'PY'
+          from pathlib import Path
+          requirements = []
+          for path in sorted(Path('backend').glob('requirements*.txt')):
+              for line in path.read_text(encoding='utf-8').splitlines():
+                  stripped = line.strip()
+                  if stripped and not stripped.startswith('#') and stripped not in requirements:
+                      requirements.append(stripped)
+          Path('backend/requirements-ci.txt').write_text('\n'.join(requirements) + '\n', encoding='utf-8')
+          PY
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements-ci.txt pytest
 
-  e2e-smoke:
-    needs: lint-and-test
+      - name: Run pytest
+        shell: bash
+        env:
+          PYTHONPATH: ${{ github.workspace }}/backend
+          DATABASE_URL: postgresql+psycopg2://employed:employed_dev@127.0.0.1:5432/employed_test
+          ALEMBIC_DATABASE_URL: postgresql+psycopg2://employed:employed_dev@127.0.0.1:5432/employed_test
+          REDIS_URL: redis://127.0.0.1:6379/0
+          SECRET_KEY: test-secret-key
+          DEBUG: "false"
+        run: |
+          set +e
+          pytest backend -q
+          status=$?
+          set -e
+          if [ "$status" -ne 0 ] && [ "$status" -ne 5 ]; then
+            exit "$status"
+          fi
+          if [ "$status" -eq 5 ]; then
+            echo "No backend pytest tests collected yet."
+          fi
+
+  frontend-lint:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    if: github.event_name == 'push'
+    strategy:
+      matrix:
+        node-version: [20]
+
+    defaults:
+      run:
+        working-directory: frontend
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build & start app (Docker)
-        run: |
-          docker compose -f docker-compose.yml up -d --build --wait
-        timeout-minutes: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
 
-      - name: Healthz smoke test
-        run: |
-          for i in $(seq 1 30); do
-            if curl -sf http://localhost:3000/healthz; then
-              echo " ✓ /healthz OK"
-              exit 0
-            fi
-            echo "  waiting ($i/30)..."
-            sleep 2
-          done
-          echo "✗ /healthz never responded"
-          exit 1
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Install lint dependencies
+        run: npm install --no-save eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
+
+      - name: ESLint
+        run: npx eslint . --max-warnings=0
+
+      - name: TypeScript check
+        run: npx tsc --noEmit
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        node-version: [20]
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
 
-      - name: Install Playwright
-        run: npx playwright install --with-deps chromium
+      - name: Install frontend dependencies
+        run: npm ci
 
-      - name: Run E2E smoke tests
+      - name: Build frontend
         env:
-          BASE_URL: http://localhost:3000
-        run: npx playwright test tests/e2e/ --reporter=list
-
-      - name: Teardown
-        if: always()
-        run: docker compose -f docker-compose.yml down -v
+          NEXT_PUBLIC_API_URL: http://localhost:3301
+        run: npm run build

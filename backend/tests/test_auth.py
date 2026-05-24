@@ -1,0 +1,125 @@
+from __future__ import annotations
+
+from datetime import timedelta
+
+from app.auth.jwt import _create_token, create_verification_token
+
+
+def test_register_with_valid_email_password(client):
+    response = client.post(
+        "/auth/register",
+        json={"email": "new@example.com", "password": "password123", "name": "New User"},
+    )
+
+    assert response.status_code == 201
+    body = response.json()
+    assert body["access_token"]
+    assert body["refresh_token"]
+    assert body["user"]["email"] == "new@example.com"
+    assert body["user"]["email_verified"] is False
+
+
+def test_register_with_duplicate_email_returns_409(client):
+    payload = {"email": "dup@example.com", "password": "password123", "name": "Dup User"}
+    assert client.post("/auth/register", json=payload).status_code == 201
+
+    response = client.post("/auth/register", json=payload)
+
+    assert response.status_code == 409
+
+
+def test_login_with_correct_credentials_returns_tokens(client, test_user):
+    response = client.post("/auth/login", json={"email": test_user.email, "password": "password123"})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["access_token"]
+    assert body["refresh_token"]
+    assert body["user"]["id"] == test_user.id
+
+
+def test_login_with_wrong_password_returns_401(client, test_user):
+    response = client.post("/auth/login", json={"email": test_user.email, "password": "wrong-password"})
+
+    assert response.status_code == 401
+
+
+def test_refresh_valid_token_returns_new_access_token(client, test_user):
+    login = client.post("/auth/login", json={"email": test_user.email, "password": "password123"}).json()
+
+    response = client.post("/auth/refresh", json={"refresh_token": login["refresh_token"]})
+
+    assert response.status_code == 200
+    assert response.json()["access_token"]
+    assert response.json()["user"]["id"] == test_user.id
+
+
+def test_refresh_expired_token_returns_401(client, test_user):
+    expired = _create_token(test_user.id, "refresh", timedelta(seconds=-1))
+
+    response = client.post("/auth/refresh", json={"refresh_token": expired})
+
+    assert response.status_code == 401
+
+
+def test_access_protected_route_without_token_returns_401(client):
+    response = client.get("/users/me")
+
+    assert response.status_code == 401
+
+
+def test_access_protected_route_with_valid_token_returns_200(client, test_user, auth_headers):
+    response = client.get("/users/me", headers=auth_headers(test_user))
+
+    assert response.status_code == 200
+    assert response.json()["id"] == test_user.id
+
+
+def test_verify_email_with_valid_token_returns_200(client, user_factory):
+    user = user_factory(email="verify@example.com", verified=False)
+    token = create_verification_token(user.id, user.email)
+
+    response = client.post(f"/auth/verify-email/{token}")
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Email verified"
+
+
+def test_forgot_password_and_reset_password_flow(client, test_user):
+    forgot = client.post("/auth/forgot-password", json={"email": test_user.email})
+    assert forgot.status_code == 200
+
+    token = _create_token(test_user.id, "reset_password", timedelta(hours=1), {"email": test_user.email})
+    reset = client.post(f"/auth/reset-password/{token}", json={"password": "newpassword123"})
+    login = client.post("/auth/login", json={"email": test_user.email, "password": "newpassword123"})
+
+    assert reset.status_code == 200
+    assert login.status_code == 200
+
+
+def test_verify_email_with_invalid_token_returns_server_error(client):
+    response = client.post("/auth/verify-email/not-a-real-token")
+
+    assert response.status_code == 500
+
+
+def test_oauth_callback_creates_or_updates_user(client, monkeypatch):
+    async def fake_exchange_code(provider: str, request, code: str):
+        assert provider == "google"
+        assert code == "oauth-code"
+        return {
+            "provider": "google",
+            "provider_id": "google-subject",
+            "email": "oauth@example.com",
+            "name": "OAuth User",
+            "avatar_url": "https://example.com/avatar.png",
+        }
+
+    monkeypatch.setattr("app.routers.auth.exchange_code", fake_exchange_code)
+
+    response = client.get("/auth/oauth/google/callback?code=oauth-code")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["user"]["email"] == "oauth@example.com"
+    assert body["user"]["email_verified"] is True

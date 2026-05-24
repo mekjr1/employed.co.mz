@@ -1,0 +1,178 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
+
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import type { Job, MarketConfig } from "@/lib/types";
+import { deleteJob, updateJob, apiFetch } from "@/lib/api";
+import { formatDate, formatSalary, toWhatsAppUrl } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
+
+export default function JobDetail({ job, market }: { job: Job; market: MarketConfig }) {
+  const router = useRouter();
+  const { user, isAuthenticated } = useAuth();
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [message, setMessage] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const isOwner = Boolean(user?.id && user.id === job.owner_id);
+  const salary = formatSalary(job);
+  const applyHref = useMemo(() => toWhatsAppUrl(job.apply_whatsapp) ?? job.url ?? (job.contact ? `mailto:${job.contact}` : null), [job.apply_whatsapp, job.contact, job.url]);
+
+  async function handleDeactivate() {
+    if (!isOwner) return;
+    setBusy(true);
+    setMessage(null);
+    try {
+      await updateJob(job.id, { status: "inactive" });
+      setMessage("Listing deactivated.");
+      router.refresh();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not deactivate the listing.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!isOwner || !window.confirm("Delete this listing? This cannot be undone.")) return;
+    setBusy(true);
+    setMessage(null);
+    try {
+      await deleteJob(job.id);
+      router.push("/jobs");
+      router.refresh();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not delete the listing.");
+      setBusy(false);
+    }
+  }
+
+  async function submitReport() {
+    setBusy(true);
+    setMessage(null);
+    try {
+      await apiFetch(`/api/jobs/${job.id}/report`, {
+        method: "POST",
+        body: { reason: reportReason }
+      });
+      setMessage("Thanks. The report has been submitted for review.");
+      setReportOpen(false);
+      setReportReason("");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not submit the report.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,2.2fr)_minmax(300px,1fr)]">
+      <section className="space-y-6">
+        <div className="card-surface space-y-4 p-6">
+          <div className="flex flex-wrap items-center gap-2">
+            {job.featured ? <Badge variant="warning">Featured</Badge> : null}
+            {job.remote ? <Badge variant="success">Remote</Badge> : null}
+            <Badge>{job.jobtype}</Badge>
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-zinc-100">{job.title}</h1>
+            <p className="mt-2 text-lg text-zinc-300">{job.company ?? market.siteName}</p>
+          </div>
+          <div className="grid gap-2 text-sm text-zinc-400 sm:grid-cols-2">
+            <p>{job.location ?? "Flexible location"}</p>
+            <p>{job.country}</p>
+            <p>Posted {formatDate(job.published_at ?? job.created_at, market.locale)}</p>
+            {salary ? <p>{salary}</p> : null}
+          </div>
+        </div>
+
+        <article className="card-surface p-6">
+          <div className="job-copy" dangerouslySetInnerHTML={{ __html: job.html_description ?? job.description ?? "<p>No description provided.</p>" }} />
+        </article>
+      </section>
+
+      <aside className="space-y-4">
+        <div className="card-surface space-y-4 p-5">
+          <h2 className="text-lg font-semibold text-zinc-100">Apply for this role</h2>
+          {applyHref ? (
+            <a
+              href={applyHref}
+              target={applyHref.startsWith("http") ? "_blank" : undefined}
+              rel={applyHref.startsWith("http") ? "noopener noreferrer" : undefined}
+              className="inline-flex w-full items-center justify-center rounded-xl bg-indigo-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-indigo-500"
+            >
+              {job.apply_whatsapp ? "Apply on WhatsApp" : job.url ? "Apply now" : "Contact employer"}
+            </a>
+          ) : (
+            <p className="rounded-xl border border-zinc-800 bg-[#111827] px-4 py-3 text-sm text-zinc-400">Application details will be shared by the employer.</p>
+          )}
+          {job.contact ? <p className="text-sm text-zinc-400">Contact: {job.contact}</p> : null}
+        </div>
+
+        <div className="card-surface space-y-3 p-5 text-sm text-zinc-300">
+          <h2 className="text-lg font-semibold text-zinc-100">Listing details</h2>
+          <p><span className="text-zinc-500">Company:</span> {job.company ?? "Independent employer"}</p>
+          <p><span className="text-zinc-500">Location:</span> {job.location ?? "Flexible"}</p>
+          <p><span className="text-zinc-500">Type:</span> {job.jobtype}</p>
+          <p><span className="text-zinc-500">Remote:</span> {job.remote ? "Yes" : "No"}</p>
+          {salary ? <p><span className="text-zinc-500">Salary:</span> {salary}</p> : null}
+          <p><span className="text-zinc-500">Published:</span> {formatDate(job.published_at ?? job.created_at, market.locale)}</p>
+        </div>
+
+        {isOwner ? (
+          <div className="card-surface space-y-3 p-5">
+            <h2 className="text-lg font-semibold text-zinc-100">Manage your listing</h2>
+            <div className="flex flex-wrap gap-2">
+              <Link href={`/jobs/${job.id}/edit`} className="inline-flex items-center justify-center rounded-xl border border-zinc-700 bg-[#16213e] px-4 py-2 text-sm font-medium text-zinc-100 hover:border-zinc-600">
+                Edit
+              </Link>
+              <Button variant="secondary" disabled={busy} onClick={handleDeactivate}>
+                Deactivate
+              </Button>
+              <Button variant="danger" disabled={busy} onClick={handleDelete}>
+                Delete
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="card-surface space-y-3 p-5">
+            <h2 className="text-lg font-semibold text-zinc-100">Need to flag this listing?</h2>
+            <Button variant="secondary" onClick={() => setReportOpen(true)}>
+              Report job
+            </Button>
+          </div>
+        )}
+
+        {message ? <div className="rounded-2xl border border-zinc-700 bg-[#111827] px-4 py-3 text-sm text-zinc-300">{message}</div> : null}
+      </aside>
+
+      {reportOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+          <div className="w-full max-w-lg rounded-3xl border border-zinc-800 bg-[#16213e] p-6 shadow-2xl shadow-black/50">
+            <h2 className="text-xl font-semibold text-zinc-100">Report this job</h2>
+            <p className="mt-2 text-sm text-zinc-400">Share why this listing should be reviewed by the moderation team.</p>
+            <textarea
+              value={reportReason}
+              onChange={(event) => setReportReason(event.target.value)}
+              className="mt-4 min-h-32 w-full rounded-2xl border border-zinc-800 bg-[#111827] px-4 py-3 text-sm text-zinc-100 outline-none focus:border-indigo-500"
+              placeholder="Spam, misleading salary, duplicate post, or policy issue…"
+            />
+            <div className="mt-4 flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => setReportOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={submitReport} disabled={busy || !reportReason.trim()}>
+                Submit report
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
