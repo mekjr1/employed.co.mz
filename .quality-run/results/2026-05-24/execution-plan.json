@@ -1,0 +1,127 @@
+{
+  "approved_by_message": "User approved all 12 automatable items on 2026-05-24T12:18:00Z",
+  "created_at": "2026-05-24T12:18:00Z",
+  "items": [
+    {
+      "id": "AUTH-TESTS",
+      "seq": 4,
+      "title": "Write auth flow tests",
+      "severity": "high",
+      "effort": "L",
+      "files": ["tests/accounts.tests.js"],
+      "description": "Add tests covering login, logout, registration, and password reset auth flows.",
+      "status": "pending",
+      "automatable": true
+    },
+    {
+      "id": "WEBHOOK-SIG",
+      "seq": 5,
+      "title": "Add webhook signature verification stubs for M-Pesa/e-Mola",
+      "severity": "high",
+      "effort": "M",
+      "files": ["server/mpesa.js", "server/emola.js"],
+      "description": "Add webhook signature/HMAC verification to payment provider webhook endpoints to prevent forged callbacks.",
+      "status": "pending",
+      "automatable": true
+    },
+    {
+      "id": "FIX-HEALTHZ-TEST",
+      "seq": 11,
+      "title": "Fix healthz E2E test uptime assertion",
+      "severity": "medium",
+      "effort": "S",
+      "files": ["tests/e2e/smoke.spec.js"],
+      "description": "Fix the healthz endpoint E2E test so the uptime assertion matches the actual response shape.",
+      "status": "pending",
+      "automatable": true
+    },
+    {
+      "id": "FIX-JOBS-TEST",
+      "seq": 12,
+      "title": "Fix /api/jobs E2E test envelope shape",
+      "severity": "medium",
+      "effort": "S",
+      "files": ["tests/e2e/smoke.spec.js"],
+      "description": "Fix the /api/jobs E2E test so it asserts against the correct response envelope structure.",
+      "status": "pending",
+      "automatable": true
+    },
+    {
+      "id": "EXPORT-TOKEN",
+      "seq": 13,
+      "title": "Deprecate token-in-URL for data export",
+      "severity": "medium",
+      "effort": "S",
+      "files": ["server/api.js"],
+      "description": "Replace token-in-URL authentication for data export endpoints with header-based auth to avoid token leakage in logs/referrers.",
+      "status": "pending",
+      "automatable": true
+    },
+    {
+      "id": "POSTER-N1",
+      "seq": 14,
+      "title": "Fix N+1 posterName() in admin",
+      "severity": "medium",
+      "effort": "M",
+      "files": ["client/views/admin/", "server/publications.js"],
+      "description": "Resolve N+1 query issue where posterName() triggers individual lookups per job in admin views. Batch-load user names via publication join or denormalization.",
+      "status": "pending",
+      "automatable": true
+    },
+    {
+      "id": "COMPOUND-IDX",
+      "seq": 15,
+      "title": "Add compound index for featured-exclusion query",
+      "severity": "medium",
+      "effort": "S",
+      "files": ["both/collections/"],
+      "description": "Add a compound MongoDB index to support the featured-exclusion query pattern efficiently.",
+      "status": "pending",
+      "automatable": true
+    },
+    {
+      "id": "IP-HASH",
+      "seq": 19,
+      "title": "Increase IP hash truncation to >=16 chars",
+      "severity": "medium",
+      "effort": "S",
+      "files": ["server/"],
+      "description": "Increase the IP address hash truncation length to at least 16 characters to reduce collision risk.",
+      "status": "pending",
+      "automatable": true
+    },
+    {
+      "id": "TEST-PAYMENTS",
+      "seq": 23,
+      "title": "Add payment provider registry tests",
+      "severity": "low",
+      "effort": "M",
+      "files": ["tests/payments.tests.js"],
+      "description": "Add unit tests for the payment provider registry covering M-Pesa and e-Mola integration paths.",
+      "status": "pending",
+      "automatable": true
+    },
+    {
+      "id": "TEST-EMAIL",
+      "seq": 24,
+      "title": "Add email notification tests",
+      "severity": "low",
+      "effort": "M",
+      "files": ["tests/methods.tests.js"],
+      "description": "Add tests verifying email notification triggers and content for key application events.",
+      "status": "pending",
+      "automatable": true
+    },
+    {
+      "id": "TEST-HELPERS",
+      "seq": 25,
+      "title": "Add client helper unit tests",
+      "severity": "low",
+      "effort": "S",
+      "files": ["tests/helpers.tests.js"],
+      "description": "Add unit tests for client-side helper functions.",
+      "status": "pending",
+      "automatable": true
+    }
+  ]
+}
