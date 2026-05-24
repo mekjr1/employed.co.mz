@@ -14,9 +14,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="{{t 'modal.cancel'}}">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{t 'modal.cancel'}}"></button>
                     <h4 class="modal-title" id="{{dialogId}}-title">
                         {{t 'job.featured.title'}}
                     </h4>
@@ -31,11 +29,11 @@
                         <div class="featured-checkout-providers">
                             {{#each providers}}
                                 <button type="button"
-                                        class="btn btn-block featured-checkout-provider-btn provider-{{key}}"
+                                        class="btn w-100 featured-checkout-provider-btn provider-{{key}}"
                                         data-provider="{{key}}">
                                     <span class="featured-checkout-provider-name">{{providerLabel key name}}</span>
                                     {{#if simulator}}
-                                        <span class="label label-warning featured-checkout-sim-tag">{{t 'checkout.simulator_tag'}}</span>
+                                        <span class="badge bg-warning text-dark featured-checkout-sim-tag">{{t 'checkout.simulator_tag'}}</span>
                                     {{/if}}
                                 </button>
                             {{/each}}
@@ -54,19 +52,19 @@
                                 <label for="featured-msisdn-input">{{t 'checkout.msisdn.label'}}</label>
                                 <input type="tel"
                                        id="featured-msisdn-input"
-                                       class="form-control input-lg featured-checkout-msisdn-input"
+                                       class="form-control form-control-lg featured-checkout-msisdn-input"
                                        inputmode="numeric"
                                        autocomplete="tel-national"
                                        placeholder="{{t (concat 'checkout.msisdn.placeholder.' selectedProvider)}}"
                                        maxlength="13"
                                        value="{{msisdnValue}}" />
                                 {{#if msisdnError}}
-                                    <p class="help-block text-danger">{{msisdnError}}</p>
+                                    <p class="form-text text-danger">{{msisdnError}}</p>
                                 {{/if}}
                             </div>
                             <div class="featured-checkout-msisdn-actions">
                                 <button type="button"
-                                        class="btn btn-default featured-checkout-back-btn"
+                                        class="btn btn-secondary featured-checkout-back-btn"
                                         data-action="back">
                                     {{t 'action.back'}}
                                 </button>
@@ -130,7 +128,7 @@
                             <h4>{{t 'checkout.failure.title'}}</h4>
                             <p>{{t (concat 'checkout.failure.reason.' failureReason)}}</p>
                             <button type="button"
-                                    class="btn btn-default featured-checkout-retry-btn"
+                                    class="btn btn-secondary featured-checkout-retry-btn"
                                     data-action="retry">
                                 {{t 'checkout.try_again'}}
                             </button>
@@ -138,7 +136,7 @@
                     {{/if}}
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         {{t 'modal.close'}}
                     </button>
                 </div>

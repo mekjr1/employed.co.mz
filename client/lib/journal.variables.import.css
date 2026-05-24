@@ -1,0 +1,23 @@
+:root {
+  --gray-base: #000;
+  --gray-darker: #111827;
+  --gray-dark: #374151;
+  --gray: #6B7280;
+  --gray-light: #9CA3AF;
+  --gray-lighter: #F3F4F6;
+  --brand-primary: #4F46E5;
+  --brand-primary-dark: #4338CA;
+  --brand-primary-light: #E0E7FF;
+  --brand-success: #15803D;
+  --brand-info: #2563EB;
+  --brand-warning: #B45309;
+  --brand-danger: #DC2626;
+  --brand-featured: #F59E0B;
+  --text-color: #374151;
+  --body-bg: #fff;
+  --font-family-sans-serif: "Montserrat", "Arial Narrow Bold", sans-serif;
+  --font-family-monospace: Menlo, Monaco, Consolas, "Courier New", monospace;
+  --border-radius-base: 6px;
+  --border-radius-large: 8px;
+  --border-radius-small: 4px;
+}

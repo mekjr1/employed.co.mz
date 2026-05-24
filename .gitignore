@@ -5,6 +5,11 @@ README-private.md
 npm-debug.log
 node_modules
 
+# Env files — never commit secrets (STANDARDS.md §4)
+.env
+.env.*
+!.env.example
+
 .DS_Store
 /**/.DS_Store
 .demeteorized/
@@ -24,3 +29,6 @@ tests/e2e/e2e-results.json
 # A10.0 — perf scaffolding
 build/
 .lighthouse/
+
+# Quality run artifacts (session-local, not committed)
+.quality-run/

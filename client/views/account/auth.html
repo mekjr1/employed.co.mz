@@ -6,11 +6,9 @@
   `AccountsTemplates.configureRoute(...)` calls in `both/accounts.js` are
   commented out, so iron-router owns these routes now (see router.js).
 
-  Markup still uses Bootstrap 3 classes (`.form-group`, `.btn`,
-  `.alert`) because the BS3 stylesheet is currently mounted via
-  `nemo64:bootstrap`. PR 3 of the migration sweeps BS3 → BS5 across
-  every template in one pass, so writing BS5 markup here today would
-  produce visually broken pages.
+  Markup now uses the Bootstrap 5-compatible button utilities adopted
+  during the BS3 → BS5 template migration pass while keeping the
+  surrounding auth card structure intact.
 
   The wrapping `.auth-card` class is already defined in `client/lib/app.less`
   (added during the May 2026 rebrand pass). It gives every auth surface a
@@ -48,7 +46,7 @@
                  autocomplete="current-password" required placeholder="••••••••">
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block" data-action="submit">
+        <button type="submit" class="btn btn-primary w-100" data-action="submit">
           {{#if isLoading}}
             <i class="fa fa-spinner fa-spin" aria-hidden="true"></i>
           {{/if}}
@@ -102,7 +100,7 @@
                  autocomplete="new-password" required minlength="8" placeholder="••••••••">
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block" data-action="submit">
+        <button type="submit" class="btn btn-primary w-100" data-action="submit">
           {{#if isLoading}}
             <i class="fa fa-spinner fa-spin" aria-hidden="true"></i>
           {{/if}}
@@ -146,7 +144,7 @@
                    autocomplete="username" required placeholder="you@example.com">
           </div>
 
-          <button type="submit" class="btn btn-primary btn-block" data-action="submit">
+          <button type="submit" class="btn btn-primary w-100" data-action="submit">
             {{#if isLoading}}
               <i class="fa fa-spinner fa-spin" aria-hidden="true"></i>
             {{/if}}
@@ -196,7 +194,7 @@
                    autocomplete="new-password" required minlength="8" placeholder="••••••••">
           </div>
 
-          <button type="submit" class="btn btn-primary btn-block" data-action="submit">
+          <button type="submit" class="btn btn-primary w-100" data-action="submit">
             {{#if isLoading}}
               <i class="fa fa-spinner fa-spin" aria-hidden="true"></i>
             {{/if}}
@@ -236,7 +234,7 @@
         {{/if}}
 
         <p class="text-center" style="margin-top:18px;margin-bottom:0;">
-          <a href="{{pathFor 'home'}}" class="btn btn-primary btn-block">
+          <a href="{{pathFor 'home'}}" class="btn btn-primary w-100">
             {{t 'nav.all_jobs'}}
           </a>
         </p>

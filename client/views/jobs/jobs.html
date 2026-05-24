@@ -8,30 +8,30 @@
 
     {{!-- Filter bar --}}
     <div class="job-filters">
-        <form class="form-inline" id="jobFilters" role="search" aria-label="{{t 'jobs.filter.aria'}}">
+        <form class="d-flex flex-wrap gap-2 align-items-end" id="jobFilters" role="search" aria-label="{{t 'jobs.filter.aria'}}">
             <div class="form-group">
-                <label class="sr-only" for="jobFilterQuery">{{t 'jobs.filter.query'}}</label>
+                <label class="visually-hidden" for="jobFilterQuery">{{t 'jobs.filter.query'}}</label>
                 <input type="search" class="form-control" id="jobFilterQuery"
                     placeholder="{{t 'jobs.filter.query_placeholder'}}"
                     value="{{filterQuery}}" maxlength="80">
             </div>
             <div class="form-group">
-                <label class="sr-only" for="jobFilterType">{{t 'jobs.filter.type'}}</label>
-                <select class="form-control" id="jobFilterType" aria-label="{{t 'jobs.filter.type'}}">
+                <label class="visually-hidden" for="jobFilterType">{{t 'jobs.filter.type'}}</label>
+                <select class="form-select" id="jobFilterType" aria-label="{{t 'jobs.filter.type'}}">
                     <option value="">{{t 'jobs.filter.type_any'}}</option>
                     {{#each jobTypes}}
                         <option value="{{this}}" {{selectedAttr ../filterType this}}>{{this}}</option>
                     {{/each}}
                 </select>
             </div>
-            <div class="checkbox">
-                <label>
-                    <input type="checkbox" id="jobFilterRemote" {{checkedAttr filterRemote}}>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="jobFilterRemote" {{checkedAttr filterRemote}}>
+                <label class="form-check-label" for="jobFilterRemote">
                     {{t 'jobs.filter.remote_only'}}
                 </label>
             </div>
             {{#if filtersActive}}
-                <button type="button" class="btn btn-default btn-sm" id="jobFilterClear">
+                <button type="button" class="btn btn-secondary btn-sm" id="jobFilterClear">
                     <i class="fa fa-times" aria-hidden="true"></i> {{t 'jobs.filter.clear'}}
                 </button>
             {{/if}}
@@ -85,24 +85,24 @@
             <div class="pagination-controls">
                 <label class="pagination-page-size">
                     <span class="pagination-page-size-label">{{t 'jobs.pagination.page_size_label'}}</span>
-                    <select id="jobPageSize" class="form-control input-sm">
+                    <select id="jobPageSize" class="form-select form-select-sm">
                         {{#each pageSizeOptions}}
                             <option value="{{this}}" {{selectedAttr ../currentPageSize this}}>{{this}}</option>
                         {{/each}}
                     </select>
                 </label>
                 <div class="pagination-buttons btn-group" role="group">
-                    <button type="button" class="btn btn-default btn-sm" id="jobPagePrev"
+                    <button type="button" class="btn btn-secondary btn-sm" id="jobPagePrev"
                         {{disabledAttr prevDisabled}}>
                         <i class="fa fa-chevron-left" aria-hidden="true"></i>
-                        <span class="hidden-xs">{{t 'jobs.pagination.previous'}}</span>
+                        <span class="d-none d-sm-inline">{{t 'jobs.pagination.previous'}}</span>
                     </button>
                     <span class="pagination-page-of">
                         {{t 'jobs.pagination.page_of' page=currentPageLabel total=totalPages}}
                     </span>
-                    <button type="button" class="btn btn-default btn-sm" id="jobPageNext"
+                    <button type="button" class="btn btn-secondary btn-sm" id="jobPageNext"
                         {{disabledAttr nextDisabled}}>
-                        <span class="hidden-xs">{{t 'jobs.pagination.next'}}</span>
+                        <span class="d-none d-sm-inline">{{t 'jobs.pagination.next'}}</span>
                         <i class="fa fa-chevron-right" aria-hidden="true"></i>
                     </button>
                 </div>
@@ -129,7 +129,7 @@
             <h4>{{t 'jobs.none_found'}}</h4>
             {{#if filtersActive}}
                 <p>{{t 'jobs.none_found_filters'}}</p>
-                <button type="button" class="btn btn-default" id="jobFilterClearEmpty">
+                <button type="button" class="btn btn-secondary" id="jobFilterClearEmpty">
                     {{t 'jobs.filter.clear'}}
                 </button>
             {{else}}

@@ -11,12 +11,12 @@
               subscription (see adminJobs.js). --}}
         <ul class="nav nav-tabs admin-status-tabs">
             {{#each statusTabs}}
-                <li class="{{tabActiveClass}}">
-                    <a href="#" class="set-tab" data-tab="{{tabKey}}">
+                <li class="nav-item {{tabActiveClass}}">
+                    <a href="#" class="nav-link {{tabActiveClass}} set-tab" data-tab="{{tabKey}}">
                         {{label}}
                         {{#if isPendingTab}}
                             {{#if pendingCount}}
-                                <span class="badge">{{pendingCount}}</span>
+                                <span class="badge text-bg-secondary">{{pendingCount}}</span>
                             {{/if}}
                         {{/if}}
                     </a>
@@ -30,21 +30,21 @@
                 <input type="checkbox" class="select-all"> {{t 'admin.select_all_on_page'}}
             </label>
             <span class="text-muted">{{t 'admin.selected_count' n=selectedCount}}</span>
-            <select class="form-control bulk-status" style="width: auto;" aria-label="{{t 'admin.bulk_set_status'}}">
+            <select class="form-select bulk-status" style="width: auto;" aria-label="{{t 'admin.bulk_set_status'}}">
                 <option value="">{{t 'admin.bulk_set_status'}}</option>
                 {{#each statuses}}
                     <option value="{{this}}">{{this}}</option>
                 {{/each}}
             </select>
-            <button type="button" class="btn btn-default bulk-apply" {{bulkApplyDisabled}}>
+            <button type="button" class="btn btn-secondary bulk-apply" {{bulkApplyDisabled}}>
                 {{t 'admin.apply_to_selected'}}
             </button>
         </div>
 
         {{#if Template.subscriptionsReady}}
             {{#each jobs}}
-                <div class="panel panel-default admin-job-panel">
-                    <div class="panel-body">
+                <div class="card admin-job-panel">
+                    <div class="card-body">
                         <div class="row">
                             <div class="col-sm-8">
                                 <label style="font-weight: normal;">
@@ -64,10 +64,10 @@
                                     {{t 'admin.posted_ago' age=(ageLabel createdAt)}}
                                 </p>
                             </div>
-                            <div class="col-sm-4 text-right">
+                            <div class="col-sm-4 text-end">
                                 {{>jobLabels}}
                                 {{#if isExpired}}
-                                    <span class="label label-warning" title="Older than 90 days—reactivating won’t bring it back to public listings.">
+                                    <span class="badge bg-warning text-dark" title="Older than 90 days—reactivating won’t bring it back to public listings.">
                                         <i class="fa fa-hourglass-end" aria-hidden="true"></i> {{t 'jobs.label.expired'}}
                                     </span>
                                 {{/if}}
@@ -80,8 +80,8 @@
                     </div>
                 </div>
             {{else}}
-                <div class="panel panel-default">
-                    <div class="panel-body">
+                <div class="card">
+                    <div class="card-body">
                         {{t 'admin.no_jobs_in_view'}}
                     </div>
                 </div>
@@ -89,7 +89,7 @@
 
             {{#if showLoadMore}}
                 <div class="text-center" style="margin: 16px 0;">
-                    <button type="button" class="btn btn-default load-more">{{t 'action.load_more'}}</button>
+                    <button type="button" class="btn btn-secondary load-more">{{t 'action.load_more'}}</button>
                 </div>
             {{/if}}
         {{else}}
@@ -103,13 +103,13 @@
             <div class="col-sm-12">
                 <h3>{{t 'admin.admins.section'}}</h3>
                 {{#if Template.subscriptionsReady}}
-                    <table class="table table-condensed">
+                    <table class="table table-sm">
                         <thead>
                             <tr>
                                 <th>{{t 'admin.admins.col.name'}}</th>
                                 <th>{{t 'admin.admins.col.email'}}</th>
                                 <th>{{t 'admin.admins.col.created'}}</th>
-                                <th><span class="sr-only">{{t 'admin.reports.col.actions'}}</span></th>
+                                <th><span class="visually-hidden">{{t 'admin.reports.col.actions'}}</span></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -120,7 +120,7 @@
                                     <td>{{formatDate createdAt}}</td>
                                     <td>
                                         {{#unless isSelf}}
-                                            <button type="button" class="btn btn-xs btn-danger revoke-admin" data-user-id="{{_id}}">
+                                            <button type="button" class="btn btn-sm btn-danger revoke-admin" data-user-id="{{_id}}">
                                                 {{t 'admin.admins.revoke'}}
                                             </button>
                                         {{/unless}}
@@ -131,13 +131,13 @@
                             {{/each}}
                         </tbody>
                     </table>
-                    <form class="form-inline grant-admin-form">
+                    <form class="d-flex flex-wrap gap-2 align-items-end grant-admin-form">
                         <div class="form-group">
-                            <label class="sr-only" for="grant-admin-input">{{t 'admin.admins.grant'}}</label>
+                            <label class="visually-hidden" for="grant-admin-input">{{t 'admin.admins.grant'}}</label>
                             <input id="grant-admin-input" type="text" class="form-control" placeholder="{{t 'admin.admins.id_placeholder'}}" autocomplete="off">
                         </div>
-                        <button type="submit" class="btn btn-default">{{t 'admin.admins.grant'}}</button>
-                        <p class="help-block">{{t 'admin.admins.help'}}</p>
+                        <button type="submit" class="btn btn-secondary">{{t 'admin.admins.grant'}}</button>
+                        <p class="form-text">{{t 'admin.admins.help'}}</p>
                     </form>
                 {{else}}
                     {{>loading}}
@@ -154,7 +154,7 @@
                 <h3>
                     {{t 'admin.reports.heading'}}
                     {{#if pendingReportCount}}
-                        <span class="badge">{{pendingReportCount}}</span>
+                        <span class="badge text-bg-secondary">{{pendingReportCount}}</span>
                     {{/if}}
                 </h3>
                 {{#if pendingReportCount}}
@@ -182,15 +182,15 @@
                                     <td>{{reportReasonLabel}}</td>
                                     <td>{{#if details}}{{details}}{{else}}—{{/if}}</td>
                                     <td>
-                                        <button type="button" class="btn btn-default btn-xs resolve-report"
+                                        <button type="button" class="btn btn-secondary btn-sm resolve-report"
                                             data-id="{{_id}}" data-resolution="dismissed">
                                             {{t 'admin.reports.action.dismiss'}}
                                         </button>
-                                        <button type="button" class="btn btn-warning btn-xs resolve-report"
+                                        <button type="button" class="btn btn-warning btn-sm resolve-report"
                                             data-id="{{_id}}" data-resolution="job_removed">
                                             {{t 'admin.reports.action.removed'}}
                                         </button>
-                                        <button type="button" class="btn btn-default btn-xs resolve-report"
+                                        <button type="button" class="btn btn-secondary btn-sm resolve-report"
                                             data-id="{{_id}}" data-resolution="reviewed">
                                             {{t 'admin.reports.action.reviewed'}}
                                         </button>

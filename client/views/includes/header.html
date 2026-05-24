@@ -2,36 +2,32 @@
     <section id="header">
         {{>connectionBanner}}
         {{>verifyEmailBanner}}
-        <nav class="navbar navbar-default" role="navigation" aria-label="{{t 'nav.toggle'}}">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light" role="navigation" aria-label="{{t 'nav.toggle'}}">
             <div class="container">
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#main-nav-collapse" aria-expanded="false" aria-label="{{t 'nav.toggle'}}">
-                        <span class="sr-only">{{t 'nav.toggle'}}</span>
-                        <span class="icon-bar" aria-hidden="true"></span>
-                        <span class="icon-bar" aria-hidden="true"></span>
-                        <span class="icon-bar" aria-hidden="true"></span>
-                    </button>
-                    <a class="navbar-brand" href="/">
-                        <img src="/images/logo.svg" alt="" class="brand-logo" width="28" height="28" />
-                        <span class="brand-name">{{activeMarketSiteName}}</span>
-                    </a>
-                </div>
+                <a class="navbar-brand" href="/">
+                    <img src="/images/logo.svg" alt="" class="brand-logo" width="28" height="28" />
+                    <span class="brand-name">{{activeMarketSiteName}}</span>
+                </a>
+                <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#main-nav-collapse" aria-controls="main-nav-collapse" aria-expanded="false" aria-label="{{t 'nav.toggle'}}">
+                    <span class="visually-hidden">{{t 'nav.toggle'}}</span>
+                    <span class="navbar-toggler-icon" aria-hidden="true"></span>
+                </button>
                 <div class="collapse navbar-collapse" id="main-nav-collapse">
-                    <ul class="nav navbar-nav">
-                        <li class="{{isActiveRoute regex='^jobs$'}}">
-                            <a href="{{pathFor 'jobs'}}">{{t 'nav.all_jobs'}}</a>
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item {{isActiveRoute regex='^jobs$'}}">
+                            <a class="nav-link" href="{{pathFor 'jobs'}}">{{t 'nav.all_jobs'}}</a>
                         </li>
                     </ul>
-                    <ul class="nav navbar-nav navbar-right">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                         {{>localeMenu}}
                         {{#if currentUser}}
                             {{>headerUserMenu}}
                         {{else}}
-                            <li class="{{isActiveRoute regex='signIn'}}">
-                                <a href="{{pathFor 'signIn'}}">{{t 'action.sign_in'}}</a>
+                            <li class="nav-item {{isActiveRoute regex='signIn'}}">
+                                <a class="nav-link" href="{{pathFor 'signIn'}}">{{t 'action.sign_in'}}</a>
                             </li>
-                            <li>
-                                <a href="{{pathFor 'jobNew'}}" class="nav-post-job-btn">{{t 'nav.post_a_job'}}</a>
+                            <li class="nav-item">
+                                <a href="{{pathFor 'jobNew'}}" class="nav-link nav-post-job-btn">{{t 'nav.post_a_job'}}</a>
                             </li>
                         {{/if}}
                     </ul>
@@ -42,16 +38,15 @@
 </template>
 
 <template name="localeMenu">
-    <li class="dropdown locale-menu">
-        <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-label="{{t 'nav.language'}}" aria-haspopup="true">
+    <li class="nav-item dropdown locale-menu">
+        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-label="{{t 'nav.language'}}" aria-haspopup="true" aria-expanded="false">
             <i class="fa fa-globe fa-fw" aria-hidden="true"></i>
-            <span class="hidden-xs"> {{localeLabel currentLocale}}</span>
-            <span class="caret" aria-hidden="true"></span>
+            <span class="d-none d-sm-inline"> {{localeLabel currentLocale}}</span>
         </a>
-        <ul class="dropdown-menu dropdown-menu-right" role="menu">
+        <ul class="dropdown-menu dropdown-menu-end" role="menu">
             {{#each locales}}
-                <li class="{{#if active}}active{{/if}}">
-                    <a href="#" class="set-locale" data-locale="{{code}}" {{currentAttrs}}>{{label}}</a>
+                <li>
+                    <a href="#" class="dropdown-item {{#if active}}active{{/if}} set-locale" data-locale="{{code}}" {{currentAttrs}}>{{label}}</a>
                 </li>
             {{/each}}
         </ul>
@@ -59,34 +54,34 @@
 </template>
 
 <template name="headerUserMenu">
-    <li id="user-drop-down" class="dropdown">
-        <a class="dropdown-toggle box-user-option" data-toggle="dropdown" href="#" aria-haspopup="true">
-            <span class="header-avatar" aria-hidden="true">{{currentUserInitials}}</span>{{currentUserDisplayName}} <span class="caret" aria-hidden="true"></span>
+    <li id="user-drop-down" class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle box-user-option d-flex align-items-center" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+            <span class="header-avatar" aria-hidden="true">{{currentUserInitials}}</span>{{currentUserDisplayName}}
         </a>
-        <ul class="dropdown-menu dropdown-menu-right" role="menu">
+        <ul class="dropdown-menu dropdown-menu-end" role="menu">
             <li>
-                <a href="{{pathFor 'jobNew'}}"><i class="fa fa-plus fa-fw" aria-hidden="true"></i> {{t 'nav.post_a_job'}}</a>
+                <a class="dropdown-item" href="{{pathFor 'jobNew'}}"><i class="fa fa-plus fa-fw" aria-hidden="true"></i> {{t 'nav.post_a_job'}}</a>
             </li>
             <li>
-                <a href="{{pathFor 'myJobs'}}"><i class="fa fa-briefcase fa-fw" aria-hidden="true"></i> {{t 'nav.my_posted_jobs'}}</a>
+                <a class="dropdown-item" href="{{pathFor 'myJobs'}}"><i class="fa fa-briefcase fa-fw" aria-hidden="true"></i> {{t 'nav.my_posted_jobs'}}</a>
             </li>
-            <li class="divider"></li>
+            <li><hr class="dropdown-divider"></li>
             {{#if showResendVerification}}
-                <li><a href="#" id="resend-verification-menu"><i class="fa fa-envelope fa-fw" aria-hidden="true"></i> {{t 'nav.resend_verification'}}</a></li>
-                <li class="divider"></li>
+                <li><a class="dropdown-item" href="#" id="resend-verification-menu"><i class="fa fa-envelope fa-fw" aria-hidden="true"></i> {{t 'nav.resend_verification'}}</a></li>
+                <li><hr class="dropdown-divider"></li>
             {{/if}}
             {{#if isInRole 'admin'}}
-                <li><a href="{{pathFor 'adminJobs'}}"><i class="fa fa-shield fa-fw" aria-hidden="true"></i> {{t 'nav.admin_jobs'}}</a></li>
-                <li class="divider"></li>
+                <li><a class="dropdown-item" href="{{pathFor 'adminJobs'}}"><i class="fa fa-shield fa-fw" aria-hidden="true"></i> {{t 'nav.admin_jobs'}}</a></li>
+                <li><hr class="dropdown-divider"></li>
             {{/if}}
             <li>
-                <a href="#" id="userProfile"><i class="fa fa-user fa-fw" aria-hidden="true"></i> {{t 'nav.user_profile'}}</a>
+                <a class="dropdown-item" href="#" id="userProfile"><i class="fa fa-user fa-fw" aria-hidden="true"></i> {{t 'nav.user_profile'}}</a>
             </li>
             <li>
-                <a href="{{pathFor 'userAccount'}}"><i class="fa fa-cog fa-fw" aria-hidden="true"></i> {{t 'account.title'}}</a>
+                <a class="dropdown-item" href="{{pathFor 'userAccount'}}"><i class="fa fa-cog fa-fw" aria-hidden="true"></i> {{t 'account.title'}}</a>
             </li>
-            <li class="divider"></li>
-            <li><a href="#" id="signOut"><i class="fa fa-sign-out fa-fw" aria-hidden="true"></i> {{t 'action.sign_out'}}</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#" id="signOut"><i class="fa fa-sign-out fa-fw" aria-hidden="true"></i> {{t 'action.sign_out'}}</a></li>
         </ul>
     </li>
 </template>

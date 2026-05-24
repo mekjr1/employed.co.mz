@@ -59,3 +59,46 @@ jobs:
             --driver-package meteortesting:mocha \
             --port 3000 \
             --settings settings-example.json
+
+  e2e-smoke:
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build & start app (Docker)
+        run: |
+          docker compose -f docker-compose.yml up -d --build --wait
+        timeout-minutes: 10
+
+      - name: Healthz smoke test
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000/healthz; then
+              echo " ✓ /healthz OK"
+              exit 0
+            fi
+            echo "  waiting ($i/30)..."
+            sleep 2
+          done
+          echo "✗ /healthz never responded"
+          exit 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E smoke tests
+        env:
+          BASE_URL: http://localhost:3000
+        run: npx playwright test tests/e2e/ --reporter=list
+
+      - name: Teardown
+        if: always()
+        run: docker compose -f docker-compose.yml down -v

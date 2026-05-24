@@ -9,7 +9,8 @@ Meteor.methods({
     if (!job)
       throw new Meteor.Error("Could not find job.");
 
-    if (this.userId !== job.userId)
+    var isAdmin = Roles.userIsInRole(this.userId, ['admin']);
+    if (this.userId !== job.userId && !isAdmin)
       throw new Meteor.Error("You can only deactivate your own job.");
 
     if (job.status !== "active")

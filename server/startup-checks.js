@@ -72,6 +72,18 @@ Meteor.startup(function () {
     throw new Error('settings.json contains placeholder values (B2.9). Refusing to boot.');
   }
 
+  // M2: validate ipSalt entropy — the salt is used by hashIdentifier() to
+  // anonymise client IPs in logs. A weak/short salt makes the hash trivially
+  // reversible because the IPv4 address space is small.
+  var ipSalt = Meteor.settings.private && Meteor.settings.private.ipSalt;
+  if (typeof ipSalt === 'string' && ipSalt.length < 16) {
+    log.error('startup.ip_salt_too_short', {
+      length: ipSalt.length,
+      hint: 'private.ipSalt must be at least 16 random characters for adequate entropy.'
+    });
+    throw new Error('M2: private.ipSalt is too short (' + ipSalt.length + ' chars). Use at least 16 random characters.');
+  }
+
   var privateRecaptchaSettings = (Meteor.settings.private && Meteor.settings.private.recaptcha) || {};
   var publicRecaptchaSettings = (Meteor.settings.public && Meteor.settings.public.recaptcha) || {};
   var bypassInDev = Meteor.isDevelopment && publicRecaptchaSettings.bypassInDevelopment === true;

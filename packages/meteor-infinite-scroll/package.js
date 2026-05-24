@@ -12,8 +12,8 @@ Package.describe({
 
 Package.onUse(function(api) {
   api.versionsFrom('1.1.0.3');
-  api.use(['jquery', 'less@2.5.1', 'reactive-var', 'iron:router@1.0.9', 'templating'], 'client');
+  api.use(['jquery', 'reactive-var', 'iron:router@1.0.9', 'templating'], 'client');
   api.addFiles('infinite-scroll.js', 'client');
-  api.addFiles('infinite-scroll.less', 'client');
+  api.addFiles('infinite-scroll.css', 'client');
   api.addFiles('infiniteScroll.html', 'client');
 });

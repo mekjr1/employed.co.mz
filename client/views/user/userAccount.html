@@ -12,16 +12,16 @@
 -->
 <template name="userAccount">
   <div class="row">
-    <div class="col-md-8 col-md-offset-2">
+    <div class="col-md-8 offset-md-2">
       <h2>{{t 'account.title'}}</h2>
       <p class="text-muted">{{t 'account.subtitle'}}</p>
 
-      <div class="panel panel-default">
-        <div class="panel-heading"><strong>{{t 'account.profile_heading'}}</strong></div>
-        <div class="panel-body">
-          <dl class="dl-horizontal">
-            <dt>{{t 'account.email'}}</dt>
-            <dd>{{accountEmail}}
+      <div class="card">
+        <div class="card-header"><strong>{{t 'account.profile_heading'}}</strong></div>
+        <div class="card-body">
+          <dl class="row account-summary-list">
+            <dt class="col-sm-4">{{t 'account.email'}}</dt>
+            <dd class="col-sm-8">{{accountEmail}}
               {{#if accountEmailVerified}}
                 <span class="brand-pill brand-pill-verified" title="{{t 'account.email_verified'}}">
                   <svg class="brand-pill-icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle cx="50" cy="50" r="46" fill="#4F46E5"/><path d="M30 52 L44 66 L72 36" fill="none" stroke="#FAFAF7" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -34,30 +34,30 @@
                 </span>
               {{/if}}
             </dd>
-            <dt>{{t 'account.created_at'}}</dt>
-            <dd>{{formatDate accountCreatedAt}}</dd>
+            <dt class="col-sm-4">{{t 'account.created_at'}}</dt>
+            <dd class="col-sm-8">{{formatDate accountCreatedAt}}</dd>
           </dl>
         </div>
       </div>
 
-      <div class="panel panel-default">
-        <div class="panel-heading"><strong>{{t 'account.export.heading'}}</strong></div>
-        <div class="panel-body">
+      <div class="card">
+        <div class="card-header"><strong>{{t 'account.export.heading'}}</strong></div>
+        <div class="card-body">
           <p>{{t 'account.export.body'}}</p>
-          <button type="button" class="btn btn-default" id="download-export">
+          <button type="button" class="btn btn-secondary" id="download-export">
             <i class="fa fa-download"></i> {{t 'account.export.button'}}
           </button>
         </div>
       </div>
 
-      <div class="panel panel-danger">
-        <div class="panel-heading"><strong>{{t 'account.delete.heading'}}</strong></div>
-        <div class="panel-body">
+      <div class="card border-danger">
+        <div class="card-header"><strong>{{t 'account.delete.heading'}}</strong></div>
+        <div class="card-body">
           {{#if deletionPending}}
             <div class="alert alert-warning" role="alert" aria-live="polite">
               {{t 'account.delete.scheduled' date=(formatDate deletionScheduledFor) cancelLink=cancelLinkLabel}}
             </div>
-            <button type="button" class="btn btn-default" id="cancel-deletion">
+            <button type="button" class="btn btn-secondary" id="cancel-deletion">
               {{t 'account.delete.cancel'}}
             </button>
           {{else}}

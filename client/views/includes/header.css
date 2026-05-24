@@ -1,0 +1,114 @@
+#header #user-drop-down .header-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #4F46E5;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
+}
+#header .verify-email-banner {
+  margin: 0;
+  border-radius: 0;
+  text-align: center;
+  font-size: 13px;
+  padding: 8px 16px;
+  background-color: #FFFBEB;
+  border: none;
+  border-bottom: 1px solid #FDE68A;
+  color: #92400E;
+}
+#header .verify-email-banner a {
+  color: #92400E;
+  font-weight: 600;
+  text-decoration: underline;
+}
+#header .verify-email-banner .resend-status {
+  margin-left: 8px;
+  font-style: italic;
+  opacity: 0.8;
+}
+#header .locale-menu > a {
+  font-size: 13px;
+  color: #6B7280;
+}
+#header .locale-menu > a:hover {
+  color: #4F46E5;
+}
+.navbar-light.bg-light {
+  border-bottom: 1px solid #E5E7EB;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+.navbar-light .navbar-nav > .active > .nav-link,
+.navbar-light .navbar-nav > .active > .nav-link:hover,
+.navbar-light .navbar-nav > .active > .nav-link:focus,
+.navbar-light .navbar-nav .nav-link.active,
+.navbar-light .navbar-nav .nav-link.active:hover,
+.navbar-light .navbar-nav .nav-link.active:focus {
+  color: #4F46E5;
+  background-color: transparent;
+  border-bottom: 2px solid #4F46E5;
+  padding-bottom: calc(10px - 2px);
+}
+.navbar .dropdown-menu {
+  border-radius: 8px;
+  border: 1px solid #E5E7EB;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  padding: 6px;
+}
+.navbar .dropdown-menu .dropdown-item {
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #374151;
+}
+.navbar .dropdown-menu .dropdown-item:hover,
+.navbar .dropdown-menu .dropdown-item:focus {
+  background-color: #F3F4F6;
+  color: #111827;
+}
+.navbar .dropdown-menu .dropdown-divider {
+  margin: 4px 0;
+  background-color: #F3F4F6;
+}
+.navbar-light .navbar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+.navbar-light .navbar-brand .brand-logo {
+  display: block;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.navbar-light .navbar-brand .brand-name {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.footer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: #6B7280;
+}
+.footer-brand .footer-brand-logo {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  vertical-align: middle;
+}

@@ -109,7 +109,7 @@
 
   Meteor.startup(function() {
     var settings = (Meteor.settings && Meteor.settings.private && Meteor.settings.private.sentry) || {};
-    var dsn = settings.dsn;
+    var dsn = process.env.SENTRY_DSN || settings.dsn;
 
     if (!dsn || dsn === 'YOUR_SENTRY_DSN_HERE') {
       if (typeof log !== 'undefined') {
@@ -130,7 +130,7 @@
 
     Sentry.init({
       dsn: dsn,
-      environment: settings.environment || process.env.NODE_ENV || 'development',
+      environment: process.env.SENTRY_ENVIRONMENT || settings.environment || process.env.NODE_ENV || 'development',
       release: settings.release || process.env.SENTRY_RELEASE || undefined,
       tracesSampleRate: Number(settings.tracesSampleRate || 0),
       beforeSend: function(event) {

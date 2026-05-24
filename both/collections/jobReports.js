@@ -88,3 +88,11 @@ JobReports.deny({
   update: function() { return true; },
   remove: function() { return true; }
 });
+
+// M6: index for admin report queue — filter by job + resolution status.
+if (Meteor.isServer) {
+  Meteor.startup(function() {
+    JobReports._ensureIndex({ jobId: 1, resolution: 1 });
+    JobReports._ensureIndex({ resolution: 1, createdAt: -1 });
+  });
+}

@@ -251,14 +251,14 @@
       box-shadow: 0 1px 1px rgba(0,0,0,0.05);
       overflow: hidden;
     }
-    .panel-bs3 .panel-heading {
+    .panel-bs3 .card-header {
       padding: 10px 15px;
       background-color: #f5f5f5;
       border-bottom: 1px solid #ddd;
       font-size: 14px;
       font-weight: 500;
     }
-    .panel-bs3 .panel-body { padding: 15px; font-size: 14px; }
+    .panel-bs3 .card-body { padding: 15px; font-size: 14px; }
     .alert-bs3 {
       padding: 15px;
       border: 1px solid transparent;
@@ -787,8 +787,8 @@
     <div class="row">
       <div class="col-current">
         <div class="col-label">Current — FA trophy + Bootstrap label</div>
-        <span class="label label-warning"><i class="fa fa-trophy"></i> Featured</span>
-        <span class="label label-primary"><i class="fa fa-trophy"></i> Featured</span>
+        <span class="badge bg-warning text-dark"><i class="fa fa-trophy"></i> Featured</span>
+        <span class="badge bg-primary"><i class="fa fa-trophy"></i> Featured</span>
         <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);">
           <i class="fa fa-trophy" style="color:#F59E0B;font-size:22px;"></i>
           <span>Inline icon used in upsell CTA</span>
@@ -815,8 +815,8 @@
     <div class="row">
       <div class="col-current">
         <div class="col-label">Current — Bootstrap label, text-only</div>
-        <span class="label label-success">Email verified</span>
-        <span class="label label-warning">Email not verified</span>
+        <span class="badge bg-success">Email verified</span>
+        <span class="badge bg-warning text-dark">Email not verified</span>
       </div>
       <div class="col-proposed">
         <div class="col-label">Proposed — check-seal + supportive text</div>
@@ -1186,8 +1186,8 @@
         </div>
 
         <div class="panel-bs3" style="width:280px;">
-          <div class="panel-heading">Featured job</div>
-          <div class="panel-body">Senior backend engineer at Acme.</div>
+          <div class="card-header">Featured job</div>
+          <div class="card-body">Senior backend engineer at Acme.</div>
         </div>
 
         <div class="alert-bs3 alert-bs3-warning" style="width:280px;">

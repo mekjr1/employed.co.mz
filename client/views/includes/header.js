@@ -1,39 +1,56 @@
-Template.header.events({
-  'click .navbar-nav a': function(event, template) {
-    var targetButton = document.getElementsByClassName('navbar-toggle')[0];
-    var _this = $(event.currentTarget);
+function getNavbarToggler() {
+  return document.querySelector('.navbar-toggler');
+}
 
-    if (window.innerWidth < 768) {
-      if (!_this.hasClass('box-user-option')) {
-        targetButton.click();
-      }
-    }
+function closeNavbarOnMobile(event) {
+  var targetButton = getNavbarToggler();
+  var currentTarget = $(event.currentTarget);
+
+  if (!targetButton || window.innerWidth >= 992) {
+    return;
+  }
+
+  if (currentTarget.hasClass('dropdown-toggle') || currentTarget.hasClass('box-user-option')) {
+    return;
+  }
+
+  targetButton.click();
+}
+
+function initializeDropdowns(template) {
+  var bootstrapApi = window.bootstrap;
+
+  if (!bootstrapApi || !bootstrapApi.Dropdown) {
+    return;
+  }
+
+  template.$('.dropdown-toggle').each(function(index, element) {
+    bootstrapApi.Dropdown.getOrCreateInstance(element);
+  });
+}
+
+Template.header.events({
+  'click .navbar-nav a': function(event) {
+    closeNavbarOnMobile(event);
   }
 });
 
 Template.headerUserMenu.events({
-  'click #signOut': function(event, template) {
+  'click #signOut': function(event) {
     // A9.18: prevent the placeholder href="#" from briefly scrolling
     // to the top before Router.go runs.
     event.preventDefault();
     Meteor.logout();
-    Router.go("/");
+    Router.go('/');
   },
-  'click .navbar-nav a': function(event, template) {
-    var targetButton = document.getElementsByClassName('navbar-toggle')[0];
-    var _this = $(event.currentTarget);
-
-    if (window.innerWidth < 768) {
-      if (!_this.hasClass('box-user-option')) {
-        targetButton.click();
-      }
-    }
+  'click .navbar-nav a': function(event) {
+    closeNavbarOnMobile(event);
   },
-  'click #userProfile': function(event, template) {
+  'click #userProfile': function(event) {
     event.preventDefault();
     Modal.show('userProfile');
   },
-  'click #resend-verification-menu': function(event, template) {
+  'click #resend-verification-menu': function(event) {
     event.preventDefault();
     Meteor.call('users.resendVerification', function(err, res) {
       // A9.19: themed dialog instead of window.alert().
@@ -63,7 +80,7 @@ Template.localeMenu.events({
 });
 
 Template.localeMenu.onRendered(function() {
-  this.$('.dropdown-toggle').dropdown();
+  initializeDropdowns(this);
 });
 
 Template.headerUserMenu.helpers({
@@ -83,7 +100,7 @@ Template.headerUserMenu.helpers({
 });
 
 Template.headerUserMenu.onRendered(function() {
-  this.$('.dropdown-toggle').dropdown();
+  initializeDropdowns(this);
 });
 
 // S3: persistent banner under the navbar prompting unverified users to

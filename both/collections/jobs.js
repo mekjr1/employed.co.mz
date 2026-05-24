@@ -288,20 +288,12 @@ Jobs.helpers({
   }
 });
 
-// Block client-side inserts - all job creation goes through server methods with reCAPTCHA
-// Keep update rules to allow users to edit their own jobs after creation
-Jobs.allow({
-  insert: function(userId, doc) {
-    return false; // Prevent all client-side inserts
-  },
-  update: function(userId, doc, fieldNames, modifier) {
-    return Roles.userIsInRole(userId, ['admin']) ||
-      (!_.contains(fieldNames, 'htmlDescription') && !_.contains(fieldNames, 'status') && !_.contains(fieldNames, 'statusHistory') && !_.contains(fieldNames, 'featuredThrough') && !_.contains(fieldNames, 'featuredChargeHistory') && /*doc.status === "pending" &&*/ userId && doc && userId === doc.userId);
-  },
-  remove: function(userId, doc) {
-    return false;
-  },
-  fetch: ['userId', 'status']
+// All client-side writes are blocked. Every mutation goes through a
+// server method with proper authorization checks.
+Jobs.deny({
+  insert: function() { return true; },
+  update: function() { return true; },
+  remove: function() { return true; }
 });
 
 // Tier 6 — operational hygiene: indexes for every publication and API
@@ -321,6 +313,19 @@ if (Meteor.isServer) {
       Jobs._ensureIndex({ status: 1, createdAt: -1 });
       // H3 expiry cron's selector.
       Jobs._ensureIndex({ status: 1, createdAt: 1 });
+      // M4: text index for keyword search. Enables future migration from
+      // regex-based search to MongoDB $text queries. Weights prioritize
+      // title matches over company/location.
+      try {
+        Jobs._collection._ensureIndex(
+          { title: 'text', company: 'text', location: 'text' },
+          { weights: { title: 10, company: 5, location: 3 }, name: 'jobs_text_search' }
+        );
+      } catch (textErr) {
+        // Text index creation can fail if a different text index already
+        // exists (MongoDB allows only one text index per collection).
+        log.warn('jobs.text_index.skipped', { error: textErr && textErr.message });
+      }
     } catch (e) {
       // A9.45 \u2014 server-only; log shim is safe here.
       log.error('jobs.ensure_index.failed', { error: e && e.message });

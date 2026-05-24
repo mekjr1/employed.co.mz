@@ -19,16 +19,16 @@
 				<div class="modal-body">
 					<p>{{message}}</p>
 					{{#if withReason}}
-						<label for="app-confirm-reason" class="sr-only">{{reasonLabel}}</label>
+						<label for="app-confirm-reason" class="visually-hidden">{{reasonLabel}}</label>
 						<textarea id="app-confirm-reason" class="form-control reason" rows="2" placeholder="{{reasonLabel}}"></textarea>
 					{{/if}}
 					{{#if withPrompt}}
-						<label for="app-confirm-prompt" class="sr-only">{{message}}</label>
+						<label for="app-confirm-prompt" class="visually-hidden">{{message}}</label>
 						<input id="app-confirm-prompt" class="form-control prompt" type="text" value="{{promptValue}}" placeholder="{{promptPlaceholder}}">
 					{{/if}}
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-default cancel-btn" data-dismiss="modal">{{cancelLabel}}</button>
+					<button type="button" class="btn btn-secondary cancel-btn" data-bs-dismiss="modal">{{cancelLabel}}</button>
 					<button type="button" class="btn submit-btn {{submitClass}}">{{submitLabel}}</button>
 				</div>
 			</div>
@@ -47,7 +47,7 @@
 					<p>{{message}}</p>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-primary ok-btn" data-dismiss="modal">{{okLabel}}</button>
+					<button type="button" class="btn btn-primary ok-btn" data-bs-dismiss="modal">{{okLabel}}</button>
 				</div>
 			</div>
 		</div>

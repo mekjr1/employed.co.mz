@@ -1,0 +1,95 @@
+.ad-slot {
+  min-height: 200px;
+  margin: 16px 0;
+  display: block;
+}
+.ad-slot--home-spotlight {
+  margin: 24px 0 8px;
+}
+.ad-slot--feed-sponsor {
+  margin: 12px 0;
+}
+.ad-slot--empty-state {
+  margin: 24px auto 0;
+  max-width: 480px;
+}
+.mock-ad {
+  position: relative;
+  border: 2px dashed #C7C3B7;
+  background: repeating-linear-gradient(135deg, #FAFAF7 0px, #FAFAF7 12px, #F1EFE8 12px, #F1EFE8 24px);
+  padding: 20px 20px 16px;
+  border-radius: 8px;
+  box-shadow: none;
+}
+.mock-ad__label {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8C8678;
+  background: #FAFAF7;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+.mock-ad__body {
+  margin-top: 18px;
+}
+.mock-ad__title {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #27272B;
+  font-family: Montserrat, Inter, "Helvetica Neue", Arial, sans-serif;
+}
+.mock-ad__subtitle {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #5C5749;
+}
+.mock-ad__cta {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4F46E5;
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 1px;
+}
+.mock-ad__cta:hover,
+.mock-ad__cta:focus {
+  color: #4338CA;
+  text-decoration: none;
+}
+.mock-ad__meta {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px dotted #C7C3B7;
+  font-size: 11px;
+  color: #8C8678;
+  font-family: Menlo, Consolas, monospace;
+}
+.mock-ad__meta code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  border: 0;
+}
+@media (max-width: 767px) {
+  .mock-ad {
+    padding: 18px 14px 14px;
+  }
+  .mock-ad__title {
+    font-size: 16px;
+  }
+  .mock-ad__subtitle {
+    font-size: 13px;
+  }
+  .mock-ad__cta {
+    width: 100%;
+    text-align: center;
+  }
+}

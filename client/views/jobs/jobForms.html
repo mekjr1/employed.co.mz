@@ -71,7 +71,7 @@
                     {{> afQuickField name='contact' placeholder=(t 'form.placeholder.contact')}}
                     {{> afQuickField name='applyWhatsApp' placeholder='+258 84 1234567'}}
                     <div class="post-job-nav">
-                        <button type="button" class="btn btn-default prev-step" data-step="2">
+                        <button type="button" class="btn btn-secondary prev-step" data-step="2">
                             <i class="fa fa-arrow-left" aria-hidden="true"></i> {{t 'form.step.back'}}
                         </button>
                         <button type="button" class="btn btn-primary next-step" data-step="2">
@@ -90,8 +90,8 @@
                             <div class="job-main">
                                 <span class="job-title-link" style="cursor:default;">{{previewTitle}}</span>
                                 <div class="job-badges">
-                                    {{#if previewJobtype}}<span class="label label-default">{{previewJobtype}}</span>{{/if}}
-                                    {{#if previewRemote}}<span class="label label-success"><i class="fa fa-globe" aria-hidden="true"></i> {{t 'jobs.label.remote'}}</span>{{/if}}
+                                    {{#if previewJobtype}}<span class="badge bg-secondary">{{previewJobtype}}</span>{{/if}}
+                                    {{#if previewRemote}}<span class="badge bg-success"><i class="fa fa-globe" aria-hidden="true"></i> {{t 'jobs.label.remote'}}</span>{{/if}}
                                 </div>
                                 <div class="job-meta">
                                     {{#if previewCompany}}<span>{{previewCompany}}</span>{{/if}}
@@ -122,7 +122,7 @@
                         <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer">{{t 'form.recaptcha.terms'}}</a>.
                     </div>
                     <div class="post-job-nav">
-                        <button type="button" class="btn btn-default prev-step" data-step="3">
+                        <button type="button" class="btn btn-secondary prev-step" data-step="3">
                             <i class="fa fa-arrow-left" aria-hidden="true"></i> {{t 'form.step.back'}}
                         </button>
                         <button type="submit" class="btn btn-primary btn-lg" id="submitJobBtn">
@@ -149,7 +149,7 @@
             {{#autoForm id="jobEdit" collection="Jobs" doc=job type="update"}}
                 {{>jobFields}}
                 <div class="post-job-nav">
-                    <button type="button" id="cancel" class="btn btn-default">
+                    <button type="button" id="cancel" class="btn btn-secondary">
                         <i class="fa fa-times" aria-hidden="true"></i> {{t 'action.cancel'}}
                     </button>
                     <button type="submit" class="btn btn-primary">

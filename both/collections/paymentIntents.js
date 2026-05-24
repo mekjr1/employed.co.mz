@@ -53,6 +53,31 @@ PaymentIntents = new Mongo.Collection('paymentIntents');
 //   updatedAt        Date
 //   settledAt        Date — when status reached completed/failed/cancelled.
 
+// M5: Lightweight SimpleSchema for data integrity. The schema is
+// permissive (most fields optional) because provider metadata varies,
+// but it enforces the required fields (jobId, providerKey, status) and
+// validates enum values so bad writes fail fast at the app layer rather
+// than silently corrupting the collection.
+PaymentIntents.attachSchema(new SimpleSchema({
+  jobId:            { type: String, max: 64 },
+  userId:           { type: String, max: 64, optional: true },
+  marketKey:        { type: String, max: 8, optional: true },
+  providerKey:      { type: String, allowedValues: ['stripe', 'mpesa', 'emola'] },
+  providerRef:      { type: String, optional: true, max: 256 },
+  status:           { type: String, allowedValues: ['pending', 'awaiting_user', 'completed', 'failed', 'cancelled', 'expired'] },
+  amount:           { type: SimpleSchema.Integer, optional: true },
+  currency:         { type: String, optional: true, max: 3 },
+  payerMsisdn:      { type: String, optional: true, max: 4 },
+  payerMsisdnHash:  { type: String, optional: true, max: 128 },
+  extendedThrough:  { type: Date, optional: true },
+  failureReason:    { type: String, optional: true, max: 1000 },
+  simulator:        { type: Boolean, optional: true },
+  meta:             { type: Object, optional: true, blackbox: true },
+  createdAt:        { type: Date, autoValue: function() { if (this.isInsert) return new Date(); if (this.isUpsert) return { $setOnInsert: new Date() }; this.unset(); } },
+  updatedAt:        { type: Date, autoValue: function() { return new Date(); } },
+  settledAt:        { type: Date, optional: true }
+}));
+
 if (Meteor.isServer) {
   Meteor.startup(function() {
     // Status + provider scans (admin panels, reconciliation jobs).

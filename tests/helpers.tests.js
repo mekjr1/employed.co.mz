@@ -36,4 +36,36 @@ describe('helpers', function () {
       assert.isBelow(diffDays, 91);
     });
   });
+
+  // L8: additional pure-function helper tests
+  describe('cleanHtml', function () {
+    it('strips script tags from raw HTML', function () {
+      const result = cleanHtml('<p>Hello</p><script>alert(1)</script>');
+      assert.notInclude(result, '<script');
+      assert.include(result, 'Hello');
+    });
+
+    it('returns empty string for null/undefined input', function () {
+      assert.equal(cleanHtml(null), '');
+      assert.equal(cleanHtml(undefined), '');
+    });
+  });
+
+  if (Meteor.isServer) {
+    describe('hashIdentifier', function () {
+      it('returns a hex string', function () {
+        const hash = hashIdentifier('127.0.0.1');
+        assert.isString(hash);
+        assert.match(hash, /^[0-9a-f]+$/);
+      });
+
+      it('is deterministic for the same input', function () {
+        assert.equal(hashIdentifier('test'), hashIdentifier('test'));
+      });
+
+      it('produces different hashes for different inputs', function () {
+        assert.notEqual(hashIdentifier('a'), hashIdentifier('b'));
+      });
+    });
+  }
 });

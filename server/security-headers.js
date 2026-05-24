@@ -22,7 +22,7 @@ Meteor.startup(function () {
   BrowserPolicy.content.setPolicy([
     "default-src 'self' https://www.google.com https://www.gstatic.com https://js.stripe.com https://checkout.stripe.com https://api.stripe.com",
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com https://www.gstatic.com https://js.stripe.com https://checkout.stripe.com https://api.stripe.com",
-    "connect-src * 'self' https://www.google.com https://www.gstatic.com https://js.stripe.com https://checkout.stripe.com https://api.stripe.com",
+    "connect-src 'self' wss: https://www.google.com https://www.gstatic.com https://js.stripe.com https://checkout.stripe.com https://api.stripe.com https://*.sentry.io",
     "img-src data: 'self' https://www.google.com https://www.gstatic.com https://js.stripe.com https://checkout.stripe.com https://api.stripe.com https://*.gravatar.com https://secure.gravatar.com https://*.ucarecdn.com",
     "style-src 'self' 'unsafe-inline' https://www.google.com https://www.gstatic.com https://js.stripe.com https://checkout.stripe.com https://api.stripe.com https://fonts.googleapis.com https://maxcdn.bootstrapcdn.com",
     "font-src 'self' data: https://www.google.com https://www.gstatic.com https://js.stripe.com https://checkout.stripe.com https://api.stripe.com https://fonts.gstatic.com https://maxcdn.bootstrapcdn.com",

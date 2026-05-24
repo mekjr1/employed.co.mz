@@ -4,6 +4,12 @@
 // kept showing them as "active" forever. Runs every 6 hours; on a fresh
 // boot it also fires once so backfills run immediately.
 
+// M7: import Sentry for cron error reporting.
+var Sentry;
+try {
+  Sentry = require('@sentry/node');
+} catch (_e) { /* Sentry not installed — graceful degrade */ }
+
 var cronOptions = {
   log: true,
   collectionName: 'syncedCronHistory',
@@ -22,6 +28,7 @@ SyncedCron.add({
     return parser.text('every 6 hours');
   },
   job: function() {
+   try {
     var cutoff = daysUntilExpiration();
     var now = new Date();
     var result = Jobs.update({
@@ -54,6 +61,13 @@ SyncedCron.add({
 
     log.info('cron.expire_jobs', { expired: result });
     return result;
+   } catch (e) {
+    log.error('cron.expire_jobs.failed', { error: e && e.message });
+    if (typeof Sentry !== 'undefined' && Sentry.captureException) {
+      Sentry.captureException(e);
+    }
+    throw e;
+   }
   }
 });
 
@@ -86,6 +100,7 @@ SyncedCron.add({
     return parser.text('every 6 hours');
   },
   job: function() {
+   try {
     var now = new Date();
     var due = Meteor.users.find({
       deletionScheduledFor: { $lte: now }
@@ -97,12 +112,7 @@ SyncedCron.add({
     var removed = 0;
     due.forEach(function(u) {
       try {
-        // Remove every job authored by the user. Their featured-charge
-        // history goes with them; Stripe still has the auditable copy.
         var jobsRemoved = Jobs.remove({ userId: u._id });
-        // Then the auth doc itself. Meteor.users.remove also clears
-        // the user's login tokens because resume tokens live on the
-        // same document.
         Meteor.users.remove({ _id: u._id });
         log.warn('cron.delete_accounts.removed', {
           userId: hashIdentifier(u._id),
@@ -118,6 +128,13 @@ SyncedCron.add({
     });
     log.info('cron.delete_accounts.summary', { matched: due.length, removed: removed });
     return removed;
+   } catch (e) {
+    log.error('cron.delete_accounts.outer_error', { error: e && e.message });
+    if (Sentry && Sentry.captureException) {
+      Sentry.captureException(e);
+    }
+    throw e;
+   }
   }
 });
 

@@ -136,7 +136,20 @@ Router.map(function() {
         // full re-route. Also publishes the `adminUsers` list for the
         // Admins panel (B3.7).
         onBeforeAction: function() {
-            if (Meteor.userId() && !Roles.userIsInRole(Meteor.userId(), ['admin'])) {
+            // H2: wait for the roles subscription to be ready before
+            // redirecting — otherwise Roles.userIsInRole returns false
+            // while the sub is still loading and non-admin users flash
+            // the admin page briefly before the redirect fires.
+            if (!Meteor.userId()) {
+                this.next();
+                return;
+            }
+            var rolesReady = Meteor.subscribe('_roles').ready();
+            if (!rolesReady) {
+                this.render('loading');
+                return;
+            }
+            if (!Roles.userIsInRole(Meteor.userId(), ['admin'])) {
                 this.redirect('jobs');
             } else {
                 this.next();

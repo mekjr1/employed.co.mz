@@ -9,7 +9,7 @@ Employed is a Meteor job board adapted from the original We Work Meteor codebase
 - Framework: Meteor 2.7.1
 - Runtime: Node.js 18 LTS (A9.11 bumped from 14; CI + Dockerfile.dev pinned)
 - Database: MongoDB 5+ (docker-compose pins `mongo:5`; production should match)
-- UI: Bootstrap 3, Blaze, Iron Router
+- UI: Bootstrap 5 (migrated from BS3), Blaze, Iron Router
 - Forms: AutoForm with Collection2 schemas
 - Auth: Meteor Accounts with OAuth support
 
@@ -85,3 +85,30 @@ Use these localized hosts for app testing:
 - `both/lib/i18n.js` is the in-repo i18n module (no npm dep). Add a key by editing the `Translations` object for `en`, `es` and `pt`; templates consume keys via `{{t 'key' var=value}}` and JS via `t('key', {var: value})`.
 - `client/lib/seo.js` registers `mdg:seo` defaults and exposes a global `applySeo(routeKey, vars)` used by `Router.onAfterAction` hooks in `router.js` to publish per-route titles and `og:` tags.
 - The project was originally imported from `nate-strauser/wework`; `upstream` points to that repository.
+
+## Portfolio Standards Alignment
+
+This project follows the 10-point standardisation programme defined in `_integrations/STANDARDS.md`.
+
+| Standard | Status | Notes |
+|---|---|---|
+| S-01 Email (Resend) | ⏳ future | Currently Meteor SMTP/MailHog; Resend migration planned |
+| S-02 Structured logging | ✅ | `server/lib/log.js` outputs JSON to stdout |
+| S-03 Sentry | ✅ | Client + server SDKs wired; supports `SENTRY_DSN` env var |
+| S-04 File storage | N/A | No file uploads in current scope |
+| S-05 Database (MongoDB) | ✅ | Accepted divergence |
+| S-06 Auth (JWT) | ⏳ deferred | Uses Meteor Accounts; JWT migration is a major rewrite |
+| S-07 CI/CD | ✅ | `ci.yml` (lint+test) + `deploy-uat.yml` (push-to-deploy) |
+| S-08 UptimeRobot | ✅ | `/healthz` endpoint with liveness + readiness |
+| S-09 Background jobs | N/A | No async job processing needed |
+| S-10 LLM | N/A | No AI features |
+
+### Env var conventions
+
+Standard env var names are used where applicable: `SENTRY_DSN`, `SENTRY_ENVIRONMENT`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`. See `.env.example`.
+
+## AI Assistant Rules
+
+- No `Co-Authored-By: Claude` trailers, no AI authorship attribution in docs or commits (AI-OPS Rule 6).
+- Never paste credentials into chat. Use file paths to reference secrets (AI-OPS Rule 5).
+- Locale codes: `en`, `pt`, `es` only (STANDARDS §4).

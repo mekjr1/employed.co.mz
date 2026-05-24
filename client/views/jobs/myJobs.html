@@ -17,8 +17,8 @@
 </template>
 
 <template name="myJobRow">
-	<div class="jobSmall my-job-row {{#if featured}}featured{{/if}} panel panel-default">
-		<div class="panel-body">
+	<div class="jobSmall my-job-row {{#if featured}}featured{{/if}} card">
+		<div class="card-body">
 			<div class="job-card-inner">
 				<div class="job-avatar {{avatarColorClass}}" aria-hidden="true">{{companyInitial}}</div>
 				<div class="job-main">
@@ -34,8 +34,8 @@
 						<span><i class="fa fa-clock-o" aria-hidden="true"></i> {{formatDate createdAt}}</span>
 					</div>
 					<div class="my-job-row-actions">
-						<a href="{{pathFor 'job'}}" class="btn btn-sm btn-default">{{t 'mine.action.view'}}</a>
-						<a href="{{pathFor 'jobEdit'}}" class="btn btn-sm btn-default">{{t 'mine.action.edit'}}</a>
+						<a href="{{pathFor 'job'}}" class="btn btn-sm btn-secondary">{{t 'mine.action.view'}}</a>
+						<a href="{{pathFor 'jobEdit'}}" class="btn btn-sm btn-secondary">{{t 'mine.action.edit'}}</a>
 					</div>
 				</div>
 			</div>

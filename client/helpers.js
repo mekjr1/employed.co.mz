@@ -33,6 +33,16 @@ UI.registerHelper("featuredJobPriceLabel", function() {
     FEATURED_JOB_PRICE_LABEL;
 });
 
+// M9: gate the featured upgrade UI on the public settings flag.
+// Defaults to true for backward compatibility. Operators can set
+// public.featuredUpgradeEnabled: false to hide the button without
+// touching code (e.g. when no payment provider is configured).
+UI.registerHelper("featuredUpgradeEnabled", function() {
+  var pub = Meteor.settings && Meteor.settings.public;
+  if (pub && pub.featuredUpgradeEnabled === false) return false;
+  return true;
+});
+
 UI.registerHelper("activeMarket", function() {
   return currentMarket();
 });

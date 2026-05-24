@@ -14,10 +14,10 @@
                     {{t 'admin.title'}}
                 </span>
                 <div class="context-bar__actions">
-                    <a href="{{pathFor 'jobEdit'}}" class="btn btn-default btn-xs">
+                    <a href="{{pathFor 'jobEdit'}}" class="btn btn-secondary btn-sm">
                         <i class="fa fa-pencil" aria-hidden="true"></i> {{t 'action.edit'}}
                     </a>
-                    <button type="button" class="btn btn-link btn-xs context-bar__toggle" aria-expanded="false">
+                    <button type="button" class="btn btn-link btn-sm context-bar__toggle" aria-expanded="false">
                         <i class="fa fa-chevron-down" aria-hidden="true"></i>
                     </button>
                 </div>
@@ -56,14 +56,16 @@
                     </span>
                     <div class="context-bar__actions">
                         {{#if featuredAllowed}}
+                            {{#if featuredUpgradeEnabled}}
                             {{#unless featured}}
                                 <a id="buy-featured" class="btn btn-warning btn-sm owner-featured-btn" role="button" href="#">
                                     <i class="fa fa-star" aria-hidden="true"></i>
                                     {{t 'job.featured.buy_cta' price=featuredJobPriceLabel}}
                                 </a>
                             {{/unless}}
+                            {{/if}}
                         {{/if}}
-                        <a href="{{pathFor 'jobEdit'}}" class="btn btn-default btn-sm">
+                        <a href="{{pathFor 'jobEdit'}}" class="btn btn-secondary btn-sm">
                             <i class="fa fa-pencil" aria-hidden="true"></i> {{t 'action.edit'}}
                         </a>
                         {{#if $eq status "active"}}
@@ -102,7 +104,7 @@
             {{/if}}
             <span><i class="fa fa-clock-o" aria-hidden="true"></i> {{jobtype}}</span>
             {{#if remote}}
-                <span class="label label-success" style="vertical-align:middle;">
+                <span class="badge bg-success" style="vertical-align:middle;">
                     <i class="fa fa-globe" aria-hidden="true"></i> {{t 'jobs.label.remote'}}
                 </span>
             {{/if}}

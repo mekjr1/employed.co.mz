@@ -1,0 +1,6 @@
+.infinite-load-more .infinite-label {
+  display: none;
+}
+.infinite-load-more.loading .infinite-label {
+  display: block;
+}

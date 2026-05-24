@@ -119,3 +119,47 @@ test.describe('External Services', () => {
     expect(res.ok()).toBeTruthy();
   });
 });
+
+// ─── L10: Security headers & API shape ────────────────────────────
+
+test.describe('Security Headers', () => {
+  test('X-Content-Type-Options is nosniff', async ({ request }) => {
+    const res = await request.get('/');
+    expect(res.headers()['x-content-type-options']).toBe('nosniff');
+  });
+
+  test('X-Frame-Options is set', async ({ request }) => {
+    const res = await request.get('/');
+    const xfo = res.headers()['x-frame-options'];
+    expect(xfo).toBeTruthy();
+  });
+
+  test('Referrer-Policy is set', async ({ request }) => {
+    const res = await request.get('/');
+    expect(res.headers()['referrer-policy']).toBeTruthy();
+  });
+
+  test('Content-Security-Policy header is present', async ({ request }) => {
+    const res = await request.get('/');
+    const csp = res.headers()['content-security-policy'];
+    expect(csp).toBeTruthy();
+    expect(csp).toContain("default-src");
+    expect(csp).toContain("object-src 'none'");
+  });
+});
+
+test.describe('API Response Shape', () => {
+  test('healthz response has expected fields', async ({ request }) => {
+    const res = await request.get('/healthz?readiness=1');
+    const body = await res.json();
+    expect(body).toHaveProperty('ok');
+    expect(body).toHaveProperty('ready');
+    expect(body).toHaveProperty('uptime');
+  });
+
+  test('/api/jobs returns an array', async ({ request }) => {
+    const res = await request.get('/api/jobs');
+    const body = await res.json();
+    expect(Array.isArray(body)).toBeTruthy();
+  });
+});

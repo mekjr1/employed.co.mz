@@ -1,0 +1,122 @@
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 0;
+  background: #4F46E5;
+  color: #fff;
+  padding: 8px 16px;
+  z-index: 9999;
+  border-radius: 0 0 6px 0;
+  font-weight: 600;
+  text-decoration: none;
+}
+.skip-link:focus,
+.skip-link:active {
+  top: 0;
+  outline: 3px solid #fff;
+}
+#main-content:focus {
+  outline: none;
+}
+#content-wrapper {
+  min-height: 600px;
+}
+#content-wrapper a:not(.btn):visited {
+  color: #374151;
+}
+#content-wrapper .job-url {
+  word-break: break-all;
+}
+@media (min-width: 768px) {
+  #content-wrapper .job-url {
+    text-align: right;
+  }
+}
+footer,
+.jumbotron {
+  background-color: #1E1B4B;
+  color: #fff;
+}
+#content-wrapper .jumbotron {
+  margin-top: -20px;
+  width: 100%;
+}
+#content-wrapper .jumbotron a:visited {
+  color: rgba(255, 255, 255, 0.8);
+}
+#content-wrapper .jumbotron a.btn,
+#content-wrapper .jumbotron a.btn:visited {
+  color: #fff;
+}
+footer {
+  border-top: none;
+  margin-top: 0;
+  padding: 32px 0;
+}
+footer a {
+  color: rgba(255, 255, 255, 0.75);
+}
+footer a:visited {
+  color: rgba(255, 255, 255, 0.65);
+}
+footer a:hover,
+footer a:focus {
+  color: #fff;
+  text-decoration: none;
+}
+footer #disclaimer {
+  font-size: 12px;
+  padding-top: 12px;
+  color: rgba(255, 255, 255, 0.4);
+}
+nav.navbar .open .dropdown-toggle {
+  background: none;
+  color: #4F46E5;
+}
+nav.navbar .navbar-brand {
+  margin-right: 12px;
+}
+nav.navbar .navbar-brand:hover {
+  background: none;
+}
+nav.navbar .nav.navbar-nav li.active a {
+  background: none;
+  color: #4F46E5;
+}
+nav.navbar .nav.navbar-nav li a:hover {
+  background: none;
+  color: #4F46E5;
+}
+#iron-router-progress {
+  background-color: #4F46E5;
+  box-shadow: 0 0 5px #4F46E5;
+}
+.note-editor .btn-toolbar {
+  margin-left: 0;
+}
+.note-editor .note-editing-area .note-editable {
+  min-height: 300px;
+}
+.nav > li > p {
+  margin: 0;
+  padding: 10px 15px;
+}
+@media screen and (min-width: 768px) {
+  .nav > li > p {
+    padding: 15px;
+  }
+}
+h1.top-flush,
+h2.top-flush,
+h3.top-flush,
+h4.top-flush,
+h5.top-flush {
+  margin-top: 0;
+}
+.help-block,
+.form-text {
+  color: #6B7280;
+}
+#connection-lost-banner {
+  text-align: center;
+}
