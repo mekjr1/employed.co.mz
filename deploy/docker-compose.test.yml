@@ -1,0 +1,75 @@
+# docker-compose.test.yml — UAT test overlay for employed.co.mz
+# Extends the base docker-compose.yml, adds MailHog for email capture,
+# exposes Postgres/Redis ports, and configures SMTP for test email routing.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.test.yml up -d --build
+#
+# Frontend: http://localhost:3300
+# Backend:  http://localhost:3301
+# MailHog:  http://localhost:3310 (web UI)  / localhost:3311 (SMTP)
+# Postgres: localhost:3302
+# Redis:    localhost:3303
+
+services:
+  postgres:
+    ports:
+      - "3302:5432"
+
+  redis:
+    ports:
+      - "3303:6379"
+
+  # Override commands to bypass wait-for-it.sh (CRLF line-ending issue on Windows).
+  # The healthcheck-based depends_on already guarantees readiness.
+  migrate:
+    command: ["alembic", "upgrade", "head"]
+
+  backend:
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      SMTP_HOST: mailhog
+      SMTP_PORT: "1025"
+      SMTP_USER: ""
+      SMTP_PASSWORD: ""
+      ENVIRONMENT: development
+      DEBUG: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+        required: false
+      mailhog:
+        condition: service_started
+
+  worker:
+    command: ["arq", "app.workers.config.WorkerSettings"]
+    environment:
+      SMTP_HOST: mailhog
+      SMTP_PORT: "1025"
+      SMTP_USER: ""
+      SMTP_PASSWORD: ""
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+        required: false
+
+  frontend:
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3301
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    restart: unless-stopped
+    ports:
+      - "3310:8025"
+      - "3311:1025"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8025/api/v2/messages?limit=1 >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
