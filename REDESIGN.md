@@ -1,14 +1,9 @@
 # Employed — UI/UX Redesign Plan
 
 > **Status (May 2026):** This document is a **point-in-time audit and
-> design plan** captured from the live Docker dev environment. Many of
-> the visual issues noted here have been addressed by the brand refresh
-> (logo, colours, seals, status pills) and the BS5 migration progress
-> (PR 1 + PR 2 complete). The remaining items (floating labels, BS5
-> template surgery, mobile form improvements) are tracked in
-> [`brand/BS5-MIGRATION.md`](brand/BS5-MIGRATION.md) under PR 3.
->
-> Treat this document as **historical context**, not a current spec.
+> design plan** captured from the legacy pre-migration UI. The repository
+> now runs on FastAPI + Next.js, so treat this file as **historical
+> context**, not a current implementation spec.
 
 > Audit conducted May 2026 against the live Docker dev environment.  
 > Screenshots captured at 1440×900 (desktop) and 390×844 (iPhone 14 proxy).
@@ -17,7 +12,7 @@
 
 ## 1. Executive Summary
 
-Employed is a focused, no-nonsense job board for emerging markets (Mozambique, Mexico). The product idea is strong — local, free, multilingual. The current UI is a lightly-customised Bootstrap 3 theme from ~2015. It works, but it communicates "side project" rather than "trusted local institution." The redesign goal is not to add features — it is to make every existing interaction feel intentional, fast, and trustworthy, especially on mobile where most of the target audience lives.
+Employed is a focused, no-nonsense job board for emerging markets (Mozambique, Mexico). The product idea is strong — local, free, multilingual. The legacy UI audited here was a lightly-customised Bootstrap 3 theme from ~2015. It worked, but it communicated "side project" rather than "trusted local institution." The redesign goal was not to add features — it was to make every existing interaction feel intentional, fast, and trustworthy, especially on mobile where most of the target audience lives.
 
 **Three core problems to solve:**
 1. The visual language is generic and dated — zero brand identity
@@ -74,7 +69,7 @@ Employed is a focused, no-nonsense job board for emerging markets (Mozambique, M
 
 #### Sign In / Sign Up (`/sign-in`, `/sign-up`)
 - **The OAuth buttons say "Configure Github" / "Configure Google"** — these are admin setup labels, not user-facing labels. A visitor sees "Configure Github" and thinks it's a settings page, not a login option.
-- **The form is centered in a narrow column with no surrounding context.** No brand mark, no tagline, no reason to trust the page. It looks like a generic Meteor accounts template (because it is).
+- **The form is centered in a narrow column with no surrounding context.** No brand mark, no tagline, no reason to trust the page. It looked like a generic legacy accounts template.
 - **No "remember me" option.**
 - **Password field has no show/hide toggle.**
 
@@ -99,9 +94,9 @@ Employed is a focused, no-nonsense job board for emerging markets (Mozambique, M
 These are the constraints that should govern every decision:
 
 1. **Mobile-first, always.** The target markets (Mozambique, Mexico) have high mobile usage. Every layout decision starts at 390px and expands up.
-2. **Speed over decoration.** No heavy animations, no image carousels, no JavaScript-heavy widgets. The app is already Meteor — keep the client bundle lean.
+2. **Speed over decoration.** No heavy animations, no image carousels, no JavaScript-heavy widgets. Keep the client bundle lean.
 3. **Trust through clarity.** Emerging market users are skeptical of new platforms. Clear copy, visible contact info, and consistent visual language build trust faster than polish.
-4. **Preserve the tech stack.** This is a Blaze/Bootstrap 3 app. The redesign works *within* Bootstrap 3 — it does not require a framework migration. We upgrade the design tokens and templates, not the architecture.
+4. **Build against the current stack.** This audit was captured against the legacy Blaze/Bootstrap implementation, but any remaining redesign work should be applied in the current FastAPI + Next.js codebase rather than by reviving Meteor-era patterns.
 5. **Accessibility baseline.** WCAG AA contrast on all text. Keyboard navigable. Semantic HTML (already mostly there).
 
 ---
@@ -432,7 +427,7 @@ These are bugs, not enhancements:
 
 ## 9. Implementation Roadmap
 
-Phased to minimize risk and deliver value incrementally. All phases work within the existing Blaze/Bootstrap 3 stack.
+Phased to minimize risk and deliver value incrementally. Treat the phases below as design intent; implementation now belongs in the current FastAPI + Next.js stack.
 
 ### Phase 1 — Design Tokens & Typography (1–2 days)
 *Zero functional risk. Pure CSS changes.*
@@ -530,7 +525,7 @@ Phased to minimize risk and deliver value incrementally. All phases work within 
 
 ## 10. What NOT to Change
 
-- The Meteor/Blaze/Bootstrap 3 stack — migration cost is not justified
+- The legacy Meteor/Blaze/Bootstrap 3 stack — retained here only as historical context
 - The URL structure (minor `/job` → `/jobs/new` is optional)
 - The data model, publications, or methods
 - The i18n system — it works well

@@ -8,21 +8,13 @@
     "npm": ">= 6.0.0"
   },
   "scripts": {
-    "test": "MONGO_URL=mongodb://mongo:27017/employed_test meteor test --full-app --once --driver-package meteortesting:mocha --settings settings-docker.json --port 3100",
+    "test": "echo \"See backend/ and frontend/ for tests\"",
     "lint": "eslint .",
     "pretest": "npm run lint --silent",
     "regen-brand-pngs": "node scripts/regen-brand-pngs.js",
-    "start": "meteor --settings settings-docker.json",
-    "perf:build": "meteor build --debug --directory build/",
     "perf:bundle": "node scripts/check-bundle-size.mjs build/bundle/programs/web.browser",
     "perf:lighthouse": "node scripts/lighthouse-mobile.mjs",
-    "perf:all": "npm run perf:build && npm run perf:bundle && npm run perf:lighthouse"
-  },
-  "meteor": {
-    "testModule": {
-      "client": false,
-      "server": "tests/main.js"
-    }
+    "perf:all": "npm run perf:bundle && npm run perf:lighthouse"
   },
   "repository": {
     "type": "git",

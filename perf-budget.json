@@ -2,7 +2,7 @@
   "$schema": "https://example.com/perf-budget.schema.json",
   "description": "Mobile-first performance budget for Employed. Read by scripts/check-bundle-size.mjs and scripts/lighthouse-mobile.mjs. Targets a low-end Android device on simulated Slow 3G — the realistic floor for Mozambique. Update with PR review when a budget shift is justified.",
   "bundle": {
-    "comment": "Sizes are gzip-compressed bytes. Measured by walking the directory produced by `meteor build --debug --directory build/ ` and summing client assets matching the patterns below. Hard cap = CI fails. Soft cap = warning.",
+    "comment": "Sizes are gzip-compressed bytes. Measure them from the current Next.js frontend production build output after `cd frontend && npm run build`, then sum the emitted client assets that match the patterns below. Hard cap = CI fails. Soft cap = warning.",
     "client": {
       "javascript": {
         "hardCapBytes": 280000,

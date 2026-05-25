@@ -1,6 +1,8 @@
 # Employed Migration Plan — Meteor → FastAPI + Next.js 15 + PostgreSQL
 
-**Status:** Scaffold Complete — May 2026
+> **Status update (May 2026):** The migration is complete. This document is preserved as historical reference for the rewrite that moved Employed from Meteor to the current FastAPI + Next.js stack.
+
+**Status:** Migration Complete — May 2026
 **Scope:** Full rewrite of `employed.co.mz` from Meteor 2.7.1 + MongoDB to the portfolio-standard stack.
 **Target:** Drop-in replacement with feature parity, portfolio-consistent infrastructure, and improved SEO.
 

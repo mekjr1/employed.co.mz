@@ -4,7 +4,7 @@
  * Regenerate the brand PNG assets in public/images/ from the source SVGs
  * in brand/ and public/images/.
  *
- * Run with: meteor npm run regen-brand-pngs
+ * Run with: npm run regen-brand-pngs
  *
  * Uses @resvg/resvg-js (pure WASM, no native deps) so this works on any
  * dev machine without ImageMagick / librsvg installed.
