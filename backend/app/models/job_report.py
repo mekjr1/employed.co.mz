@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from typing import TYPE_CHECKING
+from uuid import UUID
 
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
@@ -11,8 +12,6 @@ from app.database import Base
 from app.models.enums import ReportReason, ReportResolution, pg_enum
 
 if TYPE_CHECKING:
-    from uuid import UUID
-
     from app.models.job import Job
     from app.models.user import User
 

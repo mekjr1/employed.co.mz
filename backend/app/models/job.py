@@ -4,6 +4,7 @@ from datetime import datetime
 import re
 import unicodedata
 from typing import TYPE_CHECKING, Any
+from uuid import UUID
 
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import JSONB, UUID as PGUUID
@@ -17,8 +18,6 @@ from app.models.enums import Country, JobStatus, JobType, SalaryCurrency, Salary
 # - ix_jobs_status_country_created_at(status, country, created_at) for the primary jobs listing query.
 
 if TYPE_CHECKING:
-    from uuid import UUID
-
     from app.models.job_report import JobReport
     from app.models.payment_intent import PaymentIntent
     from app.models.user import User

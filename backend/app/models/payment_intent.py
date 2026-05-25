@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
+from uuid import UUID
 
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import JSONB, UUID as PGUUID
@@ -15,8 +16,6 @@ from app.models.enums import MarketKey, PaymentProviderKey, PaymentStatus, pg_en
 # - ix_payment_intents_provider_ref(provider_ref) for webhook provider reference lookups.
 
 if TYPE_CHECKING:
-    from uuid import UUID
-
     from app.models.job import Job
     from app.models.user import User
 

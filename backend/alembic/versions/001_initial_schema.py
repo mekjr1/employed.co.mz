@@ -23,6 +23,7 @@ job_status_enum = sa.Enum(
     "inactive",
     "filled",
     name="job_status_enum",
+    create_type=False,
 )
 job_type_enum = sa.Enum(
     "Full Time",
@@ -35,14 +36,15 @@ job_type_enum = sa.Enum(
     "Volunteer",
     "Other",
     name="job_type_enum",
+    create_type=False,
 )
-country_enum = sa.Enum("Mexico", "Mozambique", name="country_enum")
-market_key_enum = sa.Enum("mx", "mz", name="market_key_enum")
-salary_currency_enum = sa.Enum("MXN", "MZN", "USD", name="salary_currency_enum")
-salary_period_enum = sa.Enum("hour", "day", "week", "month", "year", name="salary_period_enum")
-profile_type_enum = sa.Enum("Individual", "Company", name="profile_type_enum")
-profile_status_enum = sa.Enum("pending", "active", "flagged", name="profile_status_enum")
-payment_provider_key_enum = sa.Enum("stripe", "mpesa", "emola", name="payment_provider_key_enum")
+country_enum = sa.Enum("Mexico", "Mozambique", name="country_enum", create_type=False)
+market_key_enum = sa.Enum("mx", "mz", name="market_key_enum", create_type=False)
+salary_currency_enum = sa.Enum("MXN", "MZN", "USD", name="salary_currency_enum", create_type=False)
+salary_period_enum = sa.Enum("hour", "day", "week", "month", "year", name="salary_period_enum", create_type=False)
+profile_type_enum = sa.Enum("Individual", "Company", name="profile_type_enum", create_type=False)
+profile_status_enum = sa.Enum("pending", "active", "flagged", name="profile_status_enum", create_type=False)
+payment_provider_key_enum = sa.Enum("stripe", "mpesa", "emola", name="payment_provider_key_enum", create_type=False)
 payment_status_enum = sa.Enum(
     "pending",
     "awaiting_user",
@@ -51,6 +53,7 @@ payment_status_enum = sa.Enum(
     "cancelled",
     "expired",
     name="payment_status_enum",
+    create_type=False,
 )
 report_reason_enum = sa.Enum(
     "spam",
@@ -60,6 +63,7 @@ report_reason_enum = sa.Enum(
     "expired_or_filled",
     "duplicate",
     name="report_reason_enum",
+    create_type=False,
 )
 report_resolution_enum = sa.Enum(
     "pending",
@@ -67,29 +71,13 @@ report_resolution_enum = sa.Enum(
     "dismissed",
     "job_removed",
     name="report_resolution_enum",
+    create_type=False,
 )
 
 
 def upgrade() -> None:
     op.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm;")
     op.execute("CREATE EXTENSION IF NOT EXISTS pgcrypto;")
-
-    bind = op.get_bind()
-    for enum in (
-        job_status_enum,
-        job_type_enum,
-        country_enum,
-        market_key_enum,
-        salary_currency_enum,
-        salary_period_enum,
-        profile_type_enum,
-        profile_status_enum,
-        payment_provider_key_enum,
-        payment_status_enum,
-        report_reason_enum,
-        report_resolution_enum,
-    ):
-        enum.create(bind, checkfirst=True)
 
     op.create_table(
         "users",

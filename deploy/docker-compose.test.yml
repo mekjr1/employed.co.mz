@@ -47,6 +47,8 @@ services:
 
   worker:
     command: ["arq", "app.workers.config.WorkerSettings"]
+    healthcheck:
+      disable: true
     environment:
       SMTP_HOST: mailhog
       SMTP_PORT: "1025"

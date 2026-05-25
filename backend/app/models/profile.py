@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from uuid import UUID
 
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import ARRAY, UUID as PGUUID
@@ -11,8 +12,6 @@ from app.database import Base
 from app.models.enums import ProfileStatus, ProfileType, pg_enum
 
 if TYPE_CHECKING:
-    from uuid import UUID
-
     from app.models.user import User
 
 
