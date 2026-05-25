@@ -9,11 +9,9 @@ node_modules
 .env
 .env.*
 !.env.example
-
 .DS_Store
 /**/.DS_Store
-.demeteorized/
-.vscode/typings/meteor.d.ts
+/**/.DS_Store
 
 meteor.log
 .claude
@@ -31,5 +29,8 @@ tests/e2e/full-results.json
 build/
 .lighthouse/
 
-# Quality run artifacts (session-local, not committed)
+# Quality artefacts — git-tracked, reused across runs
+# quality/ is NOT ignored (tracked in repo)
+
+# Quality run results — ephemeral per-run data, not committed
 .quality-run/

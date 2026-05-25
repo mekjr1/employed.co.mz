@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-05-25T14:47:00Z",
+  "services": [
+    {
+      "id": "mailhog",
+      "name": "MailHog Email Catcher",
+      "purpose": "Captures all outbound email in test environment",
+      "type": "email",
+      "business_affecting": true,
+      "urls": {
+        "api": "http://localhost:3310/api/v2",
+        "web_ui": "http://localhost:3310",
+        "smtp": "smtp://localhost:3311"
+      },
+      "health_check": {
+        "endpoint": "http://localhost:3310/api/v2/messages",
+        "method": "GET",
+        "expected_status": 200
+      },
+      "search_endpoint": "http://localhost:3310/api/v2/search?kind=to&query={email}",
+      "clear_endpoint": "http://localhost:3310/api/v1/messages",
+      "clear_method": "DELETE",
+      "triggers": [
+        "user registration → verification email",
+        "forgot password → reset email",
+        "job submission → confirmation email",
+        "resend verification → verification email"
+      ]
+    },
+    {
+      "id": "postgres",
+      "name": "PostgreSQL Database",
+      "purpose": "Primary data store",
+      "type": "database",
+      "business_affecting": true,
+      "urls": {
+        "connection": "postgresql://localhost:3302"
+      },
+      "health_check": {
+        "method": "TCP",
+        "host": "localhost",
+        "port": 3302
+      }
+    },
+    {
+      "id": "redis",
+      "name": "Redis Cache",
+      "purpose": "Session cache and rate limiting",
+      "type": "cache",
+      "business_affecting": false,
+      "urls": {
+        "connection": "redis://localhost:3303"
+      },
+      "health_check": {
+        "method": "TCP",
+        "host": "localhost",
+        "port": 3303
+      }
+    }
+  ]
+}

@@ -1,0 +1,1245 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-05-25T14:47:00Z",
+  "synthetic_participants": [
+    {
+      "id": "persona-diego-employer",
+      "derived_from": "persona-carlos-employer",
+      "name": "Diego Ramírez",
+      "role": "employer",
+      "profile_type": "company",
+      "locale": "es-MX",
+      "market": "mx",
+      "credentials": {
+        "email_template": "diego-{run_id}@test.employed.co.mz",
+        "password": "DiegoTest2026!",
+        "display_name": "Diego Ramírez",
+        "company_name": "Constructora Norte SA"
+      }
+    }
+  ],
+  "journeys": [
+    {
+      "id": "journey-multi-job-lifecycle",
+      "title": "Employer posts, admin approves, seeker discovers, seeker reports, admin resolves",
+      "participants": [
+        "persona-carlos-employer",
+        "persona-marta-admin",
+        "persona-ana-seeker"
+      ],
+      "contexts": {
+        "A": "Carlos browser context",
+        "B": "Marta admin context",
+        "C": "Ana seeker context"
+      },
+      "steps": [
+        {
+          "step_index": 1,
+          "persona_id": "persona-carlos-employer",
+          "context_label": "A",
+          "label": "Carlos registers",
+          "action": "submit_form",
+          "target": "/sign-up",
+          "input_value": {
+            "email": "carlos-{run_id}@test.employed.co.mz"
+          },
+          "expected_result": "Carlos account is created in pending-verification state.",
+          "assertions": [
+            "Carlos sees verification-needed confirmation"
+          ],
+          "synchronization": {
+            "wait_for": [],
+            "description": "Initial actor starts the flow",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-lifecycle-carlos-register",
+            "expected_assertions_for_screenshot_analysis": [
+              "Carlos registration confirmation is visible",
+              "No validation errors remain"
+            ]
+          },
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/register"
+        },
+        {
+          "step_index": 2,
+          "persona_id": "persona-carlos-employer",
+          "context_label": "A",
+          "label": "Carlos verifies and signs in",
+          "action": "navigate_and_submit",
+          "target": "/verify-email/{token} -> /sign-in",
+          "input_value": null,
+          "expected_result": "Carlos becomes authenticated in context A.",
+          "assertions": [
+            "Carlos can access protected employer routes"
+          ],
+          "synchronization": {
+            "wait_for": [
+              1
+            ],
+            "description": "Verification depends on registration",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "multi-lifecycle-carlos-login",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/verify-email/{token} + POST /auth/login"
+        },
+        {
+          "step_index": 3,
+          "persona_id": "persona-carlos-employer",
+          "context_label": "A",
+          "label": "Carlos creates company profile",
+          "action": "api_request",
+          "target": "/profiles",
+          "input_value": {
+            "type": "company",
+            "name": "Construções Maputo Lda"
+          },
+          "expected_result": "Employer profile exists before job posting.",
+          "assertions": [
+            "Profile type is company"
+          ],
+          "synchronization": {
+            "wait_for": [
+              2
+            ],
+            "description": "Authenticated session required",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "multi-lifecycle-carlos-profile",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /profiles"
+        },
+        {
+          "step_index": 4,
+          "persona_id": "persona-carlos-employer",
+          "context_label": "A",
+          "label": "Carlos posts a new job",
+          "action": "submit_form",
+          "target": "/jobs/new",
+          "input_value": {
+            "title": "Multi-user Site Engineer"
+          },
+          "expected_result": "A pending job is created for moderation.",
+          "assertions": [
+            "Job id is created",
+            "Status is pending"
+          ],
+          "synchronization": {
+            "wait_for": [
+              3
+            ],
+            "description": "Profile should exist before posting",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-lifecycle-carlos-posted",
+            "expected_assertions_for_screenshot_analysis": [
+              "New job submission outcome is visible",
+              "Pending status is understandable"
+            ]
+          },
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /jobs"
+        },
+        {
+          "step_index": 5,
+          "persona_id": "persona-carlos-employer",
+          "context_label": "A",
+          "label": "Carlos checks submission email",
+          "action": "api_request",
+          "target": "http://localhost:3310/api/v2/search?kind=to&query=carlos-{run_id}@test.employed.co.mz",
+          "input_value": null,
+          "expected_result": "Submission email is visible for Carlos.",
+          "assertions": [
+            "MailHog returns the submission message"
+          ],
+          "synchronization": {
+            "wait_for": [
+              4
+            ],
+            "description": "Submission email is sent after posting",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "multi-lifecycle-carlos-mail",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "TEST-ONLY: MailHog search"
+        },
+        {
+          "step_index": 6,
+          "persona_id": "persona-marta-admin",
+          "context_label": "B",
+          "label": "Marta registers",
+          "action": "submit_form",
+          "target": "/sign-up",
+          "input_value": {
+            "email": "marta-{run_id}@test.employed.co.mz"
+          },
+          "expected_result": "Admin candidate account is created.",
+          "assertions": [
+            "Verification-needed confirmation shows"
+          ],
+          "synchronization": {
+            "wait_for": [],
+            "description": "Admin lane can start independently after Carlos posts",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "multi-lifecycle-marta-register",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/register"
+        },
+        {
+          "step_index": 7,
+          "persona_id": "persona-marta-admin",
+          "context_label": "B",
+          "label": "Marta verifies, signs in, and receives admin role",
+          "action": "navigate_and_api_request",
+          "target": "/verify-email/{token} -> /sign-in -> /admin/users/{id}/roles/admin",
+          "input_value": null,
+          "expected_result": "Marta can access admin moderation in context B.",
+          "assertions": [
+            "Roles array includes admin",
+            "Admin route is reachable"
+          ],
+          "synchronization": {
+            "wait_for": [
+              6
+            ],
+            "description": "Marta must exist before role grant",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-lifecycle-marta-admin",
+            "expected_assertions_for_screenshot_analysis": [
+              "Admin-ready state is visible",
+              "No auth guard redirect remains"
+            ]
+          },
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/verify-email/{token} + POST /auth/login + POST /admin/users/{user_id}/roles/{role}"
+        },
+        {
+          "step_index": 8,
+          "persona_id": "persona-marta-admin",
+          "context_label": "B",
+          "label": "Marta opens the pending queue",
+          "action": "navigate",
+          "target": "/admin/jobs?status=pending",
+          "input_value": null,
+          "expected_result": "Carlos's job is visible in the pending queue.",
+          "assertions": [
+            "Queue contains Carlos's job title",
+            "Status is pending"
+          ],
+          "synchronization": {
+            "wait_for": [
+              4,
+              7
+            ],
+            "description": "Requires posted job and admin privileges",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-lifecycle-pending-queue",
+            "expected_assertions_for_screenshot_analysis": [
+              "Pending queue row is visible",
+              "Carlos's job is identifiable"
+            ]
+          },
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /admin/jobs"
+        },
+        {
+          "step_index": 9,
+          "persona_id": "persona-marta-admin",
+          "context_label": "B",
+          "label": "Marta approves Carlos's job",
+          "action": "submit_form",
+          "target": "tr select + input + button",
+          "input_value": {
+            "status": "active",
+            "reason": "Approved during multi-user UAT"
+          },
+          "expected_result": "Carlos's pending listing becomes active.",
+          "assertions": [
+            "PATCH succeeds",
+            "Job leaves pending queue or appears under active"
+          ],
+          "synchronization": {
+            "wait_for": [
+              8
+            ],
+            "description": "Approval requires queue visibility",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-lifecycle-approved",
+            "expected_assertions_for_screenshot_analysis": [
+              "Approval result is visible",
+              "Status change is obvious"
+            ]
+          },
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "PATCH /admin/jobs/{job_id}/status"
+        },
+        {
+          "step_index": 10,
+          "persona_id": "persona-carlos-employer",
+          "context_label": "A",
+          "label": "Carlos refreshes my jobs",
+          "action": "refresh_page",
+          "target": "/myjobs",
+          "input_value": null,
+          "expected_result": "Carlos now sees his job as active in context A.",
+          "assertions": [
+            "Dashboard status badge reads active",
+            "Feature action is still available"
+          ],
+          "synchronization": {
+            "wait_for": [
+              9
+            ],
+            "description": "Employer waits for admin approval",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-lifecycle-carlos-active",
+            "expected_assertions_for_screenshot_analysis": [
+              "Carlos sees active status",
+              "Dashboard layout remains stable"
+            ]
+          },
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs"
+        },
+        {
+          "step_index": 11,
+          "persona_id": "persona-ana-seeker",
+          "context_label": "C",
+          "label": "Ana registers, verifies, and signs in",
+          "action": "navigate_and_submit",
+          "target": "/sign-up -> /verify-email/{token} -> /sign-in",
+          "input_value": null,
+          "expected_result": "Ana is authenticated and ready to browse in context C.",
+          "assertions": [
+            "Authenticated state appears for Ana"
+          ],
+          "synchronization": {
+            "wait_for": [
+              9
+            ],
+            "description": "Ana can join after the listing is active",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "multi-lifecycle-ana-login",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/register + POST /auth/verify-email/{token} + POST /auth/login"
+        },
+        {
+          "step_index": 12,
+          "persona_id": "persona-ana-seeker",
+          "context_label": "C",
+          "label": "Ana browses jobs and finds Carlos's job",
+          "action": "navigate",
+          "target": "/jobs?search=Multi-user%20Site%20Engineer",
+          "input_value": null,
+          "expected_result": "Approved job is discoverable in the public feed.",
+          "assertions": [
+            "Search results contain Carlos's job title",
+            "Only active jobs are listed publicly"
+          ],
+          "synchronization": {
+            "wait_for": [
+              10,
+              11
+            ],
+            "description": "Job must be active and Ana signed in",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-lifecycle-ana-finds-job",
+            "expected_assertions_for_screenshot_analysis": [
+              "Ana can see the approved job in results",
+              "Search/filter state is readable"
+            ]
+          },
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs"
+        },
+        {
+          "step_index": 13,
+          "persona_id": "persona-ana-seeker",
+          "context_label": "C",
+          "label": "Ana opens the job detail",
+          "action": "click",
+          "target": "/jobs/{job_id}",
+          "input_value": null,
+          "expected_result": "Ana can inspect the approved listing.",
+          "assertions": [
+            "Job title and apply panel are visible"
+          ],
+          "synchronization": {
+            "wait_for": [
+              12
+            ],
+            "description": "Requires a matching result",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-lifecycle-ana-detail",
+            "expected_assertions_for_screenshot_analysis": [
+              "Job detail is readable to Ana",
+              "Key apply information is visible"
+            ]
+          },
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs/{job_id}"
+        },
+        {
+          "step_index": 14,
+          "persona_id": "persona-ana-seeker",
+          "context_label": "C",
+          "label": "Ana reports the job",
+          "action": "submit_form",
+          "target": "button:has-text('Report job') + textarea",
+          "input_value": {
+            "reason": "spam",
+            "details": "Testing moderation path for suspicious wording."
+          },
+          "expected_result": "A pending report is created against Carlos's job.",
+          "assertions": [
+            "Report request succeeds",
+            "UI thanks Ana for the report"
+          ],
+          "synchronization": {
+            "wait_for": [
+              13
+            ],
+            "description": "Report can only be filed from the job detail",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-lifecycle-ana-report",
+            "expected_assertions_for_screenshot_analysis": [
+              "Report confirmation is visible",
+              "No duplicate dialog remains"
+            ]
+          },
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /reports"
+        },
+        {
+          "step_index": 15,
+          "persona_id": "persona-marta-admin",
+          "context_label": "B",
+          "label": "Marta sees the new report",
+          "action": "refresh_page",
+          "target": "/admin/jobs",
+          "input_value": null,
+          "expected_result": "Reports queue now contains Ana's report for Carlos's job.",
+          "assertions": [
+            "Report card references the same job id/title",
+            "Resolution is pending"
+          ],
+          "synchronization": {
+            "wait_for": [
+              14
+            ],
+            "description": "Admin waits for seeker report",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-lifecycle-report-queue",
+            "expected_assertions_for_screenshot_analysis": [
+              "New report card is visible",
+              "Reason and actions are readable"
+            ]
+          },
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /admin/reports"
+        },
+        {
+          "step_index": 16,
+          "persona_id": "persona-marta-admin",
+          "context_label": "B",
+          "label": "Marta resolves the report",
+          "action": "click",
+          "target": "button:has-text('Resolve')",
+          "input_value": null,
+          "expected_result": "The report moves out of the open queue while the approved job stays visible.",
+          "assertions": [
+            "Resolve request succeeds",
+            "Report no longer appears as open",
+            "Carlos's job remains active and public"
+          ],
+          "synchronization": {
+            "wait_for": [
+              15
+            ],
+            "description": "Admin resolves only after seeing the report",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-lifecycle-report-resolved",
+            "expected_assertions_for_screenshot_analysis": [
+              "Resolution outcome is visible",
+              "Queue remains stable after action"
+            ]
+          },
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "PATCH /reports/{report_id}/resolve"
+        }
+      ]
+    },
+    {
+      "id": "journey-multi-concurrent-posting",
+      "title": "Carlos and Diego post simultaneously and Marta bulk-approves both",
+      "participants": [
+        "persona-carlos-employer",
+        "persona-diego-employer",
+        "persona-marta-admin"
+      ],
+      "contexts": {
+        "A": "Carlos employer context",
+        "B": "Diego employer context",
+        "C": "Marta admin context"
+      },
+      "steps": [
+        {
+          "step_index": 1,
+          "persona_id": "persona-carlos-employer",
+          "context_label": "A",
+          "label": "Carlos registers and signs in",
+          "action": "navigate_and_submit",
+          "target": "/sign-up -> /verify-email/{token} -> /sign-in",
+          "input_value": null,
+          "expected_result": "Carlos is ready to post.",
+          "assertions": [
+            "Carlos reaches authenticated state"
+          ],
+          "synchronization": {
+            "wait_for": [],
+            "description": "Carlos lane starts",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "multi-concurrent-carlos-auth",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/register + POST /auth/verify-email/{token} + POST /auth/login"
+        },
+        {
+          "step_index": 2,
+          "persona_id": "persona-diego-employer",
+          "context_label": "B",
+          "label": "Diego registers and signs in",
+          "action": "navigate_and_submit",
+          "target": "/sign-up -> /verify-email/{token} -> /sign-in",
+          "input_value": null,
+          "expected_result": "Diego is ready to post in a separate context.",
+          "assertions": [
+            "Diego reaches authenticated state"
+          ],
+          "synchronization": {
+            "wait_for": [],
+            "description": "Diego lane starts in parallel",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "multi-concurrent-diego-auth",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/register + POST /auth/verify-email/{token} + POST /auth/login"
+        },
+        {
+          "step_index": 3,
+          "persona_id": "persona-carlos-employer",
+          "context_label": "A",
+          "label": "Carlos posts a job",
+          "action": "submit_form",
+          "target": "/jobs/new",
+          "input_value": {
+            "title": "Carlos Concurrent Posting"
+          },
+          "expected_result": "Carlos job enters pending queue.",
+          "assertions": [
+            "Carlos job status is pending"
+          ],
+          "synchronization": {
+            "wait_for": [
+              1
+            ],
+            "description": "Carlos must be authenticated",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-concurrent-carlos-post",
+            "expected_assertions_for_screenshot_analysis": [
+              "Carlos post confirmation is visible"
+            ]
+          },
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /jobs"
+        },
+        {
+          "step_index": 4,
+          "persona_id": "persona-diego-employer",
+          "context_label": "B",
+          "label": "Diego posts a job",
+          "action": "submit_form",
+          "target": "/jobs/new",
+          "input_value": {
+            "title": "Diego Concurrent Posting"
+          },
+          "expected_result": "Diego job also enters pending queue.",
+          "assertions": [
+            "Diego job status is pending"
+          ],
+          "synchronization": {
+            "wait_for": [
+              2
+            ],
+            "description": "Diego must be authenticated",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-concurrent-diego-post",
+            "expected_assertions_for_screenshot_analysis": [
+              "Diego post confirmation is visible"
+            ]
+          },
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /jobs"
+        },
+        {
+          "step_index": 5,
+          "persona_id": "persona-marta-admin",
+          "context_label": "C",
+          "label": "Marta signs in as admin",
+          "action": "navigate_and_submit",
+          "target": "/sign-in",
+          "input_value": null,
+          "expected_result": "Admin context is ready for moderation.",
+          "assertions": [
+            "Marta can access /admin/jobs"
+          ],
+          "synchronization": {
+            "wait_for": [],
+            "description": "Admin lane can start independently",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "multi-concurrent-marta-auth",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/login"
+        },
+        {
+          "step_index": 6,
+          "persona_id": "persona-marta-admin",
+          "context_label": "C",
+          "label": "Marta opens pending queue",
+          "action": "navigate",
+          "target": "/admin/jobs?status=pending",
+          "input_value": null,
+          "expected_result": "Both pending jobs are visible together.",
+          "assertions": [
+            "Carlos Concurrent Posting appears",
+            "Diego Concurrent Posting appears"
+          ],
+          "synchronization": {
+            "wait_for": [
+              3,
+              4,
+              5
+            ],
+            "description": "Admin waits until both jobs exist",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-concurrent-pending-queue",
+            "expected_assertions_for_screenshot_analysis": [
+              "Both pending rows are visible",
+              "Bulk-selection controls are visible"
+            ]
+          },
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /admin/jobs"
+        },
+        {
+          "step_index": 7,
+          "persona_id": "persona-marta-admin",
+          "context_label": "C",
+          "label": "Marta selects both rows",
+          "action": "click",
+          "target": "input[type='checkbox']",
+          "input_value": null,
+          "expected_result": "Bulk action bar shows two selected jobs.",
+          "assertions": [
+            "Selected count equals 2",
+            "Both checkboxes remain checked"
+          ],
+          "synchronization": {
+            "wait_for": [
+              6
+            ],
+            "description": "Rows must be visible before selection",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-concurrent-selected",
+            "expected_assertions_for_screenshot_analysis": [
+              "Bulk selection state is obvious",
+              "Rows remain readable"
+            ]
+          },
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /admin/jobs"
+        },
+        {
+          "step_index": 8,
+          "persona_id": "persona-marta-admin",
+          "context_label": "C",
+          "label": "Marta bulk-approves both",
+          "action": "submit_form",
+          "target": ".bulk-action-bar",
+          "input_value": {
+            "job_ids": [
+              "{carlos_job_id}",
+              "{diego_job_id}"
+            ],
+            "status": "active",
+            "reason": "Bulk-approved after concurrent posting UAT"
+          },
+          "expected_result": "Both jobs move to active in one request.",
+          "assertions": [
+            "Bulk response updated count equals 2",
+            "Pending queue no longer contains those jobs"
+          ],
+          "synchronization": {
+            "wait_for": [
+              7
+            ],
+            "description": "Bulk action depends on selected rows",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-concurrent-bulk-approved",
+            "expected_assertions_for_screenshot_analysis": [
+              "Bulk-approval outcome is clear",
+              "No stale selection remains"
+            ]
+          },
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "PATCH /admin/jobs/bulk-status"
+        },
+        {
+          "step_index": 9,
+          "persona_id": "persona-carlos-employer",
+          "context_label": "A",
+          "label": "Carlos refreshes dashboard",
+          "action": "refresh_page",
+          "target": "/myjobs",
+          "input_value": null,
+          "expected_result": "Carlos sees his job as active.",
+          "assertions": [
+            "Carlos job badge reads active"
+          ],
+          "synchronization": {
+            "wait_for": [
+              8
+            ],
+            "description": "Employer waits for bulk approval",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-concurrent-carlos-active",
+            "expected_assertions_for_screenshot_analysis": [
+              "Carlos sees active status"
+            ]
+          },
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs"
+        },
+        {
+          "step_index": 10,
+          "persona_id": "persona-diego-employer",
+          "context_label": "B",
+          "label": "Diego refreshes dashboard",
+          "action": "refresh_page",
+          "target": "/myjobs",
+          "input_value": null,
+          "expected_result": "Diego also sees an active job.",
+          "assertions": [
+            "Diego job badge reads active"
+          ],
+          "synchronization": {
+            "wait_for": [
+              8
+            ],
+            "description": "Employer waits for bulk approval",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-concurrent-diego-active",
+            "expected_assertions_for_screenshot_analysis": [
+              "Diego sees active status"
+            ]
+          },
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs"
+        },
+        {
+          "step_index": 11,
+          "persona_id": "persona-carlos-employer",
+          "context_label": "A",
+          "label": "Carlos confirms public visibility",
+          "action": "navigate",
+          "target": "/jobs?search=Carlos%20Concurrent%20Posting",
+          "input_value": null,
+          "expected_result": "Carlos's approved job is public.",
+          "assertions": [
+            "Search results contain Carlos's job"
+          ],
+          "synchronization": {
+            "wait_for": [
+              9
+            ],
+            "description": "Status must be active",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "multi-concurrent-carlos-public",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs"
+        },
+        {
+          "step_index": 12,
+          "persona_id": "persona-diego-employer",
+          "context_label": "B",
+          "label": "Diego confirms public visibility",
+          "action": "navigate",
+          "target": "/jobs?search=Diego%20Concurrent%20Posting",
+          "input_value": null,
+          "expected_result": "Diego's approved job is public too.",
+          "assertions": [
+            "Search results contain Diego's job"
+          ],
+          "synchronization": {
+            "wait_for": [
+              10
+            ],
+            "description": "Status must be active",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "multi-concurrent-diego-public",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs"
+        }
+      ]
+    },
+    {
+      "id": "journey-multi-report-escalation",
+      "title": "A reported job is reviewed by admin and then deactivated for the employer",
+      "participants": [
+        "persona-carlos-employer",
+        "persona-marta-admin",
+        "persona-ana-seeker"
+      ],
+      "contexts": {
+        "A": "Carlos employer context",
+        "B": "Marta admin context",
+        "C": "Ana seeker context"
+      },
+      "steps": [
+        {
+          "step_index": 1,
+          "persona_id": "persona-carlos-employer",
+          "context_label": "A",
+          "label": "Carlos signs in and posts a job",
+          "action": "submit_form",
+          "target": "/jobs/new",
+          "input_value": {
+            "title": "Escalation Test Job"
+          },
+          "expected_result": "A new moderation candidate exists.",
+          "assertions": [
+            "Job status is pending"
+          ],
+          "synchronization": {
+            "wait_for": [],
+            "description": "Employer starts escalation scenario",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "multi-escalation-carlos-post",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/login + POST /jobs"
+        },
+        {
+          "step_index": 2,
+          "persona_id": "persona-marta-admin",
+          "context_label": "B",
+          "label": "Marta signs in as admin",
+          "action": "submit_form",
+          "target": "/sign-in",
+          "input_value": null,
+          "expected_result": "Admin context is ready.",
+          "assertions": [
+            "/admin/jobs is reachable"
+          ],
+          "synchronization": {
+            "wait_for": [],
+            "description": "Admin lane starts independently",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "multi-escalation-marta-auth",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/login"
+        },
+        {
+          "step_index": 3,
+          "persona_id": "persona-marta-admin",
+          "context_label": "B",
+          "label": "Marta approves the pending job",
+          "action": "submit_form",
+          "target": "/admin/jobs",
+          "input_value": {
+            "status": "active",
+            "reason": "Approved before report escalation"
+          },
+          "expected_result": "Carlos's job becomes publicly visible.",
+          "assertions": [
+            "Job status changes to active"
+          ],
+          "synchronization": {
+            "wait_for": [
+              1,
+              2
+            ],
+            "description": "Approval requires pending job and admin access",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-escalation-approved",
+            "expected_assertions_for_screenshot_analysis": [
+              "Approved job is visible in admin context"
+            ]
+          },
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "PATCH /admin/jobs/{job_id}/status"
+        },
+        {
+          "step_index": 4,
+          "persona_id": "persona-ana-seeker",
+          "context_label": "C",
+          "label": "Ana signs in",
+          "action": "submit_form",
+          "target": "/sign-in",
+          "input_value": null,
+          "expected_result": "Ana is ready to browse and report.",
+          "assertions": [
+            "Authenticated state appears"
+          ],
+          "synchronization": {
+            "wait_for": [],
+            "description": "Seeker lane starts independently",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "multi-escalation-ana-auth",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/login"
+        },
+        {
+          "step_index": 5,
+          "persona_id": "persona-ana-seeker",
+          "context_label": "C",
+          "label": "Ana finds the approved job",
+          "action": "navigate",
+          "target": "/jobs?search=Escalation%20Test%20Job",
+          "input_value": null,
+          "expected_result": "Approved job is discoverable publicly.",
+          "assertions": [
+            "Search results contain the escalation test job"
+          ],
+          "synchronization": {
+            "wait_for": [
+              3,
+              4
+            ],
+            "description": "Job must be active and Ana logged in",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-escalation-ana-finds",
+            "expected_assertions_for_screenshot_analysis": [
+              "Reported job is visible in the results"
+            ]
+          },
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs"
+        },
+        {
+          "step_index": 6,
+          "persona_id": "persona-ana-seeker",
+          "context_label": "C",
+          "label": "Ana reports the job as fraudulent",
+          "action": "submit_form",
+          "target": "button:has-text('Report job') + textarea",
+          "input_value": {
+            "reason": "scam",
+            "details": "Fraudulent-looking contact and unrealistic compensation."
+          },
+          "expected_result": "A scam report is recorded.",
+          "assertions": [
+            "Report request succeeds",
+            "UI confirms submission"
+          ],
+          "synchronization": {
+            "wait_for": [
+              5
+            ],
+            "description": "Can only report after opening the job",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-escalation-ana-report",
+            "expected_assertions_for_screenshot_analysis": [
+              "Report confirmation is visible"
+            ]
+          },
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /reports"
+        },
+        {
+          "step_index": 7,
+          "persona_id": "persona-marta-admin",
+          "context_label": "B",
+          "label": "Marta opens reports queue",
+          "action": "refresh_page",
+          "target": "/admin/jobs",
+          "input_value": null,
+          "expected_result": "Ana's scam report appears in admin queue.",
+          "assertions": [
+            "Report reason is scam",
+            "Report references Carlos's job"
+          ],
+          "synchronization": {
+            "wait_for": [
+              6
+            ],
+            "description": "Admin waits for the report",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-escalation-report-queue",
+            "expected_assertions_for_screenshot_analysis": [
+              "Fraud/scam report card is visible"
+            ]
+          },
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /admin/reports"
+        },
+        {
+          "step_index": 8,
+          "persona_id": "persona-marta-admin",
+          "context_label": "B",
+          "label": "Marta reviews the report and deactivates the job",
+          "action": "submit_form",
+          "target": "/admin/jobs",
+          "input_value": {
+            "resolution": "job_removed",
+            "status": "inactive",
+            "reason": "Removed after fraud review"
+          },
+          "expected_result": "Report is resolved and job is no longer active.",
+          "assertions": [
+            "Report resolution succeeds",
+            "Job status changes to inactive"
+          ],
+          "synchronization": {
+            "wait_for": [
+              7
+            ],
+            "description": "Admin must see the report before acting",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-escalation-job-removed",
+            "expected_assertions_for_screenshot_analysis": [
+              "Resolved report and removed job state are apparent"
+            ]
+          },
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "PATCH /reports/{report_id}/resolve + PATCH /admin/jobs/{job_id}/status"
+        },
+        {
+          "step_index": 9,
+          "persona_id": "persona-carlos-employer",
+          "context_label": "A",
+          "label": "Carlos refreshes his dashboard",
+          "action": "refresh_page",
+          "target": "/myjobs",
+          "input_value": null,
+          "expected_result": "Employer sees the job has been deactivated.",
+          "assertions": [
+            "Job card still exists",
+            "Status badge reads inactive or filled"
+          ],
+          "synchronization": {
+            "wait_for": [
+              8
+            ],
+            "description": "Employer waits for admin action",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-escalation-carlos-inactive",
+            "expected_assertions_for_screenshot_analysis": [
+              "Employer sees the deactivated status"
+            ]
+          },
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs"
+        },
+        {
+          "step_index": 10,
+          "persona_id": "persona-ana-seeker",
+          "context_label": "C",
+          "label": "Ana rechecks the public listing",
+          "action": "navigate",
+          "target": "/jobs?search=Escalation%20Test%20Job",
+          "input_value": null,
+          "expected_result": "Removed job no longer appears in public search results.",
+          "assertions": [
+            "Search results omit the deactivated job or show an intentional empty state"
+          ],
+          "synchronization": {
+            "wait_for": [
+              8
+            ],
+            "description": "Public removal follows admin deactivation",
+            "timeout_ms": 30000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "multi-escalation-public-removed",
+            "expected_assertions_for_screenshot_analysis": [
+              "Job is absent from public results",
+              "Empty or filtered state is readable"
+            ]
+          },
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs"
+        }
+      ]
+    }
+  ]
+}

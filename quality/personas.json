@@ -1,0 +1,285 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-05-25T14:47:00Z",
+  "personas": [
+    {
+      "id": "persona-ana-seeker",
+      "name": "Ana Mondlane",
+      "role": "job_seeker",
+      "profile_type": "individual",
+      "description": "26-year-old recent graduate in Maputo looking for her first professional job. Fluent in Portuguese, conversational English. Uses Android phone primarily, laptop at internet cafés.",
+      "locale": "pt-MZ",
+      "market": "mz",
+      "motivations": [
+        "Find a professional job matching her business administration degree",
+        "Build an online professional profile",
+        "Get email alerts for new opportunities",
+        "Manage applications across multiple job listings"
+      ],
+      "frustrations": [
+        "Slow mobile data makes heavy pages unusable",
+        "Forgetting passwords on shared computers",
+        "Not knowing if employers actually see her profile",
+        "Spam jobs that waste her time"
+      ],
+      "tech_proficiency": "intermediate",
+      "devices": [
+        {
+          "type": "mobile",
+          "os": "Android 13",
+          "browser": "Chrome Mobile",
+          "viewport": {
+            "width": 375,
+            "height": 667
+          },
+          "connection": "3G"
+        },
+        {
+          "type": "desktop",
+          "os": "Windows 10",
+          "browser": "Chrome",
+          "viewport": {
+            "width": 1366,
+            "height": 768
+          },
+          "connection": "WiFi"
+        }
+      ],
+      "credentials": {
+        "email_template": "ana-{run_id}@test.employed.co.mz",
+        "password": "AnaTest2026!",
+        "display_name": "Ana Mondlane"
+      },
+      "edge_cases": [
+        "Unicode characters in name: Mondlane (accents in profile bio)",
+        "Very long bio text (500+ chars) to test truncation",
+        "Uploading profile photo on slow connection",
+        "Concurrent sessions from phone and desktop",
+        "Password with special characters: @#$%"
+      ],
+      "accessibility": {
+        "needs": [
+          "screen reader compatible navigation",
+          "high contrast for outdoor mobile use"
+        ],
+        "assistive_tech": []
+      },
+      "variants": [
+        {
+          "id": "persona-ana-seeker--mobile",
+          "device_index": 0,
+          "viewport": {
+            "width": 375,
+            "height": 667
+          },
+          "is_mobile": true,
+          "has_touch": true
+        },
+        {
+          "id": "persona-ana-seeker--desktop",
+          "device_index": 1,
+          "viewport": {
+            "width": 1366,
+            "height": 768
+          },
+          "is_mobile": false,
+          "has_touch": false
+        }
+      ]
+    },
+    {
+      "id": "persona-carlos-employer",
+      "name": "Carlos Sitoe",
+      "role": "employer",
+      "profile_type": "company",
+      "description": "42-year-old HR manager at a mid-size construction company in Maputo. Posts 3-5 jobs per month. Needs to track applicant interest and manage job visibility. Uses desktop primarily at office.",
+      "locale": "pt-MZ",
+      "market": "mz",
+      "motivations": [
+        "Post jobs quickly with minimal friction",
+        "Feature important positions for more visibility",
+        "Track which jobs get the most views",
+        "Edit or deactivate filled positions promptly",
+        "Manage multiple active listings simultaneously"
+      ],
+      "frustrations": [
+        "Complex forms that lose data on timeout",
+        "No bulk actions for managing many listings",
+        "Unclear payment flow for featuring jobs",
+        "Not knowing if job was approved or still pending"
+      ],
+      "tech_proficiency": "intermediate",
+      "devices": [
+        {
+          "type": "desktop",
+          "os": "Windows 11",
+          "browser": "Edge",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "connection": "Fiber"
+        }
+      ],
+      "credentials": {
+        "email_template": "carlos-{run_id}@test.employed.co.mz",
+        "password": "CarlosTest2026!",
+        "display_name": "Carlos Sitoe",
+        "company_name": "Construções Maputo Lda"
+      },
+      "edge_cases": [
+        "Job description with HTML/markdown injection attempts",
+        "Salary range with very large numbers (999,999,999 MZN)",
+        "Posting a job with all optional fields empty",
+        "Posting a job with all optional fields filled",
+        "Rapid successive edits to the same job",
+        "Deactivating a featured (paid) job - refund handling?"
+      ],
+      "variants": [
+        {
+          "id": "persona-carlos-employer--desktop",
+          "device_index": 0,
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "is_mobile": false,
+          "has_touch": false
+        }
+      ]
+    },
+    {
+      "id": "persona-marta-admin",
+      "name": "Marta Cossa",
+      "role": "admin",
+      "profile_type": "individual",
+      "description": "35-year-old platform administrator. Reviews all submitted jobs, manages user accounts, handles reported content. Works from the office on a large monitor. Power user who values efficiency and keyboard shortcuts.",
+      "locale": "pt-MZ",
+      "market": "mz",
+      "motivations": [
+        "Moderate content quickly with bulk actions",
+        "Identify and remove spam/fraudulent job posts",
+        "Manage user roles and handle escalations",
+        "Resolve reported content fairly and promptly",
+        "Monitor platform health metrics"
+      ],
+      "frustrations": [
+        "No keyboard shortcuts for common admin actions",
+        "Having to review jobs one-by-one instead of in bulk",
+        "No notification when new reports come in",
+        "Unclear audit trail of who approved/rejected what"
+      ],
+      "tech_proficiency": "advanced",
+      "devices": [
+        {
+          "type": "desktop",
+          "os": "macOS",
+          "browser": "Chrome",
+          "viewport": {
+            "width": 2560,
+            "height": 1440
+          },
+          "connection": "Fiber"
+        }
+      ],
+      "credentials": {
+        "email_template": "marta-{run_id}@test.employed.co.mz",
+        "password": "MartaAdmin2026!",
+        "display_name": "Marta Cossa"
+      },
+      "requires_role": "admin",
+      "edge_cases": [
+        "Bulk-approving 50+ jobs at once",
+        "Revoking admin role from self (should be prevented)",
+        "Resolving a report for a job that was already deleted",
+        "Viewing a user who requested account deletion"
+      ],
+      "variants": [
+        {
+          "id": "persona-marta-admin--desktop",
+          "device_index": 0,
+          "viewport": {
+            "width": 2560,
+            "height": 1440
+          },
+          "is_mobile": false,
+          "has_touch": false
+        }
+      ]
+    },
+    {
+      "id": "persona-visitor-anon",
+      "name": "Anonymous Visitor",
+      "role": "visitor",
+      "profile_type": null,
+      "description": "Unauthenticated user arriving from a search engine or shared link. May be a potential job seeker or employer evaluating the platform. Could be from Mozambique or Mexico.",
+      "locale": "pt-MZ",
+      "market": "mz",
+      "motivations": [
+        "Quickly assess if the platform has relevant jobs",
+        "Browse without creating an account",
+        "Understand what the platform offers before signing up",
+        "Access job details from shared links"
+      ],
+      "frustrations": [
+        "Aggressive sign-up prompts blocking content",
+        "Slow page loads on first visit",
+        "Unclear calls-to-action",
+        "Missing legal/privacy information"
+      ],
+      "tech_proficiency": "basic",
+      "devices": [
+        {
+          "type": "mobile",
+          "os": "Android 12",
+          "browser": "Chrome Mobile",
+          "viewport": {
+            "width": 360,
+            "height": 640
+          },
+          "connection": "4G"
+        },
+        {
+          "type": "desktop",
+          "os": "Windows 10",
+          "browser": "Firefox",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "connection": "WiFi"
+        }
+      ],
+      "credentials": null,
+      "edge_cases": [
+        "Deep-linking to a job that doesn't exist (404 handling)",
+        "Deep-linking to a deactivated job",
+        "Accessing admin routes without auth",
+        "Using the public API programmatically",
+        "Navigating with JavaScript disabled"
+      ],
+      "variants": [
+        {
+          "id": "persona-visitor-anon--mobile",
+          "device_index": 0,
+          "viewport": {
+            "width": 360,
+            "height": 640
+          },
+          "is_mobile": true,
+          "has_touch": true
+        },
+        {
+          "id": "persona-visitor-anon--desktop",
+          "device_index": 1,
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "is_mobile": false,
+          "has_touch": false
+        }
+      ]
+    }
+  ]
+}

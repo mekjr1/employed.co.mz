@@ -1,0 +1,4520 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-05-25T14:47:00Z",
+  "journeys": [
+    {
+      "id": "journey-visitor-browse",
+      "persona_id": "persona-visitor-anon",
+      "title": "Anonymous visitor browses public content, hits auth guards, and inspects public APIs",
+      "host": "https://mz.lvh.me:3000",
+      "routes_covered": [
+        "/",
+        "/jobs",
+        "/jobs/[id]",
+        "/sign-in",
+        "/terms",
+        "/privacy",
+        "/myjobs",
+        "/admin/jobs",
+        "/jobs/nonexistent-id"
+      ],
+      "api_coverage": [
+        "GET /jobs",
+        "GET /jobs/featured",
+        "GET /jobs/count",
+        "GET /jobs/{job_id}",
+        "GET /auth/oauth/{provider}",
+        "GET /auth/oauth/{provider}/callback",
+        "GET /api/jobs",
+        "GET /api/featuredJobs"
+      ],
+      "steps": [
+        {
+          "step_index": 1,
+          "label": "Open the home page",
+          "action": "navigate",
+          "target": "/",
+          "input_value": null,
+          "expected_result": "The home page should resolve the mz host to Mozambique and show featured content.",
+          "assertions": [
+            "URL pathname is /",
+            "Hero contains Browse jobs CTA",
+            "Featured jobs strip or featured cards render",
+            "Market label resolves to Employed MZ or Mozambique copy"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "visitor-home",
+            "expected_assertions_for_screenshot_analysis": [
+              "Hero headline is visible above the fold",
+              "Primary browse CTA is prominent",
+              "Featured jobs cards are present or empty state is visually intentional",
+              "Header remains legible with market and locale selectors"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs/featured"
+        },
+        {
+          "step_index": 2,
+          "label": "Open the public jobs index",
+          "action": "click",
+          "target": "a[href='/jobs']",
+          "input_value": null,
+          "expected_result": "The visitor lands on the browse page with filters and a public results grid.",
+          "assertions": [
+            "URL pathname is /jobs",
+            "Search roles input is visible",
+            "Job type select is visible",
+            "Job results summary shows total jobs found"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "visitor-browse-jobs",
+            "expected_assertions_for_screenshot_analysis": [
+              "Search/filter bar is visible",
+              "Results count is readable",
+              "Featured strip is separated from results grid",
+              "Cards fit without clipping"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs"
+        },
+        {
+          "step_index": 3,
+          "label": "Inspect featured jobs API directly",
+          "action": "api_request",
+          "target": "/jobs/featured",
+          "input_value": null,
+          "expected_result": "Featured jobs API returns an array of featured active listings scoped to the current market.",
+          "assertions": [
+            "HTTP status is 200",
+            "Response body is a JSON array",
+            "Each item has id, title, and featured window metadata when present"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "visitor-featured-api",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs/featured"
+        },
+        {
+          "step_index": 4,
+          "label": "Filter by category/job type",
+          "action": "choose_option",
+          "target": "select[name='job_type']",
+          "input_value": "Full Time",
+          "expected_result": "The jobs list narrows to the selected employment type.",
+          "assertions": [
+            "Selected option equals Full Time",
+            "URL contains job_type=Full+Time",
+            "Results remain public and paginated"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "visitor-jobtype-filter",
+            "expected_assertions_for_screenshot_analysis": [
+              "Selected filter chip or select state is visible",
+              "Results changed after filtering",
+              "No overflow or broken layout in filter bar"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs"
+        },
+        {
+          "step_index": 5,
+          "label": "Filter by location using the shared search box",
+          "action": "type",
+          "target": "input[name='search']",
+          "input_value": "Maputo",
+          "expected_result": "Search should match location text and return relevant Mozambique jobs.",
+          "assertions": [
+            "Search input contains Maputo",
+            "URL contains search=Maputo after submit",
+            "Rendered cards contain Maputo or show a meaningful empty state"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "visitor-location-filter",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs"
+        },
+        {
+          "step_index": 6,
+          "label": "Request filtered count",
+          "action": "api_request",
+          "target": "/jobs/count?query=Maputo&jobtype=Full%20Time",
+          "input_value": null,
+          "expected_result": "Count endpoint returns the same filtered total the UI summary is based on.",
+          "assertions": [
+            "HTTP status is 200",
+            "Response body contains numeric total",
+            "Total is consistent with visible result count or pagination summary"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "visitor-count-api",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs/count"
+        },
+        {
+          "step_index": 7,
+          "label": "Search by keyword",
+          "action": "click",
+          "target": "button:has-text('Search')",
+          "input_value": null,
+          "expected_result": "The page refreshes with the current keyword and filter state applied.",
+          "assertions": [
+            "URL retains /jobs with search params",
+            "Keyword search results are shown or a no-results state explains the filter outcome",
+            "Reset button remains available"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "visitor-keyword-search",
+            "expected_assertions_for_screenshot_analysis": [
+              "Applied filters are clear to the user",
+              "Results state is obvious",
+              "Search and reset buttons remain accessible"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs"
+        },
+        {
+          "step_index": 8,
+          "label": "Open a job detail page",
+          "action": "click",
+          "target": ".card-surface a[href^='/jobs/'], .job-card a[href^='/jobs/']",
+          "input_value": null,
+          "expected_result": "The visitor can review the job detail page without authentication.",
+          "assertions": [
+            "URL matches /jobs/{job_id}",
+            "Job title heading is visible",
+            "Apply panel is visible",
+            "Listing details panel is visible"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "visitor-job-detail",
+            "expected_assertions_for_screenshot_analysis": [
+              "Job title and company are readable",
+              "Apply card is visible in sidebar or stacked layout",
+              "Description content is readable and not clipped",
+              "Badges such as Remote or Featured are visually consistent"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs/{job_id}"
+        },
+        {
+          "step_index": 9,
+          "label": "Attempt a gated apply flow",
+          "action": "click",
+          "target": "[data-testid='job-apply-button'], .apply-guard-trigger, aside a[href^='/sign-in?redirect=']",
+          "input_value": null,
+          "expected_result": "If the product gates applying, the user is redirected to sign-in while preserving the return URL.",
+          "assertions": [
+            "Either a redirect to /sign-in occurs or an auth-required modal appears",
+            "Redirect query preserves the originating job URL or apply anchor",
+            "No authenticated-only action is performed without a session"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "visitor-apply-guard",
+            "expected_assertions_for_screenshot_analysis": [
+              "Auth guard messaging is clear",
+              "Redirect destination preserves context",
+              "No broken overlay or clipped modal is present"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs/{job_id}"
+        },
+        {
+          "step_index": 10,
+          "label": "Inspect OAuth entry from the sign-in screen",
+          "action": "click",
+          "target": "button:has-text('Continue with Google')",
+          "input_value": null,
+          "expected_result": "Clicking an OAuth button should initiate a provider redirect request.",
+          "assertions": [
+            "The Google OAuth button is visible",
+            "The request targets /auth/oauth/google",
+            "Backend responds with a redirect or a configuration error that is understandable in test environments"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "visitor-oauth-entry",
+            "expected_assertions_for_screenshot_analysis": [
+              "OAuth buttons are visible and clearly labeled",
+              "The sign-in surface remains readable on desktop",
+              "Third-party auth options are visually distinct"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "GET /auth/oauth/{provider}"
+        },
+        {
+          "step_index": 11,
+          "label": "Exercise the OAuth callback route with a mocked provider response",
+          "action": "api_request",
+          "target": "/auth/oauth/google/callback?code={mock_code}&state={mock_state}",
+          "input_value": null,
+          "expected_result": "The callback route should be reachable by automation with a mocked code/state pair or fail with a deterministic validation error.",
+          "assertions": [
+            "Route exists and responds",
+            "Error handling is deterministic when state or provider config is invalid",
+            "Successful mocked callbacks produce a token payload when stubs are enabled"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "visitor-oauth-callback",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "GET /auth/oauth/{provider}/callback"
+        },
+        {
+          "step_index": 12,
+          "label": "Return to jobs list",
+          "action": "navigate",
+          "target": "/jobs",
+          "input_value": null,
+          "expected_result": "The visitor can continue browsing after auth exploration.",
+          "assertions": [
+            "URL pathname is /jobs",
+            "Filter bar is still usable",
+            "Public browsing does not require a session"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "visitor-back-to-jobs",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs"
+        },
+        {
+          "step_index": 13,
+          "label": "Review the terms page",
+          "action": "navigate",
+          "target": "/terms",
+          "input_value": null,
+          "expected_result": "Legal terms content is accessible without authentication.",
+          "assertions": [
+            "URL pathname is /terms",
+            "Page contains Terms heading or legal copy",
+            "Links and text are readable"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "visitor-terms",
+            "expected_assertions_for_screenshot_analysis": [
+              "Legal text is readable",
+              "Primary heading is visible",
+              "Page spacing remains comfortable for long-form content"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "NONE"
+        },
+        {
+          "step_index": 14,
+          "label": "Review the privacy page",
+          "action": "navigate",
+          "target": "/privacy",
+          "input_value": null,
+          "expected_result": "Privacy information is accessible without authentication.",
+          "assertions": [
+            "URL pathname is /privacy",
+            "Privacy heading or data handling copy is present",
+            "Footer/header navigation remains consistent"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "visitor-privacy",
+            "expected_assertions_for_screenshot_analysis": [
+              "Privacy heading is visible",
+              "Content is readable without overlapping sections",
+              "Navigation remains available"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "NONE"
+        },
+        {
+          "step_index": 15,
+          "label": "Try the protected my jobs route",
+          "action": "navigate",
+          "target": "/myjobs",
+          "input_value": null,
+          "expected_result": "Anonymous access should redirect to sign-in with a redirect parameter.",
+          "assertions": [
+            "Final URL starts with /sign-in",
+            "redirect query contains /myjobs",
+            "The sign-in form is visible"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "visitor-myjobs-redirect",
+            "expected_assertions_for_screenshot_analysis": [
+              "Redirected sign-in view is obvious",
+              "Context-preserving redirect parameter is present or surfaced",
+              "No blank screen or flash of protected content occurs"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "NONE"
+        },
+        {
+          "step_index": 16,
+          "label": "Try the protected admin route",
+          "action": "navigate",
+          "target": "/admin/jobs",
+          "input_value": null,
+          "expected_result": "Anonymous access should redirect away from admin moderation.",
+          "assertions": [
+            "Visitor is redirected to /sign-in or /",
+            "No admin job table renders for anonymous traffic",
+            "Protected route does not leak moderation data"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "visitor-admin-redirect",
+            "expected_assertions_for_screenshot_analysis": [
+              "Protected route does not expose admin content",
+              "Redirect destination is clearly rendered",
+              "Navigation remains intact"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "NONE"
+        },
+        {
+          "step_index": 17,
+          "label": "Call the public jobs API",
+          "action": "api_request",
+          "target": "/api/jobs?page=1&page_size=10",
+          "input_value": null,
+          "expected_result": "Public API returns market-scoped paginated jobs without contact details.",
+          "assertions": [
+            "HTTP status is 200",
+            "Response contains items, total, page, and page_size",
+            "Contact fields are omitted or null in public API responses"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "visitor-public-api-jobs",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /api/jobs"
+        },
+        {
+          "step_index": 18,
+          "label": "Call the public featured jobs API",
+          "action": "api_request",
+          "target": "/api/featuredJobs",
+          "input_value": null,
+          "expected_result": "Public featured endpoint returns a lightweight array for unauthenticated consumers.",
+          "assertions": [
+            "HTTP status is 200",
+            "Response is a JSON array",
+            "Returned items represent active featured jobs only"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "visitor-public-api-featured",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /api/featuredJobs"
+        },
+        {
+          "step_index": 19,
+          "label": "Open a nonexistent job URL",
+          "action": "navigate",
+          "target": "/jobs/nonexistent-id",
+          "input_value": null,
+          "expected_result": "The application should show a 404 experience instead of an unhandled error.",
+          "assertions": [
+            "404 page title or 'We couldn’t find that page.' message is visible",
+            "Recovery actions back home and browse jobs are present",
+            "The page uses the market-specific shell"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "visitor-404",
+            "expected_assertions_for_screenshot_analysis": [
+              "404 heading is visible",
+              "Recovery CTAs are obvious",
+              "The error page looks intentional rather than broken"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs/{job_id}"
+        }
+      ]
+    },
+    {
+      "id": "journey-seeker-onboarding",
+      "persona_id": "persona-ana-seeker",
+      "variant_id": "persona-ana-seeker--desktop",
+      "title": "Ana registers, verifies her email, creates a profile, and browses jobs",
+      "host": "https://mz.lvh.me:3000",
+      "routes_covered": [
+        "/sign-up",
+        "/verify-email/[token]",
+        "/sign-in",
+        "/",
+        "/account",
+        "/jobs",
+        "/jobs/[id]",
+        "/myjobs"
+      ],
+      "api_coverage": [
+        "POST /auth/register",
+        "POST /auth/verify-email/{token}",
+        "POST /auth/login",
+        "POST /auth/refresh",
+        "GET /users/me",
+        "POST /profiles",
+        "GET /profiles/{user_id}",
+        "GET /jobs",
+        "GET /jobs/{job_id}"
+      ],
+      "steps": [
+        {
+          "step_index": 1,
+          "label": "Open sign-up page",
+          "action": "navigate",
+          "target": "/sign-up",
+          "input_value": null,
+          "expected_result": "Registration form loads with local and OAuth options.",
+          "assertions": [
+            "URL pathname is /sign-up",
+            "#register-name, #register-email, #register-password, and #register-confirm-password are visible",
+            "Create account button is visible"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "seeker-signup-start",
+            "expected_assertions_for_screenshot_analysis": [
+              "Registration form is centered and readable",
+              "Primary CTA is visible",
+              "OAuth alternatives are visible beneath the form"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "NONE"
+        },
+        {
+          "step_index": 2,
+          "label": "Enter an invalid email first",
+          "action": "type",
+          "target": "#register-email",
+          "input_value": "ana-at-test.employed.co.mz",
+          "expected_result": "Browser or client validation prevents submission until the email is corrected.",
+          "assertions": [
+            "Email input contains invalid value before correction",
+            "Submit remains blocked or email field shows validation message"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "seeker-invalid-email",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": {
+            "wrong_input": "ana-at-test.employed.co.mz",
+            "correction_input": "ana-{run_id}@test.employed.co.mz",
+            "expected_error": "Email format is invalid or form cannot submit",
+            "expected_after_correction": "Valid email is accepted and the form becomes submittable"
+          },
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "POST /auth/register"
+        },
+        {
+          "step_index": 3,
+          "label": "Enter a too-short password first",
+          "action": "type",
+          "target": "#register-password",
+          "input_value": "Ana1!",
+          "expected_result": "Password strength stays weak and submit remains unavailable.",
+          "assertions": [
+            "Password strength indicator shows weak or disabled submit state",
+            "Create account button remains disabled until requirements are met"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "seeker-short-password",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": {
+            "wrong_input": "Ana1!",
+            "correction_input": "AnaTest2026!",
+            "expected_error": "Password is too short or submit remains disabled",
+            "expected_after_correction": "Password strength improves and submit becomes available"
+          },
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "POST /auth/register"
+        },
+        {
+          "step_index": 4,
+          "label": "Complete the registration form with valid values",
+          "action": "type",
+          "target": "#register-name, #register-email, #register-password, #register-confirm-password",
+          "input_value": {
+            "name": "Ana Mondlane",
+            "email": "ana-{run_id}@test.employed.co.mz",
+            "password": "AnaTest2026!",
+            "confirm_password": "AnaTest2026!"
+          },
+          "expected_result": "The form is ready for submission.",
+          "assertions": [
+            "All required fields contain valid values",
+            "Create account button is enabled",
+            "Password mismatch warning is absent"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "seeker-signup-filled",
+            "expected_assertions_for_screenshot_analysis": [
+              "All required inputs are filled",
+              "Submit CTA looks enabled",
+              "No validation errors are visible"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "POST /auth/register"
+        },
+        {
+          "step_index": 5,
+          "label": "Submit registration",
+          "action": "submit_form",
+          "target": "form",
+          "input_value": null,
+          "expected_result": "The backend creates the account and the UI instructs Ana to verify her email.",
+          "assertions": [
+            "Success state contains 'Check your email'",
+            "No access token is assumed yet",
+            "New user is unverified until token confirmation"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "seeker-signup-submitted",
+            "expected_assertions_for_screenshot_analysis": [
+              "Post-submit confirmation is readable",
+              "User understands email verification is required",
+              "No raw error is exposed"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/register"
+        },
+        {
+          "step_index": 6,
+          "label": "Check MailHog for the verification email",
+          "action": "api_request",
+          "target": "http://localhost:3310/api/v2/search?kind=to&query=ana-{run_id}@test.employed.co.mz",
+          "input_value": null,
+          "expected_result": "MailHog returns the verification email sent by the register endpoint.",
+          "assertions": [
+            "HTTP status is 200 in the test environment",
+            "At least one message to Ana's email is returned",
+            "Message subject indicates email verification"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "seeker-mailhog-verify",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "TEST-ONLY: MailHog search"
+        },
+        {
+          "step_index": 7,
+          "label": "Extract the verification token and visit the verification route",
+          "action": "navigate",
+          "target": "/verify-email/{token}",
+          "input_value": null,
+          "expected_result": "Frontend verify page posts the token to the backend and confirms success.",
+          "assertions": [
+            "Verification page shows 'Verify email' heading",
+            "Success message confirms the email is verified",
+            "CTA to sign in becomes available"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "seeker-verify-email",
+            "expected_assertions_for_screenshot_analysis": [
+              "Verification success messaging is visible",
+              "Primary sign-in CTA is available",
+              "The screen does not expose raw token data"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/verify-email/{token}"
+        },
+        {
+          "step_index": 8,
+          "label": "Continue to sign in",
+          "action": "click",
+          "target": "a[href='/sign-in']",
+          "input_value": null,
+          "expected_result": "Ana is routed to the sign-in page after verification.",
+          "assertions": [
+            "URL pathname is /sign-in",
+            "Email and password inputs are visible"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "seeker-to-signin",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "NONE"
+        },
+        {
+          "step_index": 9,
+          "label": "Sign in with the verified account",
+          "action": "submit_form",
+          "target": "form",
+          "input_value": {
+            "email": "ana-{run_id}@test.employed.co.mz",
+            "password": "AnaTest2026!"
+          },
+          "expected_result": "Ana receives a token pair and becomes authenticated in the browser.",
+          "assertions": [
+            "Sign out button or authenticated header state appears",
+            "Protected routes become accessible",
+            "No invalid-login message is shown"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "seeker-login-success",
+            "expected_assertions_for_screenshot_analysis": [
+              "Authenticated header state is visible",
+              "User is not left on an error state",
+              "Page shell remains stable after login"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/login"
+        },
+        {
+          "step_index": 10,
+          "label": "Refresh the session token",
+          "action": "api_request",
+          "target": "/auth/refresh",
+          "input_value": {
+            "refresh_token": "{session.refresh_token}"
+          },
+          "expected_result": "Backend exchanges the refresh token for a fresh bearer token pair.",
+          "assertions": [
+            "HTTP status is 200",
+            "Response contains access_token and refresh_token",
+            "Returned user payload matches Ana's account"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "seeker-refresh-token",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/refresh"
+        },
+        {
+          "step_index": 11,
+          "label": "Fetch the authenticated user snapshot",
+          "action": "api_request",
+          "target": "/users/me",
+          "input_value": null,
+          "expected_result": "The API returns Ana's identity and verification state.",
+          "assertions": [
+            "HTTP status is 200",
+            "Response email matches Ana's template",
+            "roles is an array and email_verified is true"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "seeker-users-me",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /users/me"
+        },
+        {
+          "step_index": 12,
+          "label": "Open account settings",
+          "action": "navigate",
+          "target": "/account",
+          "input_value": null,
+          "expected_result": "Protected account route loads for the authenticated seeker.",
+          "assertions": [
+            "URL pathname is /account",
+            "Account settings heading is visible",
+            "Export and deletion actions are visible"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "seeker-account",
+            "expected_assertions_for_screenshot_analysis": [
+              "Account heading is visible",
+              "Verification status is readable",
+              "Primary account actions are above the fold"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "NONE"
+        },
+        {
+          "step_index": 13,
+          "label": "Create the individual profile",
+          "action": "api_request",
+          "target": "/profiles",
+          "input_value": {
+            "name": "Ana Mondlane",
+            "type": "individual",
+            "title": "Business Administration Graduate",
+            "location": "Maputo",
+            "description": "Recent graduate seeking entry-level administration and operations roles.",
+            "available_for_hire": true,
+            "interested_in": [
+              "operations",
+              "customer success"
+            ],
+            "contact": "ana-{run_id}@test.employed.co.mz"
+          },
+          "expected_result": "Ana's seeker profile is created or upserted successfully.",
+          "assertions": [
+            "HTTP status is 201 or 200",
+            "Response type equals individual",
+            "Description is sanitized and persisted"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "seeker-profile-created",
+            "expected_assertions_for_screenshot_analysis": [
+              "Account/profile area communicates success",
+              "Profile type and role summary are readable",
+              "No duplicate form or error overlay is visible"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /profiles"
+        },
+        {
+          "step_index": 14,
+          "label": "Fetch the public profile by user id",
+          "action": "api_request",
+          "target": "/profiles/{user_id}",
+          "input_value": null,
+          "expected_result": "Once activated in fixtures, the public profile endpoint returns Ana's profile card data.",
+          "assertions": [
+            "Route exists",
+            "If the profile is active, returned user_id matches Ana",
+            "If not active yet, the API returns a controlled 404"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "seeker-profile-get",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /profiles/{user_id}"
+        },
+        {
+          "step_index": 15,
+          "label": "Browse and search jobs",
+          "action": "navigate",
+          "target": "/jobs?search=administração",
+          "input_value": null,
+          "expected_result": "Ana can browse jobs and use the shared search box to narrow listings.",
+          "assertions": [
+            "URL pathname is /jobs",
+            "Search roles input contains the keyword",
+            "Results list or empty-state text is visible"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "seeker-browse-search",
+            "expected_assertions_for_screenshot_analysis": [
+              "Filter bar and job cards fit comfortably on desktop",
+              "The result state is obvious",
+              "Search keyword is visible in the filter input"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs"
+        },
+        {
+          "step_index": 16,
+          "label": "View a job detail page",
+          "action": "click",
+          "target": ".card-surface a[href^='/jobs/'], .job-card a[href^='/jobs/']",
+          "input_value": null,
+          "expected_result": "Ana can inspect an individual job before deciding whether to apply.",
+          "assertions": [
+            "Job heading renders",
+            "Apply card is visible",
+            "Listing details panel is visible"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "seeker-job-detail",
+            "expected_assertions_for_screenshot_analysis": [
+              "Job content is readable",
+              "Apply panel is visible",
+              "Typography and spacing remain consistent"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs/{job_id}"
+        },
+        {
+          "step_index": 17,
+          "label": "Visit my jobs and confirm the empty employer state",
+          "action": "navigate",
+          "target": "/myjobs",
+          "input_value": null,
+          "expected_result": "Because Ana is a seeker rather than an employer, the page should show no posted jobs.",
+          "assertions": [
+            "URL pathname is /myjobs",
+            "Empty state says no jobs have been posted yet or equivalent",
+            "No employer cards are displayed"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "seeker-myjobs-empty",
+            "expected_assertions_for_screenshot_analysis": [
+              "Empty state text is readable",
+              "The page does not look broken despite zero jobs",
+              "Primary navigation remains accessible"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "NONE"
+        },
+        {
+          "step_index": 18,
+          "label": "Sign out",
+          "action": "click",
+          "target": "button:has-text('Sign out')",
+          "input_value": null,
+          "expected_result": "Authenticated state is cleared and public navigation is restored.",
+          "assertions": [
+            "Sign in link becomes visible again",
+            "Protected cookies/local storage token is cleared by the test harness",
+            "Visitor can navigate as anonymous again"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "seeker-signout",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "NONE"
+        }
+      ]
+    },
+    {
+      "id": "journey-seeker-password-recovery",
+      "persona_id": "persona-ana-seeker",
+      "variant_id": "persona-ana-seeker--desktop",
+      "title": "Ana recovers access through the forgot-password flow",
+      "host": "https://mz.lvh.me:3000",
+      "routes_covered": [
+        "/forgot-password",
+        "/reset-password/[token]",
+        "/sign-in"
+      ],
+      "api_coverage": [
+        "POST /auth/forgot-password",
+        "POST /auth/reset-password/{token}",
+        "POST /auth/login"
+      ],
+      "steps": [
+        {
+          "step_index": 1,
+          "label": "Open forgot-password page",
+          "action": "navigate",
+          "target": "/forgot-password",
+          "input_value": null,
+          "expected_result": "Reset request form loads with a single email field.",
+          "assertions": [
+            "URL pathname is /forgot-password",
+            "#forgot-password-email is visible",
+            "Send reset link button is visible"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "recovery-forgot-start",
+            "expected_assertions_for_screenshot_analysis": [
+              "Forgot password form is visible",
+              "Primary reset CTA is present",
+              "Layout remains uncluttered"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "NONE"
+        },
+        {
+          "step_index": 2,
+          "label": "Enter Ana's email and submit",
+          "action": "submit_form",
+          "target": "form",
+          "input_value": {
+            "email": "ana-{run_id}@test.employed.co.mz"
+          },
+          "expected_result": "The UI shows a generic success confirmation regardless of account existence.",
+          "assertions": [
+            "Confirmation text contains 'If an account exists'",
+            "No sensitive account existence leak is shown",
+            "Button returns to idle state"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "recovery-requested",
+            "expected_assertions_for_screenshot_analysis": [
+              "Success flash is readable",
+              "No raw server error is visible",
+              "Email field remains available for retry"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/forgot-password"
+        },
+        {
+          "step_index": 3,
+          "label": "Search MailHog for the reset email",
+          "action": "api_request",
+          "target": "http://localhost:3310/api/v2/search?kind=to&query=ana-{run_id}@test.employed.co.mz",
+          "input_value": null,
+          "expected_result": "The password reset email is discoverable in the test mailbox.",
+          "assertions": [
+            "HTTP status is 200 in test environment",
+            "Message subject mentions password reset",
+            "Email body contains a reset link"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "recovery-mailhog",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "TEST-ONLY: MailHog search"
+        },
+        {
+          "step_index": 4,
+          "label": "Extract reset token",
+          "action": "parse_text",
+          "target": "mailhog-message-body",
+          "input_value": null,
+          "expected_result": "Automation extracts the opaque reset token from the email body.",
+          "assertions": [
+            "Token string is non-empty",
+            "Token can be substituted into the reset route",
+            "No credentials are stored in plain text artifacts"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "recovery-token",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "POST /auth/reset-password/{token}"
+        },
+        {
+          "step_index": 5,
+          "label": "Open reset-password route",
+          "action": "navigate",
+          "target": "/reset-password/{token}",
+          "input_value": null,
+          "expected_result": "Reset form loads for a valid token or shows a controlled invalid-link state.",
+          "assertions": [
+            "URL pathname matches /reset-password/{token}",
+            "Either new password form or invalid-link message is visible",
+            "No unhandled error is shown"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "recovery-reset-screen",
+            "expected_assertions_for_screenshot_analysis": [
+              "Reset password screen is readable",
+              "Primary action is visible",
+              "Any error state looks intentional"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "POST /auth/reset-password/{token}"
+        },
+        {
+          "step_index": 6,
+          "label": "Enter mismatched passwords first",
+          "action": "type",
+          "target": "#reset-password, #reset-password-confirm",
+          "input_value": {
+            "password": "AnaNew2026!",
+            "confirm_password": "AnaNew2026?"
+          },
+          "expected_result": "Mismatch feedback prevents submission until both values match.",
+          "assertions": [
+            "Inline text 'Passwords do not match.' is visible",
+            "Submit button remains disabled or submit is blocked"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "recovery-mismatch",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": {
+            "wrong_input": {
+              "password": "AnaNew2026!",
+              "confirm_password": "AnaNew2026?"
+            },
+            "correction_input": {
+              "password": "AnaNew2026!",
+              "confirm_password": "AnaNew2026!"
+            },
+            "expected_error": "Mismatch error is shown",
+            "expected_after_correction": "Form accepts the corrected matching passwords"
+          },
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "POST /auth/reset-password/{token}"
+        },
+        {
+          "step_index": 7,
+          "label": "Correct the passwords",
+          "action": "type",
+          "target": "#reset-password, #reset-password-confirm",
+          "input_value": {
+            "password": "AnaNew2026!",
+            "confirm_password": "AnaNew2026!"
+          },
+          "expected_result": "Form becomes valid and ready to submit.",
+          "assertions": [
+            "Mismatch warning disappears",
+            "Update password button becomes enabled"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "recovery-corrected-passwords",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "POST /auth/reset-password/{token}"
+        },
+        {
+          "step_index": 8,
+          "label": "Submit the new password",
+          "action": "submit_form",
+          "target": "form",
+          "input_value": null,
+          "expected_result": "Backend stores the new password and frontend routes Ana back to sign in.",
+          "assertions": [
+            "Password update request succeeds",
+            "Browser is redirected to /sign-in?reset=success",
+            "No stale validation error remains"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "recovery-password-updated",
+            "expected_assertions_for_screenshot_analysis": [
+              "Redirect or confirmation message is visible",
+              "The user understands the reset succeeded",
+              "No raw token data is exposed"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/reset-password/{token}"
+        },
+        {
+          "step_index": 9,
+          "label": "Confirm the success hint on sign-in",
+          "action": "assert",
+          "target": "/sign-in?reset=success",
+          "input_value": null,
+          "expected_result": "The sign-in screen acknowledges that the password was changed.",
+          "assertions": [
+            "URL contains reset=success",
+            "Sign-in form is visible and ready for new credentials"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "recovery-signin-success-hint",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "NONE"
+        },
+        {
+          "step_index": 10,
+          "label": "Sign in with the new password",
+          "action": "submit_form",
+          "target": "form",
+          "input_value": {
+            "email": "ana-{run_id}@test.employed.co.mz",
+            "password": "AnaNew2026!"
+          },
+          "expected_result": "Ana regains access using the updated password.",
+          "assertions": [
+            "Authenticated header state appears",
+            "No invalid-login error is displayed",
+            "Session tokens are refreshed for the new password timestamp"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "recovery-login-new-password",
+            "expected_assertions_for_screenshot_analysis": [
+              "Authenticated state is visible",
+              "No lingering error banner remains",
+              "Layout remains stable after login"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/login"
+        },
+        {
+          "step_index": 11,
+          "label": "Open account to prove recovery worked",
+          "action": "navigate",
+          "target": "/account",
+          "input_value": null,
+          "expected_result": "Protected routes are accessible after the reset.",
+          "assertions": [
+            "Account settings heading is visible",
+            "Protected route no longer redirects to sign-in"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "recovery-account-access",
+            "expected_assertions_for_screenshot_analysis": [
+              "Account content is visible",
+              "No auth guard redirect is shown",
+              "Key actions remain visible"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /users/me"
+        },
+        {
+          "step_index": 12,
+          "label": "Sign out after recovery",
+          "action": "click",
+          "target": "button:has-text('Sign out')",
+          "input_value": null,
+          "expected_result": "Ana leaves the session cleanly after confirming recovery success.",
+          "assertions": [
+            "Sign in link becomes visible again",
+            "Protected session state is cleared"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "recovery-signout",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "NONE"
+        }
+      ]
+    },
+    {
+      "id": "journey-seeker-account-management",
+      "persona_id": "persona-ana-seeker",
+      "variant_id": "persona-ana-seeker--desktop",
+      "title": "Ana exercises export, deletion scheduling, cancellation, resend verification, and token refresh",
+      "host": "https://mz.lvh.me:3000",
+      "routes_covered": [
+        "/sign-in",
+        "/account"
+      ],
+      "api_coverage": [
+        "POST /auth/login",
+        "GET /users/me",
+        "GET /users/me/export",
+        "POST /users/me/request-deletion",
+        "POST /users/me/cancel-deletion",
+        "POST /users/me/resend-verification",
+        "POST /auth/refresh"
+      ],
+      "steps": [
+        {
+          "step_index": 1,
+          "label": "Sign in as Ana",
+          "action": "navigate",
+          "target": "/sign-in",
+          "input_value": {
+            "email": "ana-{run_id}@test.employed.co.mz",
+            "password": "AnaTest2026!"
+          },
+          "expected_result": "Ana enters an authenticated session for account management.",
+          "assertions": [
+            "Sign-in form loads",
+            "After submit, authenticated header state appears"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "accountmgmt-login",
+            "expected_assertions_for_screenshot_analysis": [
+              "Authenticated state is obvious",
+              "Header and content are readable",
+              "No login error is shown"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/login"
+        },
+        {
+          "step_index": 2,
+          "label": "Fetch current user state",
+          "action": "api_request",
+          "target": "/users/me",
+          "input_value": null,
+          "expected_result": "Current user payload includes id, roles, verification state, and deletion schedule if any.",
+          "assertions": [
+            "HTTP status is 200",
+            "Response contains id and email",
+            "roles is an array"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "accountmgmt-users-me",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /users/me"
+        },
+        {
+          "step_index": 3,
+          "label": "Open account settings",
+          "action": "navigate",
+          "target": "/account",
+          "input_value": null,
+          "expected_result": "Protected account page is available.",
+          "assertions": [
+            "URL pathname is /account",
+            "Account settings heading is visible",
+            "Export button is visible"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "accountmgmt-account",
+            "expected_assertions_for_screenshot_analysis": [
+              "Account heading is visible",
+              "Export and danger-zone actions are visible",
+              "No layout clipping occurs"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "NONE"
+        },
+        {
+          "step_index": 4,
+          "label": "Export personal data",
+          "action": "click",
+          "target": "button:has-text('Export my data')",
+          "input_value": null,
+          "expected_result": "Browser downloads a JSON export generated from the authenticated account snapshot.",
+          "assertions": [
+            "Download is initiated",
+            "Response payload contains generated_at and account keys",
+            "Export contains jobs/profile/payments/reports arrays"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "accountmgmt-export",
+            "expected_assertions_for_screenshot_analysis": [
+              "Export action is clearly visible",
+              "The page remains stable while download begins",
+              "No raw exception text is displayed"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /users/me/export"
+        },
+        {
+          "step_index": 5,
+          "label": "Schedule account deletion",
+          "action": "click",
+          "target": "button:has-text('Delete my account')",
+          "input_value": null,
+          "expected_result": "Deletion enters a 30-day grace period and the danger zone updates.",
+          "assertions": [
+            "Deletion request returns scheduled_for timestamp",
+            "UI shows scheduled deletion date",
+            "Cancel deletion action replaces the delete button"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "accountmgmt-request-deletion",
+            "expected_assertions_for_screenshot_analysis": [
+              "Danger-zone state changes are obvious",
+              "Scheduled deletion date or countdown is visible",
+              "Action text is understandable"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /users/me/request-deletion"
+        },
+        {
+          "step_index": 6,
+          "label": "Verify the countdown state",
+          "action": "assert",
+          "target": "/account",
+          "input_value": null,
+          "expected_result": "The page shows the pending deletion countdown without a refresh loop.",
+          "assertions": [
+            "Countdown or scheduled date text is present",
+            "Cancel deletion request button is visible"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "accountmgmt-countdown",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "NONE"
+        },
+        {
+          "step_index": 7,
+          "label": "Cancel the deletion request",
+          "action": "click",
+          "target": "button:has-text('Cancel deletion request')",
+          "input_value": null,
+          "expected_result": "Scheduled deletion is cleared and the danger zone returns to its initial state.",
+          "assertions": [
+            "Success message indicates cancellation",
+            "Delete my account button returns",
+            "Scheduled deletion text disappears"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "accountmgmt-cancel-deletion",
+            "expected_assertions_for_screenshot_analysis": [
+              "Cancellation confirmation is readable",
+              "Danger-zone actions reset cleanly",
+              "No stale countdown remains"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /users/me/cancel-deletion"
+        },
+        {
+          "step_index": 8,
+          "label": "Resend verification email even for already-verified accounts",
+          "action": "click",
+          "target": "button:has-text('Resend verification email') or api_request fallback",
+          "input_value": null,
+          "expected_result": "The endpoint either sends a new verification email or returns an already-verified confirmation.",
+          "assertions": [
+            "Response message is deterministic",
+            "No destructive change occurs",
+            "UI communicates what happened"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "accountmgmt-resend-verification",
+            "expected_assertions_for_screenshot_analysis": [
+              "Verification feedback is visible",
+              "Page remains readable and stable",
+              "No duplicate actions stack unexpectedly"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /users/me/resend-verification"
+        },
+        {
+          "step_index": 9,
+          "label": "Check MailHog for the resend outcome",
+          "action": "api_request",
+          "target": "http://localhost:3310/api/v2/search?kind=to&query=ana-{run_id}@test.employed.co.mz",
+          "input_value": null,
+          "expected_result": "If a resend occurred, the latest verification email is visible in MailHog.",
+          "assertions": [
+            "MailHog search completes in the test environment",
+            "Message list can be filtered by recipient",
+            "The newest message is a verification email when resend is allowed"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "accountmgmt-mailhog",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "TEST-ONLY: MailHog search"
+        },
+        {
+          "step_index": 10,
+          "label": "Refresh the session token from account state",
+          "action": "api_request",
+          "target": "/auth/refresh",
+          "input_value": {
+            "refresh_token": "{session.refresh_token}"
+          },
+          "expected_result": "A fresh token pair is issued without forcing a new login.",
+          "assertions": [
+            "HTTP status is 200",
+            "New token payload contains access_token and refresh_token",
+            "Returned user id matches /users/me"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "accountmgmt-refresh",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/refresh"
+        },
+        {
+          "step_index": 11,
+          "label": "Reload account after refresh",
+          "action": "refresh_page",
+          "target": "/account",
+          "input_value": null,
+          "expected_result": "The refreshed session continues to authorize account access.",
+          "assertions": [
+            "Account settings still render after refresh",
+            "No redirect to sign-in occurs"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "accountmgmt-post-refresh",
+            "expected_assertions_for_screenshot_analysis": [
+              "Account screen remains intact after refresh",
+              "No auth flicker or blank state is visible",
+              "Key controls remain visible"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /users/me"
+        },
+        {
+          "step_index": 12,
+          "label": "Sign out after account management",
+          "action": "click",
+          "target": "button:has-text('Sign out')",
+          "input_value": null,
+          "expected_result": "Ana exits the session cleanly.",
+          "assertions": [
+            "Public sign-in link becomes visible",
+            "Protected navigation is no longer accessible without re-authentication"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "accountmgmt-signout",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "NONE"
+        }
+      ]
+    },
+    {
+      "id": "journey-employer-full-lifecycle",
+      "persona_id": "persona-carlos-employer",
+      "variant_id": "persona-carlos-employer--desktop",
+      "title": "Carlos registers, posts a job, sees moderation updates, edits it, deactivates it, and deletes it",
+      "host": "https://mz.lvh.me:3000",
+      "routes_covered": [
+        "/sign-up",
+        "/verify-email/[token]",
+        "/sign-in",
+        "/jobs/new",
+        "/myjobs",
+        "/jobs/[id]/edit",
+        "/jobs/[id]"
+      ],
+      "api_coverage": [
+        "POST /auth/register",
+        "POST /auth/verify-email/{token}",
+        "POST /auth/login",
+        "POST /profiles",
+        "PUT /profiles",
+        "POST /jobs",
+        "GET /admin/jobs",
+        "PUT /jobs/{job_id}",
+        "GET /jobs/{job_id}",
+        "POST /jobs/{job_id}/deactivate",
+        "DELETE /jobs/{job_id}"
+      ],
+      "steps": [
+        {
+          "step_index": 1,
+          "label": "Open sign-up and register Carlos",
+          "action": "navigate",
+          "target": "/sign-up",
+          "input_value": {
+            "name": "Carlos Sitoe",
+            "email": "carlos-{run_id}@test.employed.co.mz",
+            "password": "CarlosTest2026!"
+          },
+          "expected_result": "Employer registration enters the verification-needed state.",
+          "assertions": [
+            "Registration form is visible",
+            "Submit leads to a check-email confirmation"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "employer-register",
+            "expected_assertions_for_screenshot_analysis": [
+              "Employer registration screen is readable",
+              "Confirmation state explains the next step",
+              "No overflow occurs on desktop"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/register"
+        },
+        {
+          "step_index": 2,
+          "label": "Verify Carlos via MailHog token",
+          "action": "navigate",
+          "target": "/verify-email/{token}",
+          "input_value": null,
+          "expected_result": "Verification succeeds and enables sign-in.",
+          "assertions": [
+            "MailHog message contains a verification link",
+            "Verify page shows success state",
+            "CTA to sign in is visible"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "employer-verify",
+            "expected_assertions_for_screenshot_analysis": [
+              "Verification success state is visible",
+              "Next action is clear",
+              "No raw error details are shown"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/verify-email/{token}"
+        },
+        {
+          "step_index": 3,
+          "label": "Sign in as Carlos",
+          "action": "submit_form",
+          "target": "form",
+          "input_value": {
+            "email": "carlos-{run_id}@test.employed.co.mz",
+            "password": "CarlosTest2026!"
+          },
+          "expected_result": "Carlos receives an authenticated employer session.",
+          "assertions": [
+            "Authenticated header or sign-out button appears",
+            "Protected pages are now reachable"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "employer-login",
+            "expected_assertions_for_screenshot_analysis": [
+              "Authenticated state is obvious",
+              "No login error remains",
+              "Navigation remains readable"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/login"
+        },
+        {
+          "step_index": 4,
+          "label": "Create a company profile",
+          "action": "api_request",
+          "target": "/profiles",
+          "input_value": {
+            "name": "Construções Maputo Lda",
+            "type": "company",
+            "title": "HR Manager",
+            "location": "Maputo",
+            "description": "Mid-size construction company hiring across Mozambique.",
+            "contact": "carlos-{run_id}@test.employed.co.mz",
+            "url": "https://construcoes-maputo.example"
+          },
+          "expected_result": "Carlos now has a company profile associated with his account.",
+          "assertions": [
+            "HTTP status is 201 or 200",
+            "Response type equals company",
+            "Returned name equals Construções Maputo Lda"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "employer-profile-create",
+            "expected_assertions_for_screenshot_analysis": [
+              "Profile creation outcome is visible or logged for the user",
+              "Company name is readable",
+              "No duplicate state appears"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /profiles"
+        },
+        {
+          "step_index": 5,
+          "label": "Update the company profile with fuller details",
+          "action": "api_request",
+          "target": "/profiles",
+          "input_value": {
+            "title": "Head of Talent Acquisition",
+            "description": "Hiring engineers, technicians, and project coordinators across active worksites.",
+            "linkedin_url": "https://linkedin.com/company/construcoes-maputo"
+          },
+          "expected_result": "Profile changes are saved without creating a duplicate record.",
+          "assertions": [
+            "HTTP status is 200",
+            "Returned title reflects the update",
+            "Updated description is sanitized and persisted"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "employer-profile-update",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "PUT /profiles"
+        },
+        {
+          "step_index": 6,
+          "label": "Open the new job form",
+          "action": "navigate",
+          "target": "/jobs/new",
+          "input_value": null,
+          "expected_result": "Protected job-posting form loads for the authenticated employer.",
+          "assertions": [
+            "URL pathname is /jobs/new",
+            "Job title, contact, and description controls are visible",
+            "Post job button is visible"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "employer-job-form",
+            "expected_assertions_for_screenshot_analysis": [
+              "Job form sections are visible",
+              "Fields are aligned and readable",
+              "Primary submit CTA is obvious"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "NONE"
+        },
+        {
+          "step_index": 7,
+          "label": "Submit with an empty title first",
+          "action": "click",
+          "target": "button:has-text('Post job')",
+          "input_value": null,
+          "expected_result": "Validation blocks submission and surfaces the missing-title error.",
+          "assertions": [
+            "Error text says a job title is required",
+            "Form stays on /jobs/new",
+            "No job is created while validation fails"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "employer-empty-title-error",
+            "expected_assertions_for_screenshot_analysis": [
+              "Validation error is readable near the relevant field",
+              "Form state is preserved",
+              "No broken layout is introduced"
+            ]
+          },
+          "mistake_then_correct": {
+            "wrong_input": {
+              "title": ""
+            },
+            "correction_input": {
+              "title": "Site Supervisor"
+            },
+            "expected_error": "Title required validation appears",
+            "expected_after_correction": "Job can be submitted once the title is provided"
+          },
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "POST /jobs"
+        },
+        {
+          "step_index": 8,
+          "label": "Complete the full job form",
+          "action": "type",
+          "target": "form",
+          "input_value": {
+            "title": "Site Supervisor",
+            "company": "Construções Maputo Lda",
+            "location": "Maputo",
+            "contact": "carlos-{run_id}@test.employed.co.mz",
+            "apply_whatsapp": "+258840000000",
+            "jobtype": "Full Time",
+            "remote": false,
+            "salary_min": 40000,
+            "salary_max": 55000,
+            "salary_currency": "MZN",
+            "salary_period": "month",
+            "description": "Lead site coordination, track crews, and oversee project safety."
+          },
+          "expected_result": "All required and optional fields are populated, including salary and contact details.",
+          "assertions": [
+            "Job title input contains Site Supervisor",
+            "Salary fields are populated",
+            "Rich text description contains the role summary"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "employer-job-filled",
+            "expected_assertions_for_screenshot_analysis": [
+              "Form looks complete and legible",
+              "Optional payment-related fields are not blocking submission",
+              "No validation errors are visible"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "POST /jobs"
+        },
+        {
+          "step_index": 9,
+          "label": "Submit the job",
+          "action": "submit_form",
+          "target": "form",
+          "input_value": null,
+          "expected_result": "A pending job listing is created and Carlos is routed to the new job detail page.",
+          "assertions": [
+            "HTTP request returns 201",
+            "Browser navigates to /jobs/{job_id}",
+            "New job status is pending"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "employer-job-submitted",
+            "expected_assertions_for_screenshot_analysis": [
+              "Submission success looks intentional",
+              "Job title is visible on the resulting page",
+              "No blank or duplicate page render occurs"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /jobs"
+        },
+        {
+          "step_index": 10,
+          "label": "Check MailHog for the submission confirmation",
+          "action": "api_request",
+          "target": "http://localhost:3310/api/v2/search?kind=to&query=carlos-{run_id}@test.employed.co.mz",
+          "input_value": null,
+          "expected_result": "A submission confirmation email exists for the employer.",
+          "assertions": [
+            "Message recipient matches Carlos",
+            "Subject mentions job submission or moderation",
+            "Body includes the job title or listing link"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "employer-mailhog-submission",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "TEST-ONLY: MailHog search"
+        },
+        {
+          "step_index": 11,
+          "label": "Open my jobs and confirm pending status",
+          "action": "navigate",
+          "target": "/myjobs",
+          "input_value": null,
+          "expected_result": "Carlos sees the newly created listing in his dashboard as pending.",
+          "assertions": [
+            "My jobs page shows the new title",
+            "Status badge reads pending",
+            "Feature, edit, and status actions are visible"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "employer-myjobs-pending",
+            "expected_assertions_for_screenshot_analysis": [
+              "Job card is visible",
+              "Pending badge is readable",
+              "Dashboard actions are accessible"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs"
+        },
+        {
+          "step_index": 12,
+          "label": "Wait for admin approval via API",
+          "action": "api_request",
+          "target": "/admin/jobs?status=pending",
+          "input_value": null,
+          "expected_result": "The pending listing is visible to the admin moderation queue before approval.",
+          "assertions": [
+            "Listing id/title appears in the pending queue",
+            "Status is pending before the approval event"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "employer-admin-queue-check",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "GET /admin/jobs"
+        },
+        {
+          "step_index": 13,
+          "label": "Refresh my jobs after admin approval",
+          "action": "refresh_page",
+          "target": "/myjobs",
+          "input_value": null,
+          "expected_result": "Once moderation approves the listing, Carlos sees it as active.",
+          "assertions": [
+            "Job card is still present",
+            "Status badge changes to active",
+            "Feature action remains available"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "employer-myjobs-active",
+            "expected_assertions_for_screenshot_analysis": [
+              "Active badge is readable",
+              "Card actions remain aligned",
+              "The state change is obvious to the employer"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs"
+        },
+        {
+          "step_index": 14,
+          "label": "Open the edit route",
+          "action": "navigate",
+          "target": "/jobs/{job_id}/edit",
+          "input_value": null,
+          "expected_result": "The edit form loads prefilled with the existing listing values.",
+          "assertions": [
+            "URL pathname matches /jobs/{job_id}/edit",
+            "Job title and company fields are pre-populated",
+            "Save changes button is visible"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "employer-edit-form",
+            "expected_assertions_for_screenshot_analysis": [
+              "Prefilled values are visible",
+              "Form sections remain readable",
+              "Primary save CTA is obvious"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs/{job_id}"
+        },
+        {
+          "step_index": 15,
+          "label": "Save changes to the active job",
+          "action": "submit_form",
+          "target": "form",
+          "input_value": {
+            "title": "Senior Site Supervisor",
+            "location": "Matola",
+            "description": "Updated responsibilities and shift expectations."
+          },
+          "expected_result": "Listing updates persist and the detail page reflects the new content.",
+          "assertions": [
+            "HTTP status is 200",
+            "Updated title is Senior Site Supervisor",
+            "Location now shows Matola"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "employer-job-updated",
+            "expected_assertions_for_screenshot_analysis": [
+              "Updated title is visible",
+              "No stale values remain on the page",
+              "Success state is readable"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "PUT /jobs/{job_id}"
+        },
+        {
+          "step_index": 16,
+          "label": "Open the updated job detail page",
+          "action": "navigate",
+          "target": "/jobs/{job_id}",
+          "input_value": null,
+          "expected_result": "The detail page shows the edited values.",
+          "assertions": [
+            "Title matches the edited title",
+            "Updated description is visible",
+            "Listing details panel shows the revised location"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "employer-updated-detail",
+            "expected_assertions_for_screenshot_analysis": [
+              "Updated content is visually reflected",
+              "Sidebar and body copy remain aligned",
+              "No stale pending state is shown"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs/{job_id}"
+        },
+        {
+          "step_index": 17,
+          "label": "Deactivate the job",
+          "action": "click",
+          "target": "button:has-text('Deactivate'), button:has-text('Mark inactive / filled')",
+          "input_value": null,
+          "expected_result": "The active listing transitions to inactive or filled and disappears from the public feed.",
+          "assertions": [
+            "Deactivate request succeeds",
+            "Status changes away from active",
+            "Dashboard reflects the new status"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "employer-deactivated",
+            "expected_assertions_for_screenshot_analysis": [
+              "Deactivation result is visible",
+              "Status badge is updated",
+              "No broken confirmation state appears"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /jobs/{job_id}/deactivate"
+        },
+        {
+          "step_index": 18,
+          "label": "Delete the job",
+          "action": "click",
+          "target": "button:has-text('Delete')",
+          "input_value": null,
+          "expected_result": "The listing is permanently removed from Carlos's dashboard after confirmation.",
+          "assertions": [
+            "Delete request returns 204",
+            "Job card is removed from /myjobs",
+            "Deleted listing no longer resolves publicly"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "employer-deleted",
+            "expected_assertions_for_screenshot_analysis": [
+              "Removed job no longer appears in the dashboard",
+              "Remaining page content stays aligned",
+              "The deleted-state transition is understandable"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "DELETE /jobs/{job_id}"
+        }
+      ]
+    },
+    {
+      "id": "journey-employer-featured-payment",
+      "persona_id": "persona-carlos-employer",
+      "variant_id": "persona-carlos-employer--desktop",
+      "title": "Carlos features a job, inspects payment status, and cancels an intent",
+      "host": "https://mz.lvh.me:3000",
+      "routes_covered": [
+        "/sign-in",
+        "/jobs/new",
+        "/myjobs"
+      ],
+      "api_coverage": [
+        "POST /auth/login",
+        "POST /jobs",
+        "GET /payments/providers",
+        "POST /payments/initiate",
+        "GET /payments/{intent_id}/status",
+        "POST /payments/{intent_id}/cancel"
+      ],
+      "steps": [
+        {
+          "step_index": 1,
+          "label": "Sign in as Carlos",
+          "action": "navigate",
+          "target": "/sign-in",
+          "input_value": {
+            "email": "carlos-{run_id}@test.employed.co.mz",
+            "password": "CarlosTest2026!"
+          },
+          "expected_result": "Carlos has an authenticated employer session for payments.",
+          "assertions": [
+            "Authenticated state is visible after submit"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "payment-login",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/login"
+        },
+        {
+          "step_index": 2,
+          "label": "Create a fresh job to feature",
+          "action": "navigate",
+          "target": "/jobs/new",
+          "input_value": {
+            "title": "Featured Quantity Surveyor",
+            "company": "Construções Maputo Lda",
+            "location": "Maputo",
+            "contact": "carlos-{run_id}@test.employed.co.mz",
+            "jobtype": "Full Time",
+            "description": "Role created specifically for featured-payment UAT."
+          },
+          "expected_result": "A new pending or active listing exists for payment flows.",
+          "assertions": [
+            "Job form loads",
+            "Submission creates a new job id",
+            "Carlos can return to my jobs with the new listing visible"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "payment-job-created",
+            "expected_assertions_for_screenshot_analysis": [
+              "New listing creation is obvious",
+              "No validation errors remain",
+              "The created listing title is visible"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /jobs"
+        },
+        {
+          "step_index": 3,
+          "label": "Open my jobs dashboard",
+          "action": "navigate",
+          "target": "/myjobs",
+          "input_value": null,
+          "expected_result": "The new job card is visible with a Feature action.",
+          "assertions": [
+            "Feature button exists on the target job card",
+            "Job status badge is visible"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "payment-myjobs",
+            "expected_assertions_for_screenshot_analysis": [
+              "Feature action is clearly visible",
+              "Job card remains readable",
+              "Status badge is present"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs"
+        },
+        {
+          "step_index": 4,
+          "label": "Open the feature modal",
+          "action": "click",
+          "target": "button:has-text('Feature')",
+          "input_value": null,
+          "expected_result": "Feature modal loads available providers for the mz market.",
+          "assertions": [
+            "Modal title 'Feature job' is visible",
+            "Provider choices include Stripe, M-Pesa, and e-Mola",
+            "Close and Continue buttons are visible"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "payment-provider-modal",
+            "expected_assertions_for_screenshot_analysis": [
+              "Modal is centered and readable",
+              "All providers are visible",
+              "Primary continue CTA is present"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /payments/providers"
+        },
+        {
+          "step_index": 5,
+          "label": "Inspect provider availability",
+          "action": "api_request",
+          "target": "/payments/providers",
+          "input_value": null,
+          "expected_result": "Providers API returns Stripe, M-Pesa, and e-Mola for Mozambique.",
+          "assertions": [
+            "HTTP status is 200",
+            "Response market key is mz",
+            "Provider list contains stripe, mpesa, and emola"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "payment-providers-api",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /payments/providers"
+        },
+        {
+          "step_index": 6,
+          "label": "Start a Stripe intent",
+          "action": "click",
+          "target": "button:has-text('Stripe')",
+          "input_value": null,
+          "expected_result": "Selecting Stripe prepares a redirect-style featured-job payment intent.",
+          "assertions": [
+            "Stripe card is visibly selected",
+            "Continue button becomes active",
+            "Provider description references secure card checkout"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "payment-select-stripe",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "POST /payments/initiate"
+        },
+        {
+          "step_index": 7,
+          "label": "Continue with Stripe",
+          "action": "click",
+          "target": "button:has-text('Continue')",
+          "input_value": null,
+          "expected_result": "A payment intent is created and either redirects or returns a pending intent id for test automation.",
+          "assertions": [
+            "Initiate response includes intent id",
+            "Returned provider key is stripe",
+            "Kind is redirect or await depending on harness"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "payment-stripe-initiated",
+            "expected_assertions_for_screenshot_analysis": [
+              "Post-initiation state is visible",
+              "The modal conveys next steps",
+              "No raw backend traceback is shown"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /payments/initiate"
+        },
+        {
+          "step_index": 8,
+          "label": "Check the Stripe intent status",
+          "action": "api_request",
+          "target": "/payments/{intent_id}/status",
+          "input_value": null,
+          "expected_result": "The payment intent status can be polled while pending.",
+          "assertions": [
+            "HTTP status is 200",
+            "Response includes intent_id and status",
+            "Status is pending, awaiting_user, or another controlled intermediate value"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "payment-stripe-status",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "GET /payments/{intent_id}/status"
+        },
+        {
+          "step_index": 9,
+          "label": "Cancel the Stripe intent",
+          "action": "api_request",
+          "target": "/payments/{intent_id}/cancel",
+          "input_value": null,
+          "expected_result": "Pending Stripe intent moves to cancelled.",
+          "assertions": [
+            "HTTP status is 200",
+            "Returned status becomes cancelled",
+            "failure_reason indicates user_cancelled when exposed"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "payment-stripe-cancelled",
+            "expected_assertions_for_screenshot_analysis": [
+              "Cancellation state is visually obvious or logged",
+              "No duplicate modal stacks appear",
+              "The user can continue using the dashboard"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /payments/{intent_id}/cancel"
+        },
+        {
+          "step_index": 10,
+          "label": "Check status again after cancellation",
+          "action": "api_request",
+          "target": "/payments/{intent_id}/status",
+          "input_value": null,
+          "expected_result": "Polling confirms the cancelled state is stable.",
+          "assertions": [
+            "Status remains cancelled",
+            "Intent id is unchanged",
+            "No settlement extension is applied"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "payment-stripe-status-cancelled",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "GET /payments/{intent_id}/status"
+        },
+        {
+          "step_index": 11,
+          "label": "Reopen the modal and choose M-Pesa",
+          "action": "click",
+          "target": "button:has-text('Feature'), button:has-text('M-Pesa')",
+          "input_value": null,
+          "expected_result": "M-Pesa-specific UI requests a Mozambican phone number.",
+          "assertions": [
+            "M-Pesa card is selected",
+            "#feature-msisdn input is visible",
+            "Placeholder starts with 84 or 85"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "payment-mpesa-selected",
+            "expected_assertions_for_screenshot_analysis": [
+              "Selected provider is clear",
+              "MSISDN field is visible",
+              "Modal remains readable"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "POST /payments/initiate"
+        },
+        {
+          "step_index": 12,
+          "label": "Try an invalid M-Pesa number first",
+          "action": "type",
+          "target": "#feature-msisdn",
+          "input_value": "861234567",
+          "expected_result": "Client validation blocks using an e-Mola-style number for M-Pesa.",
+          "assertions": [
+            "Validation message says to use a number starting with 84 or 85",
+            "Continue action is blocked until correction"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "payment-invalid-msisdn",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": {
+            "wrong_input": "861234567",
+            "correction_input": "841234567",
+            "expected_error": "Provider-specific MSISDN error is shown",
+            "expected_after_correction": "Corrected M-Pesa number is accepted"
+          },
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "POST /payments/initiate"
+        },
+        {
+          "step_index": 13,
+          "label": "Initiate a valid M-Pesa intent",
+          "action": "click",
+          "target": "button:has-text('Continue')",
+          "input_value": {
+            "provider_key": "mpesa",
+            "payer_msisdn": "841234567"
+          },
+          "expected_result": "Backend creates an awaiting_user simulator intent for M-Pesa.",
+          "assertions": [
+            "HTTP status is 201 or 200",
+            "Response provider key is mpesa",
+            "Status equals awaiting_user or pending"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "payment-mpesa-initiated",
+            "expected_assertions_for_screenshot_analysis": [
+              "Awaiting-user state is understandable",
+              "The modal still looks stable",
+              "The provider reference or next step is visible"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /payments/initiate"
+        },
+        {
+          "step_index": 14,
+          "label": "Poll the M-Pesa status",
+          "action": "api_request",
+          "target": "/payments/{intent_id}/status",
+          "input_value": null,
+          "expected_result": "The mobile-money intent exposes a pollable intermediate state.",
+          "assertions": [
+            "Status API returns awaiting_user, pending, cancelled, or completed",
+            "extended_through is set when settlement completes"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "payment-mpesa-status",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "GET /payments/{intent_id}/status"
+        }
+      ]
+    },
+    {
+      "id": "journey-admin-moderation",
+      "persona_id": "persona-marta-admin",
+      "variant_id": "persona-marta-admin--desktop",
+      "title": "Marta moderates jobs, manages admin roles, and resolves reports",
+      "host": "https://mz.lvh.me:3000",
+      "routes_covered": [
+        "/sign-up",
+        "/verify-email/[token]",
+        "/sign-in",
+        "/admin/jobs"
+      ],
+      "api_coverage": [
+        "POST /auth/register",
+        "POST /auth/verify-email/{token}",
+        "POST /auth/login",
+        "POST /admin/users/{user_id}/roles/{role}",
+        "GET /admin/jobs",
+        "PATCH /admin/jobs/{job_id}/status",
+        "PATCH /admin/jobs/bulk-status",
+        "GET /admin/users",
+        "DELETE /admin/users/{user_id}/roles/{role}",
+        "GET /admin/reports",
+        "PATCH /reports/{report_id}/resolve"
+      ],
+      "steps": [
+        {
+          "step_index": 1,
+          "label": "Register Marta",
+          "action": "navigate",
+          "target": "/sign-up",
+          "input_value": {
+            "name": "Marta Cossa",
+            "email": "marta-{run_id}@test.employed.co.mz",
+            "password": "MartaAdmin2026!"
+          },
+          "expected_result": "Admin candidate account enters verification-needed state.",
+          "assertions": [
+            "Registration success instructs email verification"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "admin-register",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/register"
+        },
+        {
+          "step_index": 2,
+          "label": "Verify Marta",
+          "action": "navigate",
+          "target": "/verify-email/{token}",
+          "input_value": null,
+          "expected_result": "Verification succeeds and Marta can sign in.",
+          "assertions": [
+            "Verify screen shows success",
+            "Go to sign in CTA is visible"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "admin-verify",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/verify-email/{token}"
+        },
+        {
+          "step_index": 3,
+          "label": "Sign in as Marta",
+          "action": "submit_form",
+          "target": "form",
+          "input_value": {
+            "email": "marta-{run_id}@test.employed.co.mz",
+            "password": "MartaAdmin2026!"
+          },
+          "expected_result": "Authenticated but not yet elevated session exists.",
+          "assertions": [
+            "Authenticated state is visible"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "admin-login",
+            "expected_assertions_for_screenshot_analysis": [
+              "Authenticated header state is visible",
+              "No error banner remains",
+              "Navigation is stable"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/login"
+        },
+        {
+          "step_index": 4,
+          "label": "Grant Marta the admin role through test bootstrap",
+          "action": "api_request",
+          "target": "/admin/users/{user_id}/roles/admin",
+          "input_value": {
+            "role": "admin"
+          },
+          "expected_result": "Harness or bootstrap admin grants Marta the admin role required by middleware.",
+          "assertions": [
+            "Response roles array includes admin",
+            "Subsequent admin routes no longer redirect away"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "admin-bootstrap-role",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /admin/users/{user_id}/roles/{role}"
+        },
+        {
+          "step_index": 5,
+          "label": "Open admin jobs",
+          "action": "navigate",
+          "target": "/admin/jobs",
+          "input_value": null,
+          "expected_result": "Admin moderation dashboard loads with jobs, users, and reports panels.",
+          "assertions": [
+            "Admin job moderation heading is visible",
+            "Status tabs are visible",
+            "Admin users and Reports queue panels are visible"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "admin-dashboard",
+            "expected_assertions_for_screenshot_analysis": [
+              "Moderation dashboard is readable",
+              "Primary tables/panels are visible",
+              "The page looks like a cohesive admin workspace"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /admin/jobs"
+        },
+        {
+          "step_index": 6,
+          "label": "Filter the queue to pending",
+          "action": "click",
+          "target": "button:has-text('Pending')",
+          "input_value": null,
+          "expected_result": "Pending moderation items are listed in the table.",
+          "assertions": [
+            "Pending tab appears selected",
+            "Rows show pending jobs or an intentional empty state",
+            "Checkbox column is visible for bulk actions"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "admin-pending-filter",
+            "expected_assertions_for_screenshot_analysis": [
+              "Pending tab state is visually clear",
+              "Rows or empty state are readable",
+              "Bulk selection controls are visible"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /admin/jobs"
+        },
+        {
+          "step_index": 7,
+          "label": "Approve one job",
+          "action": "submit_form",
+          "target": "tr select + input + button",
+          "input_value": {
+            "status": "active",
+            "reason": "Approved during UAT moderation"
+          },
+          "expected_result": "Selected job becomes active and gets a moderation history entry.",
+          "assertions": [
+            "PATCH request succeeds",
+            "Row status changes to active after reload",
+            "Published timestamp exists for first-time approval"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "admin-approve-one",
+            "expected_assertions_for_screenshot_analysis": [
+              "Updated job row remains readable",
+              "Reason/save controls remain aligned",
+              "The new status is visible"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "PATCH /admin/jobs/{job_id}/status"
+        },
+        {
+          "step_index": 8,
+          "label": "Reject another job",
+          "action": "submit_form",
+          "target": "tr select + input + button",
+          "input_value": {
+            "status": "inactive",
+            "reason": "Rejected: insufficient job detail"
+          },
+          "expected_result": "Another queued job is rejected with an explanatory reason.",
+          "assertions": [
+            "PATCH request succeeds",
+            "Rejected row no longer appears in pending filter",
+            "Status history captures the reason"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "admin-reject-one",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "PATCH /admin/jobs/{job_id}/status"
+        },
+        {
+          "step_index": 9,
+          "label": "Bulk-approve multiple jobs",
+          "action": "submit_form",
+          "target": "input[type='checkbox'], .bulk-action-bar",
+          "input_value": {
+            "job_ids": [
+              "{job_id_1}",
+              "{job_id_2}"
+            ],
+            "status": "active",
+            "reason": "Bulk-approved during UAT"
+          },
+          "expected_result": "Bulk endpoint updates all selected rows in one action.",
+          "assertions": [
+            "PATCH bulk request succeeds",
+            "Response includes requested and updated counts",
+            "Selected rows clear after completion"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "admin-bulk-approve",
+            "expected_assertions_for_screenshot_analysis": [
+              "Bulk action bar is visible",
+              "Selection state is obvious",
+              "Post-action table remains aligned"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "PATCH /admin/jobs/bulk-status"
+        },
+        {
+          "step_index": 10,
+          "label": "Review admin users",
+          "action": "api_request",
+          "target": "/admin/users",
+          "input_value": null,
+          "expected_result": "Admin users list returns current admin accounts.",
+          "assertions": [
+            "HTTP status is 200",
+            "Response is an array of users",
+            "Each item has roles including admin"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "admin-users-api",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /admin/users"
+        },
+        {
+          "step_index": 11,
+          "label": "Grant admin role to another user",
+          "action": "click",
+          "target": "button:has-text('Grant admin')",
+          "input_value": null,
+          "expected_result": "Selected user becomes an admin and the action toggles to revoke.",
+          "assertions": [
+            "Granted user's roles now include admin",
+            "Button label changes to Revoke admin"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "admin-grant-role",
+            "expected_assertions_for_screenshot_analysis": [
+              "Role-management action is visible",
+              "The updated state is obvious",
+              "Card layout remains intact"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /admin/users/{user_id}/roles/{role}"
+        },
+        {
+          "step_index": 12,
+          "label": "Revoke that admin role again",
+          "action": "click",
+          "target": "button:has-text('Revoke admin')",
+          "input_value": null,
+          "expected_result": "The temporary admin access is removed from the selected user.",
+          "assertions": [
+            "Returned roles no longer include admin",
+            "Action toggles back to Grant admin"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "admin-revoke-role",
+            "expected_assertions_for_screenshot_analysis": [
+              "Revoke outcome is visible",
+              "User card remains readable",
+              "No stale state persists"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "DELETE /admin/users/{user_id}/roles/{role}"
+        },
+        {
+          "step_index": 13,
+          "label": "Attempt to revoke her own admin role",
+          "action": "api_request",
+          "target": "/admin/users/{self_user_id}/roles/admin",
+          "input_value": null,
+          "expected_result": "Backend blocks self-revocation for safety.",
+          "assertions": [
+            "Response status is 400",
+            "Error message explains self-revocation is not allowed"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "admin-self-revoke-block",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": {
+            "wrong_input": {
+              "user_id": "{self_user_id}",
+              "role": "admin"
+            },
+            "correction_input": {
+              "user_id": "{other_user_id}",
+              "role": "admin"
+            },
+            "expected_error": "You cannot revoke your own admin role",
+            "expected_after_correction": "Revocation succeeds for a different user"
+          },
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "DELETE /admin/users/{user_id}/roles/{role}"
+        },
+        {
+          "step_index": 14,
+          "label": "Create a moderation report fixture",
+          "action": "api_request",
+          "target": "/reports",
+          "input_value": {
+            "job_id": "{reportable_job_id}",
+            "reason": "spam",
+            "details": "Seeded report to exercise the admin resolution workflow."
+          },
+          "expected_result": "A pending report exists so the reports queue is not empty during moderation UAT.",
+          "assertions": [
+            "HTTP status is 201",
+            "Response contains report id and pending resolution",
+            "Returned reason is spam"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "admin-report-created",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /reports"
+        },
+        {
+          "step_index": 15,
+          "label": "Open reports queue",
+          "action": "api_request",
+          "target": "/admin/reports",
+          "input_value": null,
+          "expected_result": "Open community reports are retrievable for moderation.",
+          "assertions": [
+            "HTTP status is 200",
+            "Response is an array",
+            "Each report has id, job_id, reason, and resolution"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "admin-reports",
+            "expected_assertions_for_screenshot_analysis": [
+              "Reports panel is readable",
+              "Each report card shows reason and actions",
+              "No layout overflow occurs"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /admin/reports"
+        },
+        {
+          "step_index": 16,
+          "label": "Resolve one report",
+          "action": "click",
+          "target": "button:has-text('Resolve')",
+          "input_value": null,
+          "expected_result": "Selected report transitions from pending to reviewed/dismissed/job_removed.",
+          "assertions": [
+            "Resolve endpoint succeeds",
+            "Resolved report disappears from open queue or shows updated state",
+            "resolved_at and resolved_by are populated"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "admin-resolve-report",
+            "expected_assertions_for_screenshot_analysis": [
+              "Resolution state is visible",
+              "No duplicate report cards remain",
+              "Moderation actions stay aligned"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "PATCH /reports/{report_id}/resolve"
+        }
+      ]
+    },
+    {
+      "id": "journey-admin-user-management",
+      "persona_id": "persona-marta-admin",
+      "variant_id": "persona-marta-admin--desktop",
+      "title": "Marta manages a target user's roles, profile, and job visibility",
+      "host": "https://mz.lvh.me:3000",
+      "routes_covered": [
+        "/sign-in",
+        "/admin/jobs"
+      ],
+      "api_coverage": [
+        "POST /auth/login",
+        "GET /admin/users",
+        "GET /profiles/{user_id}",
+        "POST /admin/users/{user_id}/roles/{role}",
+        "DELETE /admin/users/{user_id}/roles/{role}",
+        "GET /admin/jobs"
+      ],
+      "steps": [
+        {
+          "step_index": 1,
+          "label": "Sign in as admin",
+          "action": "navigate",
+          "target": "/sign-in",
+          "input_value": {
+            "email": "marta-{run_id}@test.employed.co.mz",
+            "password": "MartaAdmin2026!"
+          },
+          "expected_result": "Marta is authenticated and can access admin surfaces.",
+          "assertions": [
+            "Authenticated header state appears"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "admin-usermgmt-login",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/login"
+        },
+        {
+          "step_index": 2,
+          "label": "Open admin moderation page",
+          "action": "navigate",
+          "target": "/admin/jobs",
+          "input_value": null,
+          "expected_result": "Admin dashboard loads with user and report side panels.",
+          "assertions": [
+            "Admin users panel is visible",
+            "Admin jobs table is visible"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "admin-usermgmt-dashboard",
+            "expected_assertions_for_screenshot_analysis": [
+              "Jobs table and user panel are both visible",
+              "Page layout remains balanced",
+              "Text is readable at desktop resolution"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /admin/jobs"
+        },
+        {
+          "step_index": 3,
+          "label": "List admin-manageable users",
+          "action": "api_request",
+          "target": "/admin/users",
+          "input_value": null,
+          "expected_result": "Admin users endpoint returns current role holders and candidates in the harness.",
+          "assertions": [
+            "HTTP status is 200",
+            "Response is a JSON array",
+            "Each item includes id, email, and roles"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "admin-usermgmt-list",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /admin/users"
+        },
+        {
+          "step_index": 4,
+          "label": "Search or filter to the target user",
+          "action": "type",
+          "target": "[data-testid='admin-user-search'], input[placeholder='Search users']",
+          "input_value": "carlos",
+          "expected_result": "Target user card becomes easier to isolate in the admin panel or by harness-side filtering.",
+          "assertions": [
+            "Search control accepts input or harness filters the returned list",
+            "Target user remains visible in the narrowed set"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "admin-usermgmt-search",
+            "expected_assertions_for_screenshot_analysis": [
+              "Filtered user list is readable",
+              "Search field and result state are obvious",
+              "No overlap occurs in the side panel"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /admin/users"
+        },
+        {
+          "step_index": 5,
+          "label": "Open the target user's public profile",
+          "action": "api_request",
+          "target": "/profiles/{user_id}",
+          "input_value": null,
+          "expected_result": "Admin can inspect the user's public-facing profile payload when it is active.",
+          "assertions": [
+            "Active profile returns 200 with name/type fields",
+            "If inactive, API responds with a controlled 404"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "admin-usermgmt-profile",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /profiles/{user_id}"
+        },
+        {
+          "step_index": 6,
+          "label": "Review the user's jobs in admin queue",
+          "action": "api_request",
+          "target": "/admin/jobs?status=active",
+          "input_value": null,
+          "expected_result": "Admin can correlate the user with visible jobs in the moderation list.",
+          "assertions": [
+            "Returned jobs include poster/user_name fields",
+            "Target user's jobs can be identified from poster metadata"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "admin-usermgmt-jobs",
+            "expected_assertions_for_screenshot_analysis": [
+              "Admin jobs table remains readable",
+              "Poster information is visible per row",
+              "Filtering context is understandable"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /admin/jobs"
+        },
+        {
+          "step_index": 7,
+          "label": "Grant admin role to the target user",
+          "action": "click",
+          "target": "button:has-text('Grant admin')",
+          "input_value": null,
+          "expected_result": "The selected user's role array now contains admin.",
+          "assertions": [
+            "Grant request succeeds",
+            "UI updates the card to show Revoke admin"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "admin-usermgmt-grant",
+            "expected_assertions_for_screenshot_analysis": [
+              "Role change is visible on the user card",
+              "Action buttons remain aligned",
+              "No stale state remains"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /admin/users/{user_id}/roles/{role}"
+        },
+        {
+          "step_index": 8,
+          "label": "Verify elevated role via API",
+          "action": "api_request",
+          "target": "/admin/users",
+          "input_value": null,
+          "expected_result": "Refetched user list still shows the target with admin privileges.",
+          "assertions": [
+            "Target user's roles include admin after refresh",
+            "User remains in the admin list"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "admin-usermgmt-grant-verify",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /admin/users"
+        },
+        {
+          "step_index": 9,
+          "label": "Revoke the admin role",
+          "action": "click",
+          "target": "button:has-text('Revoke admin')",
+          "input_value": null,
+          "expected_result": "Temporary admin access is removed from the target user.",
+          "assertions": [
+            "Revoke request succeeds",
+            "Roles array no longer includes admin"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "admin-usermgmt-revoke",
+            "expected_assertions_for_screenshot_analysis": [
+              "Revoke state is visible",
+              "Card returns to grant action",
+              "Panel layout remains intact"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "DELETE /admin/users/{user_id}/roles/{role}"
+        },
+        {
+          "step_index": 10,
+          "label": "Confirm the target can no longer access admin",
+          "action": "api_request",
+          "target": "/admin/jobs",
+          "input_value": null,
+          "expected_result": "Using the target user's session in test harness should now fail authorization for admin routes.",
+          "assertions": [
+            "Unauthorized or redirect response occurs for the downgraded user",
+            "No admin payload leaks"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "admin-usermgmt-post-revoke-access",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "GET /admin/jobs"
+        },
+        {
+          "step_index": 11,
+          "label": "Re-open the user's profile after role change",
+          "action": "api_request",
+          "target": "/profiles/{user_id}",
+          "input_value": null,
+          "expected_result": "Public profile availability is unchanged by admin-role mutations.",
+          "assertions": [
+            "Profile route behavior is identical before and after role changes",
+            "Role grants do not corrupt user profile data"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "admin-usermgmt-profile-recheck",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /profiles/{user_id}"
+        },
+        {
+          "step_index": 12,
+          "label": "Leave admin page in a stable state",
+          "action": "assert",
+          "target": "/admin/jobs",
+          "input_value": null,
+          "expected_result": "No pending modal or stale selection remains after user management.",
+          "assertions": [
+            "Bulk selection clears",
+            "Jobs table still renders",
+            "User panel remains interactive"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "admin-usermgmt-stable-finish",
+            "expected_assertions_for_screenshot_analysis": [
+              "Dashboard looks stable at the end of the flow",
+              "No stale overlays or dialogs remain",
+              "All primary panels are visible"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /admin/jobs"
+        }
+      ]
+    },
+    {
+      "id": "journey-seeker-mobile",
+      "persona_id": "persona-ana-seeker",
+      "variant_id": "persona-ana-seeker--mobile",
+      "title": "Ana completes onboarding on a small Android viewport with touch gestures and responsive assertions",
+      "host": "https://mz.lvh.me:3000",
+      "routes_covered": [
+        "/",
+        "/sign-up",
+        "/verify-email/[token]",
+        "/sign-in",
+        "/account",
+        "/jobs",
+        "/jobs/[id]",
+        "/myjobs"
+      ],
+      "api_coverage": [
+        "POST /auth/register",
+        "POST /auth/verify-email/{token}",
+        "POST /auth/login",
+        "POST /profiles",
+        "GET /jobs",
+        "GET /jobs/{job_id}"
+      ],
+      "steps": [
+        {
+          "step_index": 1,
+          "label": "Open home page on mobile viewport",
+          "action": "navigate",
+          "target": "/",
+          "input_value": null,
+          "expected_result": "The mobile shell loads without horizontal overflow.",
+          "assertions": [
+            "Viewport width is 375px",
+            "Header content stacks or collapses appropriately",
+            "Hero CTA remains visible without zooming"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 240,
+            "typing_cps": 7,
+            "post_type_dwell_ms": 320,
+            "reading_dwell_ms": 1000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "mobile-home",
+            "expected_assertions_for_screenshot_analysis": [
+              "Hero fits within the mobile viewport",
+              "There is no horizontal clipping",
+              "Primary CTA remains readable"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs/featured"
+        },
+        {
+          "step_index": 2,
+          "label": "Open mobile navigation or stacked header controls",
+          "action": "tap",
+          "target": "button[aria-label='Open navigation'], .mobile-nav-toggle, header select",
+          "input_value": null,
+          "expected_result": "Mobile-specific navigation affordances or stacked controls are reachable by touch.",
+          "assertions": [
+            "Either a hamburger/menu trigger appears or header controls stack vertically",
+            "Touch targets are at least finger-friendly size",
+            "Navigation remains readable"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 220,
+            "typing_cps": 7,
+            "post_type_dwell_ms": 300,
+            "reading_dwell_ms": 900
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "mobile-navigation",
+            "expected_assertions_for_screenshot_analysis": [
+              "Mobile nav affordance is visible or header is clearly stacked",
+              "Tap targets are not cramped",
+              "No overlap occurs in the header"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "NONE"
+        },
+        {
+          "step_index": 3,
+          "label": "Open sign-up page",
+          "action": "tap",
+          "target": "/sign-up",
+          "input_value": null,
+          "expected_result": "Registration form loads in a mobile-friendly single column.",
+          "assertions": [
+            "URL pathname is /sign-up",
+            "Inputs stack vertically",
+            "Create account CTA is visible without desktop-only controls"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 220,
+            "typing_cps": 7,
+            "post_type_dwell_ms": 320,
+            "reading_dwell_ms": 900
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "mobile-signup-start",
+            "expected_assertions_for_screenshot_analysis": [
+              "Form is single-column and readable",
+              "CTA is visible within the viewport",
+              "No overlapping text exists"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "NONE"
+        },
+        {
+          "step_index": 4,
+          "label": "Try an invalid email first",
+          "action": "type",
+          "target": "#register-email",
+          "input_value": "ana.mobile.test",
+          "expected_result": "Mobile form prevents progressing with an invalid email.",
+          "assertions": [
+            "Validation prevents submit",
+            "Email field is still reachable on small screens"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 220,
+            "typing_cps": 6,
+            "post_type_dwell_ms": 320,
+            "reading_dwell_ms": 800
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "mobile-invalid-email",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": {
+            "wrong_input": "ana.mobile.test",
+            "correction_input": "ana-mobile-{run_id}@test.employed.co.mz",
+            "expected_error": "Email is invalid or form stays disabled",
+            "expected_after_correction": "Correct email is accepted"
+          },
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "POST /auth/register"
+        },
+        {
+          "step_index": 5,
+          "label": "Try a short password first",
+          "action": "type",
+          "target": "#register-password",
+          "input_value": "Ana1!",
+          "expected_result": "Weak-password state remains visible and the CTA stays disabled.",
+          "assertions": [
+            "Password strength indicates weak",
+            "Submit remains disabled"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 220,
+            "typing_cps": 6,
+            "post_type_dwell_ms": 320,
+            "reading_dwell_ms": 800
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "mobile-short-password",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": {
+            "wrong_input": "Ana1!",
+            "correction_input": "AnaTest2026!",
+            "expected_error": "Weak password blocks submit",
+            "expected_after_correction": "Strong password enables progress"
+          },
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "POST /auth/register"
+        },
+        {
+          "step_index": 6,
+          "label": "Complete the mobile registration form",
+          "action": "type",
+          "target": "#register-name, #register-email, #register-password, #register-confirm-password",
+          "input_value": {
+            "name": "Ana Mondlane",
+            "email": "ana-mobile-{run_id}@test.employed.co.mz",
+            "password": "AnaTest2026!",
+            "confirm_password": "AnaTest2026!"
+          },
+          "expected_result": "All fields are filled with touch-friendly spacing preserved.",
+          "assertions": [
+            "Form fields remain visible after virtual keyboard interactions",
+            "No label is obscured",
+            "CTA is enabled"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 220,
+            "typing_cps": 6,
+            "post_type_dwell_ms": 320,
+            "reading_dwell_ms": 900
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "mobile-signup-filled",
+            "expected_assertions_for_screenshot_analysis": [
+              "Inputs are readable on mobile",
+              "Buttons remain tappable",
+              "No field is covered by other elements"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "POST /auth/register"
+        },
+        {
+          "step_index": 7,
+          "label": "Submit the mobile registration",
+          "action": "tap",
+          "target": "button:has-text('Create account')",
+          "input_value": null,
+          "expected_result": "Mobile registration succeeds and verification instructions appear.",
+          "assertions": [
+            "Confirmation asks Ana to check email",
+            "No mobile-specific layout regression occurs"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 220,
+            "typing_cps": 6,
+            "post_type_dwell_ms": 320,
+            "reading_dwell_ms": 1000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "mobile-signup-submitted",
+            "expected_assertions_for_screenshot_analysis": [
+              "Confirmation is readable on mobile",
+              "No clipped text or buttons",
+              "User understands next step"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/register"
+        },
+        {
+          "step_index": 8,
+          "label": "Inspect MailHog for verification email",
+          "action": "api_request",
+          "target": "http://localhost:3310/api/v2/search?kind=to&query=ana-mobile-{run_id}@test.employed.co.mz",
+          "input_value": null,
+          "expected_result": "Verification email is captured for the mobile-created account.",
+          "assertions": [
+            "MailHog returns a message for the mobile account"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "mobile-mailhog-verify",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": false,
+          "api_endpoint": "TEST-ONLY: MailHog search"
+        },
+        {
+          "step_index": 9,
+          "label": "Open verify-email route",
+          "action": "navigate",
+          "target": "/verify-email/{token}",
+          "input_value": null,
+          "expected_result": "Verification succeeds on mobile and shows a tappable sign-in CTA.",
+          "assertions": [
+            "Success message is visible",
+            "Sign-in CTA fits within viewport width"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 220,
+            "typing_cps": 6,
+            "post_type_dwell_ms": 320,
+            "reading_dwell_ms": 900
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "mobile-verify",
+            "expected_assertions_for_screenshot_analysis": [
+              "Verification success copy fits on one screen or scrolls naturally",
+              "Sign-in CTA is tappable",
+              "No horizontal scroll is introduced"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/verify-email/{token}"
+        },
+        {
+          "step_index": 10,
+          "label": "Sign in on mobile",
+          "action": "submit_form",
+          "target": "form",
+          "input_value": {
+            "email": "ana-mobile-{run_id}@test.employed.co.mz",
+            "password": "AnaTest2026!"
+          },
+          "expected_result": "Ana becomes authenticated on a touch device.",
+          "assertions": [
+            "Authenticated state appears",
+            "Header adapts cleanly for logged-in mobile state"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 220,
+            "typing_cps": 6,
+            "post_type_dwell_ms": 320,
+            "reading_dwell_ms": 900
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "mobile-login",
+            "expected_assertions_for_screenshot_analysis": [
+              "Logged-in state is visible on mobile",
+              "Header remains uncluttered",
+              "No clipped auth buttons"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /auth/login"
+        },
+        {
+          "step_index": 11,
+          "label": "Open account settings on mobile",
+          "action": "navigate",
+          "target": "/account",
+          "input_value": null,
+          "expected_result": "Protected account page remains readable in a narrow viewport.",
+          "assertions": [
+            "Account settings heading is visible",
+            "Export and danger-zone actions stack vertically",
+            "No horizontal overflow exists"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 220,
+            "typing_cps": 6,
+            "post_type_dwell_ms": 320,
+            "reading_dwell_ms": 900
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "mobile-account",
+            "expected_assertions_for_screenshot_analysis": [
+              "Account actions stack neatly",
+              "Danger-zone buttons are still tappable",
+              "Text remains legible"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "NONE"
+        },
+        {
+          "step_index": 12,
+          "label": "Create profile from mobile session",
+          "action": "api_request",
+          "target": "/profiles",
+          "input_value": {
+            "name": "Ana Mondlane",
+            "type": "individual",
+            "title": "Entry-level administrator",
+            "location": "Maputo",
+            "description": "Mobile-created profile for UAT.",
+            "contact": "ana-mobile-{run_id}@test.employed.co.mz"
+          },
+          "expected_result": "Profile creation works even when initiated from a mobile-authenticated session.",
+          "assertions": [
+            "POST returns 201 or 200",
+            "Profile type is individual"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 280,
+            "typing_cps": 8,
+            "post_type_dwell_ms": 360,
+            "reading_dwell_ms": 1200
+          },
+          "screenshot": {
+            "capture": false,
+            "label": "mobile-profile-create",
+            "expected_assertions_for_screenshot_analysis": []
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": false,
+          "mutates": true,
+          "api_endpoint": "POST /profiles"
+        },
+        {
+          "step_index": 13,
+          "label": "Swipe into browse jobs and search",
+          "action": "swipe_and_type",
+          "target": "/jobs and input[name='search']",
+          "input_value": "administração",
+          "expected_result": "Browsing and filtering remain usable with touch gestures and virtual keyboard input.",
+          "assertions": [
+            "Jobs page loads",
+            "Search input accepts text after touch interaction",
+            "Content can be scrolled vertically without layout breakage"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 220,
+            "typing_cps": 6,
+            "post_type_dwell_ms": 320,
+            "reading_dwell_ms": 900
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "mobile-jobs-search",
+            "expected_assertions_for_screenshot_analysis": [
+              "Jobs list fits the mobile viewport",
+              "Filter/search control is tappable",
+              "Cards stack cleanly in one column"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs"
+        },
+        {
+          "step_index": 14,
+          "label": "Open a job detail page on mobile",
+          "action": "tap",
+          "target": ".card-surface a[href^='/jobs/'], .job-card a[href^='/jobs/']",
+          "input_value": null,
+          "expected_result": "Job detail collapses into a mobile-friendly stacked layout.",
+          "assertions": [
+            "Job title is visible",
+            "Apply panel stacks under or above the description",
+            "Sidebar content does not overflow horizontally"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 220,
+            "typing_cps": 6,
+            "post_type_dwell_ms": 320,
+            "reading_dwell_ms": 1000
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "mobile-job-detail",
+            "expected_assertions_for_screenshot_analysis": [
+              "Job detail stacks correctly",
+              "Apply CTA remains visible",
+              "No clipped sidebar or text overflow occurs"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "GET /jobs/{job_id}"
+        },
+        {
+          "step_index": 15,
+          "label": "Open my jobs and confirm empty state on mobile",
+          "action": "navigate",
+          "target": "/myjobs",
+          "input_value": null,
+          "expected_result": "Seeker still sees an empty-state dashboard on mobile with readable copy.",
+          "assertions": [
+            "Empty state text is visible",
+            "No horizontal overflow exists",
+            "Primary navigation remains tappable"
+          ],
+          "pacing": {
+            "pre_click_hover_ms": 220,
+            "typing_cps": 6,
+            "post_type_dwell_ms": 320,
+            "reading_dwell_ms": 900
+          },
+          "screenshot": {
+            "capture": true,
+            "label": "mobile-myjobs-empty",
+            "expected_assertions_for_screenshot_analysis": [
+              "Empty state is centered/readable",
+              "Buttons and navigation remain tappable",
+              "No layout clipping is visible"
+            ]
+          },
+          "mistake_then_correct": null,
+          "safe_for_live": true,
+          "mutates": false,
+          "api_endpoint": "NONE"
+        }
+      ]
+    }
+  ]
+}
