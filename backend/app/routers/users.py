@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Any
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
@@ -30,12 +31,24 @@ def _serialize_user(user: Any) -> UserRead:
     )
 
 
+def _json_safe(value: Any) -> Any:
+    if isinstance(value, UUID):
+        return str(value)
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, list):
+        return [_json_safe(item) for item in value]
+    if isinstance(value, dict):
+        return {key: _json_safe(item) for key, item in value.items()}
+    return value
+
+
 def _serialize_record(record: Any) -> dict[str, Any]:
     data = {}
     for key, value in getattr(record, "__dict__", {}).items():
         if key.startswith("_"):
             continue
-        data[key] = value
+        data[key] = _json_safe(value)
     if not data:
         data["id"] = str(get_attr(record, "id", "_id", default=""))
     return data

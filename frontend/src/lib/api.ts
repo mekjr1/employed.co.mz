@@ -2,6 +2,17 @@ import type { ApiErrorShape, Job, JobFormValues, JobsQuery, PaginatedResponse } 
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
+function getApiBaseUrl(): string {
+  if (typeof window !== "undefined") {
+    return API_BASE_URL;
+  }
+
+  return API_BASE_URL.replace("http://localhost:3301", "http://backend:8000")
+    .replace("http://127.0.0.1:3301", "http://backend:8000")
+    .replace("http://localhost:8000", "http://backend:8000")
+    .replace("http://127.0.0.1:8000", "http://backend:8000");
+}
+
 export class ApiError extends Error {
   status: number;
   payload?: ApiErrorShape | string;
@@ -32,7 +43,7 @@ function getClientHost(): string | undefined {
 }
 
 function buildUrl(path: string, query?: ApiFetchOptions["query"]): string {
-  const url = new URL(path, API_BASE_URL);
+  const url = new URL(path, getApiBaseUrl());
   if (query) {
     Object.entries(query).forEach(([key, value]) => {
       if (value === undefined || value === null || value === "") return;
@@ -58,11 +69,6 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
 
   const resolvedHost = host ?? getClientHost();
   if (resolvedHost) {
-    try {
-      requestHeaders.set("Host", resolvedHost);
-    } catch {
-      // Browsers guard Host; keep the forwarded header as a fallback.
-    }
     requestHeaders.set("X-Forwarded-Host", resolvedHost);
   }
 
@@ -99,22 +105,50 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
 }
 
 export async function getJobs(query: JobsQuery, options: Omit<ApiFetchOptions, "query"> = {}) {
-  return apiFetch<PaginatedResponse<Job>>("/api/jobs", {
+  if (query.featured) {
+    const items = await apiFetch<Job[]>("/api/featuredJobs", {
+      ...options,
+      cache: options.cache ?? "no-store"
+    });
+    return {
+      items,
+      total: items.length,
+      page: 1,
+      per_page: items.length,
+      total_pages: 1
+    } as PaginatedResponse<Job>;
+  }
+
+  const payload = await apiFetch<{ items: Job[]; total: number; page: number; page_size: number }>("/api/jobs", {
     ...options,
-    query: query as Record<string, string | number | boolean | undefined | null>,
+    query: {
+      query: query.search,
+      jobtype: query.job_type,
+      remote: query.remote,
+      page: query.page,
+      page_size: query.per_page
+    },
     cache: options.cache ?? "no-store"
   });
+
+  return {
+    items: payload.items,
+    total: payload.total,
+    page: payload.page,
+    per_page: payload.page_size,
+    total_pages: Math.max(1, Math.ceil(payload.total / Math.max(payload.page_size, 1)))
+  } satisfies PaginatedResponse<Job>;
 }
 
 export async function getJob(id: string, options: Omit<ApiFetchOptions, "query"> = {}) {
-  return apiFetch<Job>(`/api/jobs/${id}`, {
+  return apiFetch<Job>(`/jobs/${id}`, {
     ...options,
     cache: options.cache ?? "no-store"
   });
 }
 
 export async function createJob(payload: JobFormValues, options: Omit<ApiFetchOptions, "body"> = {}) {
-  return apiFetch<Job>("/api/jobs", {
+  return apiFetch<Job>("/jobs", {
     ...options,
     method: "POST",
     body: payload as unknown as Record<string, unknown>
@@ -122,15 +156,15 @@ export async function createJob(payload: JobFormValues, options: Omit<ApiFetchOp
 }
 
 export async function updateJob(id: string, payload: Partial<JobFormValues> & { status?: string }, options: Omit<ApiFetchOptions, "body"> = {}) {
-  return apiFetch<Job>(`/api/jobs/${id}`, {
+  return apiFetch<Job>(`/jobs/${id}`, {
     ...options,
-    method: "PATCH",
+    method: "PUT",
     body: payload as unknown as Record<string, unknown>
   });
 }
 
 export async function deleteJob(id: string, options: Omit<ApiFetchOptions, "body"> = {}) {
-  return apiFetch<void>(`/api/jobs/${id}`, {
+  return apiFetch<void>(`/jobs/${id}`, {
     ...options,
     method: "DELETE"
   });

@@ -20,7 +20,7 @@ def _profile_model():
 def _profile_to_read(profile: Any) -> ProfileRead:
     return ProfileRead(
         id=str(get_attr(profile, "id", "_id", default="")),
-        user_id=get_attr(profile, "user_id", "userId"),
+        user_id=(str(user_id) if (user_id := get_attr(profile, "user_id", "userId")) is not None else None),
         user_name=get_attr(profile, "user_name", "userName"),
         name=get_attr(profile, "name"),
         type=get_attr(profile, "type"),

@@ -67,7 +67,7 @@ def _job_to_read(job: Any, request: Request, *, include_contact: bool = True) ->
         salary_max=get_attr(job, "salary_max", "salaryMax"),
         salary_currency=get_attr(job, "salary_currency", "salaryCurrency"),
         salary_period=get_attr(job, "salary_period", "salaryPeriod"),
-        user_id=get_attr(job, "user_id", "userId"),
+        user_id=(str(user_id) if (user_id := get_attr(job, "user_id", "userId")) is not None else None),
         user_name=get_attr(job, "user_name", "userName"),
         status=get_attr(job, "status"),
         featured_through=get_attr(job, "featured_through", "featuredThrough"),
@@ -233,6 +233,18 @@ def count_jobs(
 ):
     items = _apply_filters(query_all(db, _job_model()), market, query, jobtype, remote)
     return JobCountResponse(total=len(items))
+
+
+@router.get("/mine", response_model=list[JobRead])
+def list_my_jobs(
+    request: Request,
+    db: Any = Depends(get_db),
+    current_user: Any = Depends(get_current_user),
+):
+    user_id = get_user_id(current_user)
+    items = [item for item in query_all(db, _job_model()) if get_attr(item, "user_id", "userId") == user_id]
+    items.sort(key=lambda item: get_attr(item, "created_at", "createdAt", default=utcnow()), reverse=True)
+    return [_job_to_read(item, request) for item in items]
 
 
 @router.get("/{job_id}", response_model=JobRead)

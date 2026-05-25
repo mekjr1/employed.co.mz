@@ -30,9 +30,9 @@ def _to_read(report: Any) -> ReportRead:
         job_id=get_attr(report, "job_id", "jobId", default=""),
         reason=get_attr(report, "reason", default=""),
         details=get_attr(report, "details"),
-        reporter_user_id=get_attr(report, "reporter_user_id", "reporterUserId"),
+        reporter_user_id=(str(reporter_user_id) if (reporter_user_id := get_attr(report, "reporter_user_id", "reporterUserId")) is not None else None),
         resolution=get_attr(report, "resolution"),
-        resolved_by=get_attr(report, "resolved_by", "resolvedBy"),
+        resolved_by=(str(resolved_by) if (resolved_by := get_attr(report, "resolved_by", "resolvedBy")) is not None else None),
         resolved_at=get_attr(report, "resolved_at", "resolvedAt"),
         created_at=get_attr(report, "created_at", "createdAt"),
     )

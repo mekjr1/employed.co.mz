@@ -69,18 +69,18 @@ function AdminJobsContent() {
     setError(null);
     try {
       const [jobsPayload, usersPayload, reportsPayload] = await Promise.all([
-        apiFetch<{ jobs?: AdminJob[]; counts?: Record<string, number> } | AdminJob[]>("/admin/jobs", {
+        apiFetch<{ items: AdminJob[]; total: number; page: number; page_size: number }>("/admin/jobs", {
           query: { status },
           cache: "no-store",
         }),
-        apiFetch<{ users?: AdminUser[] } | AdminUser[]>("/admin/users", { cache: "no-store" }),
-        apiFetch<{ reports?: ReportItem[] } | ReportItem[]>("/admin/reports", { cache: "no-store" }),
+        apiFetch<AdminUser[]>("/admin/users", { cache: "no-store" }),
+        apiFetch<ReportItem[]>("/admin/reports", { cache: "no-store" }),
       ]);
 
-      setJobs(Array.isArray(jobsPayload) ? jobsPayload : jobsPayload.jobs ?? []);
-      setCounts(Array.isArray(jobsPayload) ? {} : jobsPayload.counts ?? {});
-      setAdminUsers(Array.isArray(usersPayload) ? usersPayload : usersPayload.users ?? []);
-      setReports(Array.isArray(reportsPayload) ? reportsPayload : reportsPayload.reports ?? []);
+      setJobs(jobsPayload.items ?? []);
+      setCounts({ [status]: jobsPayload.total ?? 0 });
+      setAdminUsers(usersPayload ?? []);
+      setReports(reportsPayload ?? []);
       setSelectedIds([]);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Unable to load moderation dashboard.");
@@ -105,7 +105,7 @@ function AdminJobsContent() {
     await apiFetch<void>("/admin/jobs/bulk-status", {
       method: "PATCH",
       body: {
-        ids: selectedIds,
+        job_ids: selectedIds,
         status: nextStatus,
         reason,
       },
@@ -124,30 +124,36 @@ function AdminJobsContent() {
   };
 
   const handleGrantAdmin = async (adminUser: AdminUser) => {
-    await apiFetch<void>(`/admin/users/${adminUser.id ?? adminUser._id}/grant-role`, {
+    await apiFetch<void>(`/admin/users/${adminUser.id ?? adminUser._id}/roles/admin`, {
       method: "POST",
-      body: { role: "admin" },
       cache: "no-store",
     });
     await loadAdminState();
   };
 
   const handleRevokeAdmin = async (adminUser: AdminUser) => {
-    await apiFetch<void>(`/admin/users/${adminUser.id ?? adminUser._id}/revoke-role`, {
-      method: "POST",
-      body: { role: "admin" },
+    await apiFetch<void>(`/admin/users/${adminUser.id ?? adminUser._id}/roles/admin`, {
+      method: "DELETE",
       cache: "no-store",
     });
     await loadAdminState();
   };
 
   const handleResolveReport = async (report: ReportItem) => {
-    await apiFetch<void>(`/admin/reports/${report.id}/resolve`, { method: "POST", cache: "no-store" });
+    await apiFetch<void>(`/reports/${report.id}/resolve`, {
+      method: "PATCH",
+      body: { resolution: "reviewed" },
+      cache: "no-store"
+    });
     await loadAdminState();
   };
 
   const handleDismissReport = async (report: ReportItem) => {
-    await apiFetch<void>(`/admin/reports/${report.id}/dismiss`, { method: "POST", cache: "no-store" });
+    await apiFetch<void>(`/reports/${report.id}/resolve`, {
+      method: "PATCH",
+      body: { resolution: "dismissed" },
+      cache: "no-store"
+    });
     await loadAdminState();
   };
 

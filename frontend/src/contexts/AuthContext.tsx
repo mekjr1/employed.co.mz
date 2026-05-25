@@ -41,7 +41,9 @@ type AppUser = AuthUser & {
 type AuthResponse = {
   token?: string;
   accessToken?: string;
+  access_token?: string;
   refreshToken?: string;
+  refresh_token?: string;
   user?: AppUser;
 };
 
@@ -217,10 +219,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const payload = await apiFetch<AuthResponse>("/auth/refresh", {
         method: "POST",
-        token: activeToken,
+        body: { refresh_token: activeToken },
         cache: "no-store",
       });
-      const nextToken = payload.token ?? payload.accessToken ?? activeToken;
+      const nextToken = payload.token ?? payload.accessToken ?? payload.access_token ?? activeToken;
       const user = payload.user ?? (await fetchMe(nextToken));
       applyAuth(user, nextToken);
     } catch {
@@ -251,7 +253,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: { email, password },
         cache: "no-store",
       });
-      const token = payload.token ?? payload.accessToken;
+      const token = payload.token ?? payload.accessToken ?? payload.access_token;
       if (!token) {
         throw new Error("No access token returned by login.");
       }
