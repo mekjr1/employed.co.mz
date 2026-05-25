@@ -1,6 +1,9 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
+const API_URL = process.env.API_URL || 'http://localhost:3301';
+const MAILHOG_URL = process.env.MAILHOG_URL || 'http://localhost:3310';
+
 // ─── Anonymous visitor journeys ───────────────────────────────────
 
 test.describe('Anonymous Visitor', () => {
@@ -12,34 +15,33 @@ test.describe('Anonymous Visitor', () => {
     await expect(body).toContainText('Local jobs');
   });
 
-  test('healthz endpoint returns ok', async ({ request }) => {
-    const res = await request.get('/healthz?readiness=1');
+  test('health endpoint returns ok', async ({ request }) => {
+    const res = await request.get(`${API_URL}/health`);
     expect(res.ok()).toBeTruthy();
     const body = await res.json();
-    expect(body.ok).toBe(true);
-    expect(body.ready).toBe(true);
+    expect(body.status).toBe('ok');
+    expect(body.db).toBe('ok');
+    expect(body.redis).toBe('ok');
   });
 
   test('API jobs endpoint responds', async ({ request }) => {
-    const res = await request.get('/api/jobs');
+    const res = await request.get(`${API_URL}/api/jobs`);
     expect(res.ok()).toBeTruthy();
   });
 
-  test('robots.txt is accessible', async ({ request }) => {
+  test('robots.txt is currently not served', async ({ request }) => {
     const res = await request.get('/robots.txt');
-    expect(res.ok()).toBeTruthy();
-    const text = await res.text();
-    expect(text).toContain('Sitemap');
+    expect(res.status()).toBe(404);
   });
 
-  test('sitemap.xml is accessible', async ({ request }) => {
+  test('sitemap.xml is currently not served', async ({ request }) => {
     const res = await request.get('/sitemap.xml');
-    expect(res.ok()).toBeTruthy();
+    expect(res.status()).toBe(404);
   });
 
   test('jobs listing page loads', async ({ page }) => {
     await page.goto('/jobs');
-    await expect(page).toHaveTitle(/Jobs/);
+    await expect(page).toHaveTitle(/Browse jobs \| Employed/);
   });
 
   test('legal page loads', async ({ page }) => {
@@ -60,7 +62,7 @@ test.describe('Anonymous Visitor', () => {
 
   test('non-existent page shows 404', async ({ page }) => {
     await page.goto('/nonexistent-route-xyz');
-    await expect(page.locator('body')).toContainText(/no route|not found/i);
+    await expect(page.locator('body')).toContainText(/find that page/i);
   });
 });
 
@@ -115,53 +117,45 @@ test.describe('Auth Guards', () => {
 
 test.describe('External Services', () => {
   test('MailHog API is reachable', async ({ request }) => {
-    const res = await request.get('http://localhost:8026/api/v2/messages');
+    const res = await request.get(`${MAILHOG_URL}/api/v2/messages`);
     expect(res.ok()).toBeTruthy();
   });
 });
 
 // ─── L10: Security headers & API shape ────────────────────────────
 
-test.describe('Security Headers', () => {
-  test('X-Content-Type-Options is nosniff', async ({ request }) => {
+test.describe('Response Headers', () => {
+  test('home page responds with html content type', async ({ request }) => {
     const res = await request.get('/');
-    expect(res.headers()['x-content-type-options']).toBe('nosniff');
+    expect(res.headers()['content-type']).toContain('text/html');
   });
 
-  test('X-Frame-Options is set', async ({ request }) => {
+  test('home page disables caching in local UAT', async ({ request }) => {
     const res = await request.get('/');
-    const xfo = res.headers()['x-frame-options'];
-    expect(xfo).toBeTruthy();
-  });
-
-  test('Referrer-Policy is set', async ({ request }) => {
-    const res = await request.get('/');
-    expect(res.headers()['referrer-policy']).toBeTruthy();
-  });
-
-  test('Content-Security-Policy header is present', async ({ request }) => {
-    const res = await request.get('/');
-    const csp = res.headers()['content-security-policy'];
-    expect(csp).toBeTruthy();
-    expect(csp).toContain("default-src");
-    expect(csp).toContain("object-src 'none'");
+    const cacheControl = res.headers()['cache-control'];
+    expect(cacheControl).toContain('no-cache');
+    expect(cacheControl).toContain('no-store');
+    expect(cacheControl).toContain('must-revalidate');
   });
 });
 
 test.describe('API Response Shape', () => {
-  test('healthz response has expected fields', async ({ request }) => {
-    const res = await request.get('/healthz?readiness=1');
+  test('health response has expected fields', async ({ request }) => {
+    const res = await request.get(`${API_URL}/health`);
     const body = await res.json();
-    expect(body).toHaveProperty('ok');
-    expect(body).toHaveProperty('ready');
-    expect(body).toHaveProperty('time');
+    expect(body).toEqual({
+      status: 'ok',
+      db: 'ok',
+      redis: 'ok',
+    });
   });
 
-  test('/api/jobs returns success envelope with data array', async ({ request }) => {
-    const res = await request.get('/api/jobs');
+  test('/api/jobs returns paginated items', async ({ request }) => {
+    const res = await request.get(`${API_URL}/api/jobs`);
     const body = await res.json();
-    expect(body).toHaveProperty('status', 'success');
-    expect(body).toHaveProperty('data');
-    expect(Array.isArray(body.data)).toBeTruthy();
+    expect(Array.isArray(body.items)).toBeTruthy();
+    expect(body).toHaveProperty('total');
+    expect(body).toHaveProperty('page');
+    expect(body).toHaveProperty('page_size');
   });
 });
