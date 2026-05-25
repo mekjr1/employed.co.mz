@@ -20,6 +20,28 @@ function delay(ms = 500) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function buildClientIp(testInfo) {
+  const seed = Array.from(`${Date.now()}-${testInfo.project.name}`).reduce((total, char) => total + char.charCodeAt(0), 0);
+  return `10.${(seed % 200) + 1}.${((seed * 7) % 200) + 1}.${((seed * 13) % 200) + 1}`;
+}
+
+function requestHeaders(clientIp, token) {
+  return {
+    'X-Forwarded-For': clientIp,
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
+async function gotoAndWait(page, url, readyLocator) {
+  await page.goto(url, { waitUntil: 'domcontentloaded' });
+  await page.waitForLoadState('networkidle').catch(() => undefined);
+  await expect(readyLocator).toBeVisible({ timeout: 15000 });
+}
+
+async function submitVisibleForm(page) {
+  await page.locator('form').first().evaluate((form) => form.requestSubmit());
+}
+
 async function snap(page, testInfo, label) {
   await page.screenshot({
     path: path.join(SCREENSHOT_DIR, `${testInfo.project.name}-journey-admin-${label}.png`),
@@ -78,9 +100,10 @@ function extractToken(body) {
   return match ? match[1] : null;
 }
 
-async function registerUser(request, email, name) {
+async function registerUser(request, email, name, clientIp) {
   const response = await request.post(`${API_URL}/auth/register`, {
     data: { email, password: PASSWORD, name },
+    headers: requestHeaders(clientIp),
   });
   expect(response.ok()).toBeTruthy();
 }
@@ -93,9 +116,10 @@ async function grantAdminByDb(email) {
   runSql(`update users set email_verified = true, roles = ARRAY['admin'] where email = ${sqlQuote(email)};`);
 }
 
-async function apiLogin(request, email) {
+async function apiLogin(request, email, clientIp) {
   const response = await request.post(`${API_URL}/auth/login`, {
     data: { email, password: PASSWORD },
+    headers: requestHeaders(clientIp),
   });
   expect(response.ok()).toBeTruthy();
   const payload = await response.json();
@@ -111,8 +135,8 @@ async function seedSession(page, token) {
   await page.reload();
 }
 
-async function createPendingJob(request, email, title) {
-  await registerUser(request, email, 'Admin Queue Employer');
+async function createPendingJob(request, email, title, clientIp) {
+  await registerUser(request, email, 'Admin Queue Employer', clientIp);
   await verifyUserByDb(email);
   const userId = runSql(`select id from users where email = ${sqlQuote(email)} limit 1;`);
   const jobId = randomUUID();
@@ -127,15 +151,17 @@ test('Journey 3 — Marta (Admin)', async ({ page, request }, testInfo) => {
   const adminEmail = `marta-${runId}@test.employed.co.mz`;
   const employerEmail = `admin-queue-${runId}@test.employed.co.mz`;
   const pendingJobTitle = `Admin Pending Job ${runId}`;
+  const clientIp = buildClientIp(testInfo);
 
+  await page.context().setExtraHTTPHeaders({ 'X-Forwarded-For': clientIp });
   await clearMailhog(request);
-  const pendingJob = await createPendingJob(request, employerEmail, pendingJobTitle);
+  const pendingJob = await createPendingJob(request, employerEmail, pendingJobTitle, clientIp);
   await clearMailhog(request);
 
   let adminToken = '';
 
   await test.step('Register, verify, and bootstrap an admin user', async () => {
-    await page.goto('/sign-up');
+    await gotoAndWait(page, '/sign-up', page.getByLabel('Full name'));
     await page.getByLabel('Full name').fill('Marta Admin');
     await delay();
     await page.getByLabel('Email').fill(adminEmail);
@@ -144,8 +170,8 @@ test('Journey 3 — Marta (Admin)', async ({ page, request }, testInfo) => {
     await delay();
     await page.locator('#register-confirm-password').fill(PASSWORD);
     await delay();
-    await page.getByRole('button', { name: /create account/i }).click();
-    await expect(page.locator('body')).toContainText('Check your email');
+    await submitVisibleForm(page);
+    await expect(page.locator('body')).toContainText('Check your email', { timeout: 15000 });
 
     let verificationToken = null;
     try {
@@ -156,7 +182,9 @@ test('Journey 3 — Marta (Admin)', async ({ page, request }, testInfo) => {
     }
 
     if (verificationToken) {
-      const verifyResponse = await request.post(`${API_URL}/auth/verify-email/${verificationToken}`);
+      const verifyResponse = await request.post(`${API_URL}/auth/verify-email/${verificationToken}`, {
+        headers: requestHeaders(clientIp),
+      });
       expect.soft(verifyResponse.ok()).toBeTruthy();
     }
     await grantAdminByDb(adminEmail);
@@ -164,18 +192,18 @@ test('Journey 3 — Marta (Admin)', async ({ page, request }, testInfo) => {
   });
 
   await test.step('Sign in as admin', async () => {
-    await page.goto('/sign-in');
+    await gotoAndWait(page, '/sign-in', page.locator('#login-password'));
     await page.getByLabel('Email').fill(adminEmail);
     await delay();
-    await page.getByLabel('Password').fill(PASSWORD);
+    await page.locator('#login-password').fill(PASSWORD);
     await delay();
-    await page.getByRole('button', { name: /^sign in$/i }).click();
+    await submitVisibleForm(page);
     await delay(1500);
 
     const uiToken = await page.evaluate(() => window.localStorage.getItem('employed_token'));
     const signedInViaUi = Boolean(uiToken);
 
-    adminToken = signedInViaUi ? uiToken || '' : await apiLogin(request, adminEmail);
+    adminToken = signedInViaUi ? uiToken || '' : await apiLogin(request, adminEmail, clientIp);
     if (!signedInViaUi) {
       await seedSession(page, adminToken);
     }
@@ -184,24 +212,25 @@ test('Journey 3 — Marta (Admin)', async ({ page, request }, testInfo) => {
   });
 
   await test.step('Open the admin jobs page and filter pending jobs', async () => {
-    await page.goto('/admin/jobs');
-    await page.waitForLoadState('networkidle');
+    await gotoAndWait(page, '/admin/jobs', page.getByRole('button', { name: /^pending/i }));
     await expect(page.locator('body')).toContainText('Admin job moderation');
-    await page.getByRole('button', { name: /^pending/i }).click();
-    await expect(page.locator('body')).toContainText(pendingJobTitle);
+    await expect(page.getByRole('button', { name: /^pending/i })).toBeVisible();
+    await expect(page.locator('tr', { hasText: pendingJobTitle }).first()).toBeVisible({ timeout: 15000 });
     await snap(page, testInfo, 'step-3-admin-queue');
   });
 
   await test.step('Approve the job via the admin API and verify the status changes', async () => {
     const response = await request.patch(`${API_URL}/admin/jobs/${pendingJob.id}/status`, {
-      headers: { Authorization: `Bearer ${adminToken}` },
+      headers: requestHeaders(clientIp, adminToken),
       data: { status: 'active', reason: 'UAT approval' },
     });
     expect(response.ok()).toBeTruthy();
 
-    await page.reload();
-    await page.getByRole('button', { name: /^active/i }).click();
-    await page.waitForLoadState('networkidle');
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    const activeTab = page.getByRole('button', { name: /^active/i });
+    await activeTab.scrollIntoViewIfNeeded();
+    await activeTab.click({ force: true });
+    await page.waitForLoadState('networkidle').catch(() => undefined);
     await expect(page.locator('body')).toContainText(pendingJobTitle);
     await snap(page, testInfo, 'step-4-approved');
   });

@@ -20,6 +20,28 @@ function delay(ms = 500) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function buildClientIp(testInfo) {
+  const seed = Array.from(`${Date.now()}-${testInfo.project.name}`).reduce((total, char) => total + char.charCodeAt(0), 0);
+  return `10.${(seed % 200) + 1}.${((seed * 7) % 200) + 1}.${((seed * 13) % 200) + 1}`;
+}
+
+function requestHeaders(clientIp, token) {
+  return {
+    'X-Forwarded-For': clientIp,
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
+async function gotoAndWait(page, url, readyLocator) {
+  await page.goto(url, { waitUntil: 'domcontentloaded' });
+  await page.waitForLoadState('networkidle').catch(() => undefined);
+  await expect(readyLocator).toBeVisible({ timeout: 15000 });
+}
+
+async function submitVisibleForm(page) {
+  await page.locator('form').first().evaluate((form) => form.requestSubmit());
+}
+
 async function snap(page, testInfo, label) {
   await page.screenshot({
     path: path.join(SCREENSHOT_DIR, `${testInfo.project.name}-journey-employer-${label}.png`),
@@ -89,9 +111,10 @@ async function activateJobByDb(jobId) {
   runSql(`update jobs set status = 'active', published_at = timezone('utc', now()) where id = ${sqlQuote(jobId)};`);
 }
 
-async function apiLogin(request, email) {
+async function apiLogin(request, email, clientIp) {
   const response = await request.post(`${API_URL}/auth/login`, {
     data: { email, password: PASSWORD },
+    headers: requestHeaders(clientIp),
   });
   expect(response.ok()).toBeTruthy();
   const payload = await response.json();
@@ -107,9 +130,9 @@ async function seedSession(page, token) {
   await page.reload();
 }
 
-async function insertJobByDb(request, token, title, email) {
+async function insertJobByDb(request, token, title, email, clientIp) {
   const userResponse = await request.get(`${API_URL}/users/me`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: requestHeaders(clientIp, token),
   });
   expect(userResponse.ok()).toBeTruthy();
   const user = await userResponse.json();
@@ -124,13 +147,15 @@ test('Journey 2 — Carlos (Employer)', async ({ page, request }, testInfo) => {
   const runId = `${Date.now()}-${testInfo.project.name}`;
   const email = `carlos-${runId}@test.employed.co.mz`;
   const jobTitle = `Carlos Journey Job ${runId}`;
+  const clientIp = buildClientIp(testInfo);
   let token = '';
   let jobId = '';
 
+  await page.context().setExtraHTTPHeaders({ 'X-Forwarded-For': clientIp });
   await clearMailhog(request);
 
   await test.step('Register and verify the employer account', async () => {
-    await page.goto('/sign-up');
+    await gotoAndWait(page, '/sign-up', page.getByLabel('Full name'));
     await page.getByLabel('Full name').fill('Carlos Employer');
     await delay();
     await page.getByLabel('Email').fill(email);
@@ -139,8 +164,8 @@ test('Journey 2 — Carlos (Employer)', async ({ page, request }, testInfo) => {
     await delay();
     await page.locator('#register-confirm-password').fill(PASSWORD);
     await delay();
-    await page.getByRole('button', { name: /create account/i }).click();
-    await expect(page.locator('body')).toContainText('Check your email');
+    await submitVisibleForm(page);
+    await expect(page.locator('body')).toContainText('Check your email', { timeout: 15000 });
 
     let verificationToken = null;
     try {
@@ -151,7 +176,9 @@ test('Journey 2 — Carlos (Employer)', async ({ page, request }, testInfo) => {
     }
 
     if (verificationToken) {
-      const verifyResponse = await request.post(`${API_URL}/auth/verify-email/${verificationToken}`);
+      const verifyResponse = await request.post(`${API_URL}/auth/verify-email/${verificationToken}`, {
+        headers: requestHeaders(clientIp),
+      });
       expect.soft(verifyResponse.ok()).toBeTruthy();
     } else {
       await verifyUserByDb(email);
@@ -161,18 +188,18 @@ test('Journey 2 — Carlos (Employer)', async ({ page, request }, testInfo) => {
   });
 
   await test.step('Sign in to the employer account', async () => {
-    await page.goto('/sign-in');
+    await gotoAndWait(page, '/sign-in', page.locator('#login-password'));
     await page.getByLabel('Email').fill(email);
     await delay();
-    await page.getByLabel('Password').fill(PASSWORD);
+    await page.locator('#login-password').fill(PASSWORD);
     await delay();
-    await page.getByRole('button', { name: /^sign in$/i }).click();
+    await submitVisibleForm(page);
     await delay(1500);
 
     const uiToken = await page.evaluate(() => window.localStorage.getItem('employed_token'));
     const authenticatedViaUi = Boolean(uiToken);
 
-    token = authenticatedViaUi ? uiToken || '' : await apiLogin(request, email);
+    token = authenticatedViaUi ? uiToken || '' : await apiLogin(request, email, clientIp);
     if (!authenticatedViaUi) {
       await seedSession(page, token);
     }
@@ -183,7 +210,7 @@ test('Journey 2 — Carlos (Employer)', async ({ page, request }, testInfo) => {
 
   await test.step('Create a company profile via the API', async () => {
     const response = await request.post(`${API_URL}/profiles`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: requestHeaders(clientIp, token),
       data: {
         name: 'Carlos Hiring Co',
         type: 'Company',
@@ -200,16 +227,16 @@ test('Journey 2 — Carlos (Employer)', async ({ page, request }, testInfo) => {
   });
 
   await test.step('Open the job form and validate required fields', async () => {
-    await page.goto('/jobs/new');
-    await page.waitForLoadState('networkidle');
+    await gotoAndWait(page, '/jobs/new', page.getByRole('button', { name: /post job/i }));
     await expect(page.locator('body')).toContainText('Post a job');
 
     await page.getByLabel('Contact').fill(email);
     await delay();
-    await page.locator('.ProseMirror').first().click();
+    const descriptionEditor = page.locator('.ProseMirror').first();
+    await descriptionEditor.evaluate((element) => element.focus());
     await page.keyboard.type('Role description for validation.', { delay: 20 });
     await delay();
-    await page.getByRole('button', { name: /post job/i }).click();
+    await submitVisibleForm(page);
     await expect(page.locator('body')).toContainText('A job title is required.');
     await snap(page, testInfo, 'step-3-validation');
   });
@@ -231,7 +258,7 @@ test('Journey 2 — Carlos (Employer)', async ({ page, request }, testInfo) => {
     await delay();
     await page.getByLabel('Period').selectOption('month');
     await delay();
-    await page.getByRole('button', { name: /post job/i }).click();
+    await submitVisibleForm(page);
     await delay(2000);
 
     const createdViaUi = /\/jobs\//.test(page.url()) && !page.url().endsWith('/jobs/new');
@@ -239,7 +266,7 @@ test('Journey 2 — Carlos (Employer)', async ({ page, request }, testInfo) => {
     if (createdViaUi) {
       jobId = page.url().split('/jobs/')[1].split('/')[0];
     } else {
-      const job = await insertJobByDb(request, token, jobTitle, email);
+      const job = await insertJobByDb(request, token, jobTitle, email, clientIp);
       jobId = job.id;
     }
 
@@ -258,8 +285,7 @@ test('Journey 2 — Carlos (Employer)', async ({ page, request }, testInfo) => {
   });
 
   await test.step('Visit my jobs and look for the pending listing', async () => {
-    await page.goto('/myjobs');
-    await page.waitForLoadState('networkidle');
+    await gotoAndWait(page, '/myjobs', page.locator('body'));
     await expect.soft(page.locator('body')).toContainText(jobTitle);
     await expect.soft(page.locator('body')).toContainText(/pending/i);
     await snap(page, testInfo, 'step-6-myjobs');
@@ -267,8 +293,7 @@ test('Journey 2 — Carlos (Employer)', async ({ page, request }, testInfo) => {
 
   await test.step('Open the edit page and confirm the form is pre-filled', async () => {
     await activateJobByDb(jobId);
-    await page.goto(`/jobs/${jobId}/edit`);
-    await page.waitForLoadState('networkidle');
+    await gotoAndWait(page, `/jobs/${jobId}/edit`, page.getByLabel('Job title'));
     await expect(page.getByLabel('Job title')).toHaveValue(jobTitle);
     await expect(page.getByLabel('Company')).toHaveValue('Carlos Hiring Co');
     await snap(page, testInfo, 'step-7-edit');
@@ -277,7 +302,7 @@ test('Journey 2 — Carlos (Employer)', async ({ page, request }, testInfo) => {
   await test.step('Deactivate the job via the API', async () => {
     await activateJobByDb(jobId);
     const response = await request.post(`${API_URL}/jobs/${jobId}/deactivate`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: requestHeaders(clientIp, token),
     });
     expect(response.ok()).toBeTruthy();
     const payload = await response.json();

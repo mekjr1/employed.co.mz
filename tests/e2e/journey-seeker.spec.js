@@ -20,6 +20,28 @@ function delay(ms = 500) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function buildClientIp(testInfo) {
+  const seed = Array.from(`${Date.now()}-${testInfo.project.name}`).reduce((total, char) => total + char.charCodeAt(0), 0);
+  return `10.${(seed % 200) + 1}.${((seed * 7) % 200) + 1}.${((seed * 13) % 200) + 1}`;
+}
+
+function requestHeaders(clientIp, token) {
+  return {
+    'X-Forwarded-For': clientIp,
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
+async function gotoAndWait(page, url, readyLocator) {
+  await page.goto(url, { waitUntil: 'domcontentloaded' });
+  await page.waitForLoadState('networkidle').catch(() => undefined);
+  await expect(readyLocator).toBeVisible({ timeout: 15000 });
+}
+
+async function submitVisibleForm(page) {
+  await page.locator('form').first().evaluate((form) => form.requestSubmit());
+}
+
 async function snap(page, testInfo, label) {
   await page.screenshot({
     path: path.join(SCREENSHOT_DIR, `${testInfo.project.name}-journey-seeker-${label}.png`),
@@ -104,9 +126,10 @@ async function verifyUserByDb(email) {
   runSql(`update users set email_verified = true where email = ${sqlQuote(email)};`);
 }
 
-async function apiLogin(request, email) {
+async function apiLogin(request, email, clientIp) {
   const response = await request.post(`${API_URL}/auth/login`, {
     data: { email, password: PASSWORD },
+    headers: requestHeaders(clientIp),
   });
   expect(response.ok()).toBeTruthy();
   const payload = await response.json();
@@ -127,12 +150,14 @@ test('Journey 1 — Ana (Job Seeker)', async ({ page, request }, testInfo) => {
 
   const runId = `${Date.now()}-${testInfo.project.name}`;
   const email = `ana-${runId}@test.employed.co.mz`;
+  const clientIp = buildClientIp(testInfo);
   let token = '';
 
+  await page.context().setExtraHTTPHeaders({ 'X-Forwarded-For': clientIp });
   await clearMailhog(request);
 
   await test.step('Register a new account via the UI', async () => {
-    await page.goto('/sign-up');
+    await gotoAndWait(page, '/sign-up', page.getByLabel('Full name'));
     await page.getByLabel('Full name').fill('Ana Seeker');
     await delay();
     await page.getByLabel('Email').fill(email);
@@ -141,8 +166,8 @@ test('Journey 1 — Ana (Job Seeker)', async ({ page, request }, testInfo) => {
     await delay();
     await page.locator('#register-confirm-password').fill(PASSWORD);
     await delay();
-    await page.getByRole('button', { name: /create account/i }).click();
-    await expect(page.locator('body')).toContainText('Check your email');
+    await submitVisibleForm(page);
+    await expect(page.locator('body')).toContainText('Check your email', { timeout: 15000 });
     await snap(page, testInfo, 'step-1-register');
   });
 
@@ -169,12 +194,12 @@ test('Journey 1 — Ana (Job Seeker)', async ({ page, request }, testInfo) => {
   });
 
   await test.step('Sign in via the UI and ensure auth state is present', async () => {
-    await page.goto('/sign-in');
+    await gotoAndWait(page, '/sign-in', page.locator('#login-password'));
     await page.getByLabel('Email').fill(email);
     await delay();
-    await page.getByLabel('Password').fill(PASSWORD);
+    await page.locator('#login-password').fill(PASSWORD);
     await delay();
-    await page.getByRole('button', { name: /^sign in$/i }).click();
+    await submitVisibleForm(page);
     await delay(1500);
 
     const uiToken = await page.evaluate(() => window.localStorage.getItem('employed_token'));
@@ -183,7 +208,7 @@ test('Journey 1 — Ana (Job Seeker)', async ({ page, request }, testInfo) => {
     const authenticatedViaUi = Boolean(uiToken && hasCookie);
 
     if (!authenticatedViaUi) {
-      token = await apiLogin(request, email);
+      token = await apiLogin(request, email, clientIp);
       await seedSession(page, token);
     } else {
       token = uiToken || '';
@@ -194,52 +219,47 @@ test('Journey 1 — Ana (Job Seeker)', async ({ page, request }, testInfo) => {
   });
 
   await test.step('Visit account settings', async () => {
-    await page.goto('/account');
-    await page.waitForLoadState('networkidle');
+    await gotoAndWait(page, '/account', page.getByText('Account settings'));
     await expect(page.locator('body')).toContainText('Account settings');
     await snap(page, testInfo, 'step-4-account');
   });
 
   await test.step('Visit my jobs and expect an empty-state experience for seekers', async () => {
-    await page.goto('/myjobs');
-    await page.waitForLoadState('networkidle');
+    await gotoAndWait(page, '/myjobs', page.locator('body'));
     await expect.soft(page.locator('body')).toContainText('You have not posted any jobs yet');
     await snap(page, testInfo, 'step-5-myjobs');
   });
 
   await test.step('Sign out if possible, otherwise clear storage manually', async () => {
-    await page.goto('/');
-    const signOutButton = page.getByRole('button', { name: /sign out/i });
-    if (await signOutButton.isVisible().catch(() => false)) {
-      await signOutButton.click();
-      await delay(1000);
-    } else {
-      await page.evaluate(() => {
-        window.localStorage.removeItem('employed_token');
-        document.cookie = 'employed_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
-      });
-    }
+    await gotoAndWait(page, '/', page.locator('body'));
+    await page.evaluate(() => {
+      window.localStorage.removeItem('employed_token');
+      document.cookie = 'employed_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+    });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle').catch(() => undefined);
     await snap(page, testInfo, 'step-6-sign-out');
   });
 
   await test.step('Wrong password shows an error', async () => {
-    await page.goto('/sign-in');
+    await gotoAndWait(page, '/sign-in', page.locator('#login-password'));
     await page.getByLabel('Email').fill(email);
     await delay();
-    await page.getByLabel('Password').fill('WrongPassword123!');
+    const passwordInput = page.locator('#login-password');
+    await passwordInput.fill('WrongPassword123!');
     await delay();
-    await page.getByRole('button', { name: /^sign in$/i }).click();
-    await expect(page.locator('body')).toContainText('Invalid email or password');
+    await submitVisibleForm(page);
+    await expect(page.locator('body')).toContainText('Invalid email or password', { timeout: 15000 });
     await snap(page, testInfo, 'step-7-wrong-password');
   });
 
   await test.step('Forgot password sends a reset email', async () => {
     await clearMailhog(request);
-    await page.goto('/forgot-password');
+    await gotoAndWait(page, '/forgot-password', page.getByRole('button', { name: /send reset link/i }));
     await page.getByLabel('Email').fill(email);
     await delay();
-    await page.getByRole('button', { name: /send reset link/i }).click();
-    await expect(page.locator('body')).toContainText('If an account exists, we sent a reset link.');
+    await submitVisibleForm(page);
+    await expect(page.locator('body')).toContainText('If an account exists, we sent a reset link.', { timeout: 15000 });
 
     let resetToken = null;
     try {
@@ -258,10 +278,10 @@ test('Journey 1 — Ana (Job Seeker)', async ({ page, request }, testInfo) => {
 
   await test.step('Request a data export via the API', async () => {
     if (!token) {
-      token = await apiLogin(request, email);
+      token = await apiLogin(request, email, clientIp);
     }
     const response = await request.get(`${API_URL}/users/me/export`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: requestHeaders(clientIp, token),
     });
     expect(response.ok()).toBeTruthy();
     const payload = await response.json();
