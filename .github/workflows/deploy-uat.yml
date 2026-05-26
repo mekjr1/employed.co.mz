@@ -1,36 +1,21 @@
-# S-07 — UAT deploy pipeline.
-# Triggers on push to the `uat` branch. SSHs into Box A, pulls the
-# latest code, rebuilds the Docker stack, and runs a smoke test.
-#
-# Required GitHub secrets:
-#   BOX_A_SSH_HOST, BOX_A_SSH_USER, BOX_A_SSH_KEY
-#
-# The app directory on Box A is /home/$BOX_A_SSH_USER/apps/employed.
-
-name: deploy-uat
-
+name: Deploy UAT
 on:
   push:
     branches: [uat]
-
+    paths-ignore: ["**.md", "docs/**"]
+# Meteor app: build & deploy via SSH; Meteor serves frontend + API together.
 jobs:
+  build:
+    uses: mekjr1/.github/.github/workflows/build-push-ghcr.yml@main
+    permissions: { contents: read, packages: write }
+    with: { image-name: employed-app, context: ".", dockerfile: Dockerfile }
   deploy:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Deploy to Box A
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.BOX_A_SSH_HOST }}
-          username: ${{ secrets.BOX_A_SSH_USER }}
-          key: ${{ secrets.BOX_A_SSH_KEY }}
-          script: |
-            cd ~/apps/employed
-            git pull origin uat
-            docker compose up -d --build
-            sleep 10
-            curl -fsS http://localhost:3000/healthz | grep -q '"ok":true'
-            echo "Deploy and smoke test passed."
+    needs: build
+    uses: mekjr1/.github/.github/workflows/deploy-compose.yml@main
+    with:
+      compose-dir: /opt/employed
+      services: app
+      health-check-url: https://employed.xibodev.com/health
+    secrets:
+      SSH_HOST: ${{ secrets.BOX3_HOST }}
+      SSH_KEY: ${{ secrets.BOX3_SSH_KEY }}
