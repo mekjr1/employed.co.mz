@@ -59,6 +59,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Ensure /opt/employed exists on Box 3
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.BOX3_HOST }}
+          username: ubuntu
+          key: ${{ secrets.BOX3_SSH_KEY }}
+          script: |
+            sudo mkdir -p /opt/employed
+            sudo chown ubuntu:ubuntu /opt/employed
+            touch /opt/employed/.env
+            chmod 600 /opt/employed/.env
+
       - name: Copy production compose to Box 3
         uses: appleboy/scp-action@v0.1.7
         with:
