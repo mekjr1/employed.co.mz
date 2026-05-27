@@ -1,0 +1,35 @@
+# One-time initialisation of Box 3 for employed.co.mz.
+# Run this manually (workflow_dispatch) before the first push to `uat`.
+# Creates /opt/employed/ with correct ownership and an empty .env
+# ready to receive secrets from the deploy workflow.
+
+name: Init Box 3
+
+on:
+  workflow_dispatch:
+
+jobs:
+  init:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Prepare /opt/employed on Box 3
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.BOX3_HOST }}
+          username: ubuntu
+          key: ${{ secrets.BOX3_SSH_KEY }}
+          script: |
+            set -e
+            sudo mkdir -p /opt/employed
+            sudo chown ubuntu:ubuntu /opt/employed
+            touch /opt/employed/.env
+            chmod 600 /opt/employed/.env
+            echo "/opt/employed initialised."
+            echo ""
+            echo "Next steps:"
+            echo "  1. Add EMPLOYED_UAT_* secrets to this GitHub repo."
+            echo "  2. Add Caddy routes for employed.xibodev.com / api.employed.xibodev.com."
+            echo "  3. Add Cloudflare DNS A records pointing to Box 3 (109.123.241.71)."
+            echo "  4. Push to the uat branch to trigger the full deploy."

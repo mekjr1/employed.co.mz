@@ -1,36 +1,136 @@
-# S-07 — UAT deploy pipeline.
-# Triggers on push to the `uat` branch. SSHs into Box A, pulls the
-# latest code, rebuilds the Docker stack, and runs a smoke test.
+# Deploy to Box 3 (109.123.241.71 — Consumer + SaaS).
+# Triggers on push to the `uat` branch.
 #
 # Required GitHub secrets:
-#   BOX_A_SSH_HOST, BOX_A_SSH_USER, BOX_A_SSH_KEY
+#   BOX3_HOST, BOX3_SSH_KEY (already set)
+#   EMPLOYED_UAT_DB_PASSWORD, EMPLOYED_UAT_SECRET_KEY, EMPLOYED_UAT_IP_SALT
+#   EMPLOYED_UAT_STRIPE_SK, EMPLOYED_UAT_STRIPE_WH_SECRET, EMPLOYED_UAT_STRIPE_PK
 #
-# The app directory on Box A is /home/$BOX_A_SSH_USER/apps/employed.
+# Box 3 layout:
+#   /opt/employed/docker-compose.yml  — production compose (GHCR images)
+#   /opt/employed/.env                — secrets (chmod 600, not committed)
 
-name: deploy-uat
+name: Deploy UAT
 
 on:
   push:
     branches: [uat]
+    paths-ignore: ["**.md", "docs/**"]
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+  build-backend:
+    uses: mekjr1/.github/.github/workflows/build-push-ghcr.yml@main
+    permissions:
+      contents: read
+      packages: write
+    with:
+      image-name: employed-api
+      context: "./backend"
+      dockerfile: Dockerfile
 
+  build-frontend:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy to Box A
-        uses: appleboy/ssh-action@v1
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
         with:
-          host: ${{ secrets.BOX_A_SSH_HOST }}
-          username: ${{ secrets.BOX_A_SSH_USER }}
-          key: ${{ secrets.BOX_A_SSH_KEY }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: ghcr.io/mekjr1/employed-frontend:uat
+          build-args: |
+            NEXT_PUBLIC_API_URL=https://api.employed.xibodev.com
+
+  deploy:
+    needs: [build-backend, build-frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy production compose to Box 3
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.BOX3_HOST }}
+          username: ubuntu
+          key: ${{ secrets.BOX3_SSH_KEY }}
+          source: "deploy/docker-compose.prod.yml"
+          target: "/opt/employed/"
+          strip_components: 1
+
+      - name: Upsert env, activate compose, and restart
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          POSTGRES_PASSWORD: ${{ secrets.EMPLOYED_UAT_DB_PASSWORD }}
+          SECRET_KEY: ${{ secrets.EMPLOYED_UAT_SECRET_KEY }}
+          IP_SALT: ${{ secrets.EMPLOYED_UAT_IP_SALT }}
+          STRIPE_SK: ${{ secrets.EMPLOYED_UAT_STRIPE_SK }}
+          STRIPE_WH: ${{ secrets.EMPLOYED_UAT_STRIPE_WH_SECRET }}
+          STRIPE_PK: ${{ secrets.EMPLOYED_UAT_STRIPE_PK }}
+        with:
+          host: ${{ secrets.BOX3_HOST }}
+          username: ubuntu
+          key: ${{ secrets.BOX3_SSH_KEY }}
+          envs: POSTGRES_PASSWORD,SECRET_KEY,IP_SALT,STRIPE_SK,STRIPE_WH,STRIPE_PK
           script: |
-            cd ~/apps/employed
-            git pull origin uat
-            docker compose up -d --build
-            sleep 10
-            curl -fsS http://localhost:3000/healthz | grep -q '"ok":true'
+            set -e
+
+            # Activate production compose (SCP lands as docker-compose.prod.yml)
+            mv -f /opt/employed/docker-compose.prod.yml /opt/employed/docker-compose.yml
+
+            # Upsert secrets into /opt/employed/.env
+            cd /opt/employed
+            touch .env && chmod 600 .env
+            upsert() {
+              key="$1"; val="$2"
+              if grep -q "^${key}=" .env; then
+                sed -i "s#^${key}=.*#${key}=${val}#" .env
+              else
+                printf '%s=%s\n' "$key" "$val" >> .env
+              fi
+            }
+
+            upsert POSTGRES_USER        employed
+            upsert POSTGRES_PASSWORD    "$POSTGRES_PASSWORD"
+            upsert POSTGRES_DB          employed
+            upsert DATABASE_URL         "postgresql://employed:${POSTGRES_PASSWORD}@postgres:5432/employed"
+            upsert REDIS_URL            "redis://redis:6379/0"
+            upsert SECRET_KEY           "$SECRET_KEY"
+            upsert JWT_ALGORITHM        HS256
+            upsert ACCESS_TOKEN_EXPIRE_MINUTES  30
+            upsert REFRESH_TOKEN_EXPIRE_DAYS    7
+            upsert STRIPE_SECRET_KEY    "$STRIPE_SK"
+            upsert STRIPE_WEBHOOK_SECRET "$STRIPE_WH"
+            upsert STRIPE_PUBLISHABLE_KEY "$STRIPE_PK"
+            upsert IP_SALT              "$IP_SALT"
+            upsert DEBUG                false
+            upsert NEXT_PUBLIC_API_URL  https://api.employed.xibodev.com
+            upsert FROM_EMAIL           "Employed <noreply@xibodev.com>"
+            upsert ADMIN_EMAIL          admin@employed.co.mz
+
+            # Pull updated images and restart services
+            docker compose pull
+            docker compose up -d --remove-orphans
+
+            # Wait for backend to become healthy (up to 60s)
+            for i in $(seq 1 10); do
+              if curl -fsSo /dev/null http://localhost:3301/health; then
+                echo "Backend healthy."
+                break
+              fi
+              [ "$i" -eq 10 ] && { echo "Backend never became healthy."; exit 1; }
+              echo "Waiting for backend ($i/10)..."
+              sleep 6
+            done
             echo "Deploy and smoke test passed."
