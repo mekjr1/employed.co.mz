@@ -5,6 +5,8 @@
 #   BOX3_HOST, BOX3_SSH_KEY (already set)
 #   EMPLOYED_UAT_DB_PASSWORD, EMPLOYED_UAT_SECRET_KEY, EMPLOYED_UAT_IP_SALT
 #   EMPLOYED_UAT_STRIPE_SK, EMPLOYED_UAT_STRIPE_WH_SECRET, EMPLOYED_UAT_STRIPE_PK
+#   EMPLOYED_UAT_RECAPTCHA_SITE_KEY, EMPLOYED_UAT_RECAPTCHA_SECRET_KEY
+#   EMPLOYED_UAT_GOOGLE_CLIENT_ID, EMPLOYED_UAT_GOOGLE_CLIENT_SECRET
 #
 # Box 3 layout:
 #   /opt/employed/docker-compose.yml  — production compose (GHCR images)
@@ -64,6 +66,7 @@ jobs:
           tags: ghcr.io/mekjr1/employed-frontend:uat
           build-args: |
             NEXT_PUBLIC_API_URL=https://api.employed.xibodev.com
+            NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${{ secrets.EMPLOYED_UAT_RECAPTCHA_SITE_KEY }}
 
   deploy:
     needs: [build-backend, build-frontend]
@@ -102,11 +105,15 @@ jobs:
           STRIPE_SK: ${{ secrets.EMPLOYED_UAT_STRIPE_SK }}
           STRIPE_WH: ${{ secrets.EMPLOYED_UAT_STRIPE_WH_SECRET }}
           STRIPE_PK: ${{ secrets.EMPLOYED_UAT_STRIPE_PK }}
+          RECAPTCHA_SK: ${{ secrets.EMPLOYED_UAT_RECAPTCHA_SECRET_KEY }}
+          RECAPTCHA_SITE: ${{ secrets.EMPLOYED_UAT_RECAPTCHA_SITE_KEY }}
+          GOOGLE_CLIENT_ID: ${{ secrets.EMPLOYED_UAT_GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.EMPLOYED_UAT_GOOGLE_CLIENT_SECRET }}
         with:
           host: ${{ secrets.BOX3_HOST }}
           username: ubuntu
           key: ${{ secrets.BOX3_SSH_KEY }}
-          envs: POSTGRES_PASSWORD,SECRET_KEY,IP_SALT,STRIPE_SK,STRIPE_WH,STRIPE_PK
+          envs: POSTGRES_PASSWORD,SECRET_KEY,IP_SALT,STRIPE_SK,STRIPE_WH,STRIPE_PK,RECAPTCHA_SK,RECAPTCHA_SITE,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET
           script: |
             set -e
 
@@ -138,6 +145,10 @@ jobs:
             upsert STRIPE_WEBHOOK_SECRET "$STRIPE_WH"
             upsert STRIPE_PUBLISHABLE_KEY "$STRIPE_PK"
             upsert IP_SALT              "$IP_SALT"
+            upsert RECAPTCHA_SECRET_KEY "$RECAPTCHA_SK"
+            upsert NEXT_PUBLIC_RECAPTCHA_SITE_KEY "$RECAPTCHA_SITE"
+            upsert GOOGLE_CLIENT_ID     "$GOOGLE_CLIENT_ID"
+            upsert GOOGLE_CLIENT_SECRET "$GOOGLE_CLIENT_SECRET"
             upsert DEBUG                false
             upsert NEXT_PUBLIC_API_URL  https://api.employed.xibodev.com
             upsert FROM_EMAIL           "Employed <noreply@xibodev.com>"
