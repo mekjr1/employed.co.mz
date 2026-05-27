@@ -2,9 +2,6 @@
 
 const PROVIDERS = [
   { key: "google", label: "Continue with Google", color: "#4285F4" },
-  { key: "facebook", label: "Continue with Facebook", color: "#1877F2" },
-  { key: "github", label: "Continue with GitHub", color: "#333333" },
-  { key: "twitter", label: "Continue with Twitter", color: "#1DA1F2" },
 ] as const;
 
 interface OAuthButtonsProps {

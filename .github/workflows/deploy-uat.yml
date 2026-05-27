@@ -7,6 +7,7 @@
 #   EMPLOYED_UAT_STRIPE_SK, EMPLOYED_UAT_STRIPE_WH_SECRET, EMPLOYED_UAT_STRIPE_PK
 #   EMPLOYED_UAT_RECAPTCHA_SITE_KEY, EMPLOYED_UAT_RECAPTCHA_SECRET_KEY
 #   EMPLOYED_UAT_GOOGLE_CLIENT_ID, EMPLOYED_UAT_GOOGLE_CLIENT_SECRET
+#   EMPLOYED_UAT_RESEND_API_KEY
 #
 # Box 3 layout:
 #   /opt/employed/docker-compose.yml  — production compose (GHCR images)
@@ -109,11 +110,12 @@ jobs:
           RECAPTCHA_SITE: ${{ secrets.EMPLOYED_UAT_RECAPTCHA_SITE_KEY }}
           GOOGLE_CLIENT_ID: ${{ secrets.EMPLOYED_UAT_GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.EMPLOYED_UAT_GOOGLE_CLIENT_SECRET }}
+          RESEND_API_KEY: ${{ secrets.EMPLOYED_UAT_RESEND_API_KEY }}
         with:
           host: ${{ secrets.BOX3_HOST }}
           username: ubuntu
           key: ${{ secrets.BOX3_SSH_KEY }}
-          envs: POSTGRES_PASSWORD,SECRET_KEY,IP_SALT,STRIPE_SK,STRIPE_WH,STRIPE_PK,RECAPTCHA_SK,RECAPTCHA_SITE,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET
+          envs: POSTGRES_PASSWORD,SECRET_KEY,IP_SALT,STRIPE_SK,STRIPE_WH,STRIPE_PK,RECAPTCHA_SK,RECAPTCHA_SITE,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,RESEND_API_KEY
           script: |
             set -e
 
@@ -149,6 +151,11 @@ jobs:
             upsert NEXT_PUBLIC_RECAPTCHA_SITE_KEY "$RECAPTCHA_SITE"
             upsert GOOGLE_CLIENT_ID     "$GOOGLE_CLIENT_ID"
             upsert GOOGLE_CLIENT_SECRET "$GOOGLE_CLIENT_SECRET"
+            upsert SMTP_HOST            smtp.resend.com
+            upsert SMTP_PORT            465
+            upsert SMTP_USERNAME        resend
+            upsert SMTP_PASSWORD        "$RESEND_API_KEY"
+            upsert SMTP_USE_SSL         true
             upsert DEBUG                false
             upsert NEXT_PUBLIC_API_URL  https://api.employed.xibodev.com
             upsert FROM_EMAIL           "Employed <noreply@xibodev.com>"

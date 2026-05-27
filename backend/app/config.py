@@ -30,6 +30,15 @@ class Settings(BaseSettings):
     database_pool_timeout: int = Field(default=30, alias="DATABASE_POOL_TIMEOUT")
     database_pool_recycle: int = Field(default=1800, alias="DATABASE_POOL_RECYCLE")
 
+    # Email / SMTP
+    smtp_host: str | None = Field(default=None, alias="SMTP_HOST")
+    smtp_port: int = Field(default=587, alias="SMTP_PORT")
+    smtp_username: str | None = Field(default=None, alias="SMTP_USERNAME")
+    smtp_password: str | None = Field(default=None, alias="SMTP_PASSWORD")
+    smtp_use_tls: bool = Field(default=False, alias="SMTP_USE_TLS")
+    smtp_use_ssl: bool = Field(default=False, alias="SMTP_USE_SSL")
+    email_from: str | None = Field(default=None, alias="FROM_EMAIL")
+
     @model_validator(mode="after")
     def apply_environment_defaults(self) -> "Settings":
         environment = (self.environment or "development").strip().lower()

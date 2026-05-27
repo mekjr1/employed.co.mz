@@ -2,17 +2,12 @@ from __future__ import annotations
 
 import smtplib
 from email.message import EmailMessage
-from typing import Any
 
 from app.config import settings
 
 
-def _setting(name: str, default: Any = None) -> Any:
-    return getattr(settings, name, default)
-
-
 def _smtp_ready() -> bool:
-    return bool(_setting("SMTP_HOST") and _setting("EMAIL_FROM"))
+    return bool(settings.smtp_host and settings.email_from)
 
 
 def send_email(*, to_email: str, subject: str, text_body: str, html_body: str | None = None) -> bool:
@@ -20,26 +15,19 @@ def send_email(*, to_email: str, subject: str, text_body: str, html_body: str | 
         return False
 
     message = EmailMessage()
-    message["From"] = _setting("EMAIL_FROM")
+    message["From"] = settings.email_from
     message["To"] = to_email
     message["Subject"] = subject
     message.set_content(text_body)
     if html_body:
         message.add_alternative(html_body, subtype="html")
 
-    host = _setting("SMTP_HOST")
-    port = int(_setting("SMTP_PORT", 25))
-    username = _setting("SMTP_USERNAME")
-    password = _setting("SMTP_PASSWORD")
-    use_tls = bool(_setting("SMTP_USE_TLS", False))
-    use_ssl = bool(_setting("SMTP_USE_SSL", False))
-
-    client_cls = smtplib.SMTP_SSL if use_ssl else smtplib.SMTP
-    with client_cls(host=host, port=port, timeout=10) as client:
-        if use_tls and not use_ssl:
+    client_cls = smtplib.SMTP_SSL if settings.smtp_use_ssl else smtplib.SMTP
+    with client_cls(host=settings.smtp_host, port=settings.smtp_port, timeout=10) as client:
+        if settings.smtp_use_tls and not settings.smtp_use_ssl:
             client.starttls()
-        if username and password:
-            client.login(username, password)
+        if settings.smtp_username and settings.smtp_password:
+            client.login(settings.smtp_username, settings.smtp_password)
         client.send_message(message)
     return True
 
