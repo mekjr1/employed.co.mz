@@ -1,132 +1,127 @@
 # Settings Reference
 
-> Complete reference for `settings-example.json`. All keys, their purpose,
-> and whether they're required in production.
-
-## Boot validation
-
-`server/startup-checks.js` runs at startup and **refuses to boot** if:
-
-- Any value still contains its placeholder string (e.g., `"Stripe Secret Key"`)
-- `private.ipSalt` is shorter than 16 characters
-- reCAPTCHA keys are missing (unless `bypassInDevelopment: true` in dev)
-- Stripe keys are missing in production
+> Environment variable reference for the FastAPI backend and Next.js frontend.
+> All env vars are injected at runtime via `/opt/employed/.env` on Box 3.
+> See `deploy/.env.example` for a local development template.
 
 ---
 
-## `public` (sent to client)
+## Core
 
-| Key | Required | Default | Description |
-|-----|----------|---------|-------------|
-| `public.uploadcare.publickey` | Optional | — | UploadCare widget key for image uploads. Omit if not using file uploads. |
-| `public.Stripe.pubKey` | Prod: Yes | — | Stripe publishable key (`pk_test_...` or `pk_live_...`). Required for featured-job checkout UI. |
-| `public.recaptcha.v3SiteKey` | Prod: Yes | — | Google reCAPTCHA v3 site key. Required unless bypass is enabled. |
-| `public.recaptcha.bypassInDevelopment` | Optional | `false` | Set `true` in dev to skip reCAPTCHA verification. **Never enable in production.** |
-| `public.astronomer.appId` | Optional | — | Astronomer.io analytics app ID. Legacy; can be omitted. |
-| `public.sentry.dsn` | Optional | — | Client-side Sentry DSN. If absent, error reporter is a no-op. |
-| `public.sentry.environment` | Optional | `"development"` | Sentry environment tag (e.g., `"production"`, `"staging"`). |
-| `public.sentry.release` | Optional | `""` | Sentry release tag for source-map association. |
-| `public.sentry.tracesSampleRate` | Optional | `0` | Performance tracing sample rate (`0`–`1`). Set `> 0` in production for APM. |
-| `public.ads.enabled` | Optional | `false` | Toggle ad surfaces in the UI. |
-| `public.ads.mock` | Optional | `true` | Render mock/placeholder ads instead of real ad network tags. |
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `SECRET_KEY` | **Yes (prod)** | `development-only-secret-key` (dev only) | JWT signing key. Must be a long random string in production. Boot refuses to issue tokens if absent in prod. |
+| `ENVIRONMENT` | No | `development` | Affects CORS, debug output, HSTS header, and error responses. Set `production` on Box 3. |
+| `DEBUG` | No | `false` | Enables full tracebacks in error responses. Never `true` in production. |
+| `IP_SALT` | **Yes** | `change-me` | Salt for IP anonymisation in rate-limit and report tracking. Must be ≥16 chars in production. |
+| `LOG_LEVEL` | No | `INFO` | Python logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`). |
 
 ---
 
-## `kadira` (top-level, legacy)
+## Database
 
-| Key | Required | Default | Description |
-|-----|----------|---------|-------------|
-| `kadira.appId` | Optional | — | Kadira/Monti APM app ID. Legacy monitoring; can be omitted. |
-| `kadira.appSecret` | Optional | — | Kadira/Monti APM secret. Legacy; can be omitted. |
-
----
-
-## `Stripe` (top-level, legacy)
-
-| Key | Required | Default | Description |
-|-----|----------|---------|-------------|
-| `Stripe.secretKey` | See below | — | Legacy location for Stripe secret key. Superseded by `private.stripe.secretKey`. If both are set, `private.stripe.secretKey` takes precedence. |
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `DATABASE_URL` | **Yes** | `postgresql://postgres:postgres@localhost:5432/employed` | SQLAlchemy DSN. Use `postgresql://` (sync driver auto-upgraded to asyncpg at runtime). |
+| `POSTGRES_USER` | Yes (compose) | — | PostgreSQL user — consumed by the `postgres` service in compose. |
+| `POSTGRES_PASSWORD` | Yes (compose) | — | PostgreSQL password. |
+| `POSTGRES_DB` | Yes (compose) | — | PostgreSQL database name. |
+| `REDIS_URL` | No | — | Redis DSN (`redis://redis:6379/0`). Required for arq job queue and session caching. |
 
 ---
 
-## `private` (server-only)
+## Auth / JWT
 
-### Core
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `JWT_ALGORITHM` | No | `HS256` | HMAC algorithm for JWT signing. |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | No | `30` | Access token TTL in minutes. |
+| `REFRESH_TOKEN_EXPIRE_DAYS` | No | `7` | Refresh token TTL in days. |
 
-| Key | Required | Default | Description |
-|-----|----------|---------|-------------|
-| `private.adminEmail` | Recommended | — | Email address for admin notifications (new job posted, flagged content). |
-| `private.fromEmail` | Recommended | — | Sender address for transactional email (e.g., `"Employed <admin@employed.co.mz>"`). |
-| `private.ipSalt` | **Yes** | — | Random string (≥16 chars) used to hash IP addresses for privacy. Boot fails if too short. |
+---
+
+## Email (Resend SMTP relay)
+
+UAT uses Resend's SMTP relay at `smtp.resend.com:465` with SSL.
+Sender is `noreply@xibodev.com` (domain verified in Resend).
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `SMTP_HOST` | No | — | SMTP server hostname. If absent, email is silently disabled. UAT: `smtp.resend.com`. |
+| `SMTP_PORT` | No | `587` | SMTP port. UAT: `465` (SSL). |
+| `SMTP_USERNAME` | No | — | SMTP auth username. Resend uses the literal string `resend`. |
+| `SMTP_PASSWORD` | No | — | SMTP auth password. For Resend, this is the API key (`re_...`). |
+| `SMTP_USE_SSL` | No | `false` | Use SSL (SMTP_SSL). Set `true` for port 465. |
+| `SMTP_USE_TLS` | No | `false` | Use STARTTLS. Set `true` for port 587. Mutually exclusive with SSL. |
+| `FROM_EMAIL` | No | — | Sender address displayed in outgoing mail (e.g., `Employed <noreply@xibodev.com>`). Required alongside `SMTP_HOST` for email to send. |
+| `ADMIN_EMAIL` | No | `admin@employed.co.mz` | Recipient for admin notifications. |
+
+---
+
+## Payments
 
 ### Stripe
 
-| Key | Required | Default | Description |
-|-----|----------|---------|-------------|
-| `private.stripe.secretKey` | **Prod: Yes** | — | Stripe secret key (`sk_test_...` or `sk_live_...`). Can also be set via `STRIPE_SECRET_KEY` env var. |
-| `private.stripe.webhookSecret` | **Prod: Yes** | — | Stripe webhook signing secret (`whsec_...`). Can also be set via `STRIPE_WEBHOOK_SECRET` env var. |
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `STRIPE_SECRET_KEY` | Prod: Yes | `sk_test_...` | Stripe secret key. Test mode: `sk_test_...`, live: `sk_live_...`. |
+| `STRIPE_WEBHOOK_SECRET` | Prod: Yes | `whsec_...` | Stripe webhook signing secret. Each webhook endpoint in the dashboard has its own secret. |
+| `STRIPE_PUBLISHABLE_KEY` | No | `pk_test_...` | Stripe publishable key. Baked into frontend at build time via `NEXT_PUBLIC_*`. |
 
 ### M-Pesa (Vodacom Mozambique)
 
-| Key | Required | Default | Description |
-|-----|----------|---------|-------------|
-| `private.mpesa.simulate` | Optional | `true` | Enable simulator mode. Set `false` + configure real keys for live payments. |
-| `private.mpesa.shortcode` | Live: Yes | — | Vodacom M-Pesa business shortcode. |
-| `private.mpesa.consumerKey` | Live: Yes | — | M-Pesa REST API consumer key. |
-| `private.mpesa.consumerSecret` | Live: Yes | — | M-Pesa REST API consumer secret. |
-| `private.mpesa.callbackUrl` | Live: Yes | — | Public URL for M-Pesa webhook callbacks. |
-| `private.mpesa.webhookSecret` | Live: Yes | — | HMAC secret for verifying inbound webhooks. |
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `MPESA_WEBHOOK_SECRET` | Live: Yes | — | HMAC secret for verifying M-Pesa callback signatures. If absent, callbacks are rejected. |
 
 ### e-Mola (Movitel Mozambique)
 
-| Key | Required | Default | Description |
-|-----|----------|---------|-------------|
-| `private.emola.simulate` | Optional | `true` | Enable simulator mode. |
-| `private.emola.partnerId` | Live: Yes | — | Movitel e-Mola partner ID. |
-| `private.emola.apiKey` | Live: Yes | — | Movitel e-Mola API key. |
-| `private.emola.callbackUrl` | Live: Yes | — | Public URL for e-Mola webhook callbacks. |
-| `private.emola.webhookSecret` | Live: Yes | — | HMAC secret for verifying inbound webhooks. |
-
-### reCAPTCHA
-
-| Key | Required | Default | Description |
-|-----|----------|---------|-------------|
-| `private.recaptcha.v3SecretKey` | **Prod: Yes** | — | Server-side reCAPTCHA v3 secret key. |
-| `private.recaptcha.scoreThreshold` | Optional | `0.5` | Minimum score to accept a submission (0.0–1.0). |
-
-### Dev seed data
-
-| Key | Required | Default | Description |
-|-----|----------|---------|-------------|
-| `private.devSeed.enabled` | Optional | `false` | Generate seed data on boot. **Dev/staging only.** |
-| `private.devSeed.reset` | Optional | `false` | Wipe existing data before seeding. **Destructive.** |
-| `private.devSeed.admins` | Optional | `2` | Number of admin accounts to create. |
-| `private.devSeed.users` | Optional | `100` | Number of regular user accounts to create. |
-| `private.devSeed.jobs` | Optional | `400` | Number of job listings to create. |
-| `private.devSeed.password` | Optional | `"seedpass123"` | Password for all seed accounts. |
-
-### Sentry (server-side)
-
-| Key | Required | Default | Description |
-|-----|----------|---------|-------------|
-| `private.sentry.dsn` | Optional | — | Server-side Sentry DSN. If absent, reporter is a no-op. |
-| `private.sentry.environment` | Optional | `"development"` | Sentry environment tag. |
-| `private.sentry.release` | Optional | `""` | Sentry release tag. |
-| `private.sentry.tracesSampleRate` | Optional | `0` | Server-side performance tracing rate. |
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `EMOLA_WEBHOOK_SECRET` | Live: Yes | — | HMAC secret for verifying e-Mola callback signatures. |
 
 ---
 
-## Environment variable overrides
+## OAuth Providers
 
-These env vars override settings-file values at runtime:
+All OAuth providers are optional. If `GOOGLE_CLIENT_ID` is absent, Google OAuth returns a 501. Other providers follow the same pattern.
 
-| Env var | Overrides |
-|---------|-----------|
-| `STRIPE_SECRET_KEY` | `private.stripe.secretKey` |
-| `STRIPE_WEBHOOK_SECRET` | `private.stripe.webhookSecret` |
-| `SENTRY_DSN` | `private.sentry.dsn` (server) |
-| `ROOT_URL` | Meteor core — base URL for OAuth, emails, canonical tags |
-| `MONGO_URL` | Meteor core — MongoDB connection string |
-| `MONGO_OPLOG_URL` | Meteor core — oplog tailing for reactive performance |
-| `MAIL_URL` | Meteor core — SMTP URL for transactional email |
-| `PORT` | Meteor core — HTTP port (default 3000) |
+| Variable | Provider |
+|----------|----------|
+| `GOOGLE_CLIENT_ID` | Google OAuth 2.0 |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth 2.0 |
+| `FACEBOOK_CLIENT_ID` | Facebook Login |
+| `FACEBOOK_CLIENT_SECRET` | Facebook Login |
+| `GITHUB_CLIENT_ID` | GitHub OAuth |
+| `GITHUB_CLIENT_SECRET` | GitHub OAuth |
+| `TWITTER_CLIENT_ID` | Twitter/X OAuth |
+| `TWITTER_CLIENT_SECRET` | Twitter/X OAuth |
+
+---
+
+## reCAPTCHA v3
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `RECAPTCHA_SECRET_KEY` | No | — | Server-side reCAPTCHA v3 secret. If absent, score verification is skipped and submissions pass without bot protection. |
+| `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` | No | — | Client-side site key. **Must be baked in at Docker build time** via `--build-arg`. If absent, the frontend skips the reCAPTCHA widget. |
+
+---
+
+## Frontend build args
+
+These are baked into the Next.js Docker image at build time (not runtime). They must be passed as `--build-arg` to `docker build` and declared as `ARG` in the Dockerfile.
+
+| Build arg | Effect |
+|-----------|--------|
+| `NEXT_PUBLIC_API_URL` | Backend API base URL seen by the browser (e.g., `https://api.employed.xibodev.com`). |
+| `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` | reCAPTCHA site key used by the reCAPTCHA widget. |
+
+---
+
+## Observability
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `SENTRY_DSN` | No | — | Sentry DSN for error reporting. If absent, error reporter is a no-op. |
+| `SENTRY_ENVIRONMENT` | No | — | Sentry environment tag (e.g., `uat`, `production`). |

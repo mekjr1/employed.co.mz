@@ -5,122 +5,93 @@
 ## Market resolution
 
 ```
-Hostname                  Market key     Country    Default locale    Pricing
-──────────────────────    ──────────     ───────    ──────────────    ────────────
-mz.employed.co.mz        mz             MZ         pt                MZN 2,500
-mx.employed.co.mz        mx             MX         es                MX$999
-localhost / unknown       mz (default)   MZ         pt                MZN 2,500
+Hostname                        Market key     Country    Default locale    Pricing
+──────────────────────────────  ──────────     ───────    ──────────────    ────────────
+mz.employed.xibodev.com         mz             MZ         pt                MZN 2,500
+mx.employed.xibodev.com         mx             MX         es                MX$999
+employed.xibodev.com            mz (default)   MZ         pt                MZN 2,500
+localhost / unknown             mz (default)   MZ         pt                MZN 2,500
 ```
 
-### How it works
+### How it works (backend)
 
-1. **`marketKeyFromHostname(host)`** extracts the first subdomain label
-   (`mz`, `mx`) and looks it up in the `MARKETS` object
-   (`both/lib/constants.js`).
-2. If the subdomain doesn't match a known market, it falls back to
-   `DEFAULT_MARKET_KEY = "mz"`.
-3. Each market defines: `country`, `locale`, `featuredJob` (pricing),
-   and `paymentProviders`.
+1. `MarketMiddleware` (`backend/app/middleware/market.py`) reads the `Host` header on every request.
+2. The first subdomain label (`mz`, `mx`) is looked up in `MARKETS` (`backend/app/services/market.py`).
+3. If the subdomain doesn't match a known market, it falls back to `DEFAULT_MARKET_KEY = "mz"`.
+4. The resolved market dict is stored in `request.state.market` and injected via `Depends(get_current_market)`.
 
 ### Market definitions
 
-```js
-// both/lib/constants.js
+```python
+# backend/app/services/market.py
 MARKETS = {
-  mz: {
-    country: 'MZ',
-    locale: 'pt',
-    featuredJob: { amount: 250000, currency: 'mzn', label: 'MZN 2,500' },
-    paymentProviders: ['mpesa', 'emola', 'stripe']
-  },
-  mx: {
-    country: 'MX',
-    locale: 'es',
-    featuredJob: { amount: 99900, currency: 'mxn', label: 'MX$999' },
-    paymentProviders: ['stripe']
-  }
+    "mz": {
+        "country": "MZ",
+        "locale": "pt",
+        "featured_job": {"amount": 250000, "currency": "mzn", "label": "MZN 2,500"},
+        "payment_providers": ["mpesa", "emola", "stripe"],
+    },
+    "mx": {
+        "country": "MX",
+        "locale": "es",
+        "featured_job": {"amount": 99900, "currency": "mxn", "label": "MX$999"},
+        "payment_providers": ["stripe"],
+    },
 }
 ```
+
+### How it works (frontend)
+
+`frontend/src/lib/market.ts` resolves the market from `window.location.hostname` using the same subdomain logic. It provides the `useMarket()` hook used by components that need market-aware pricing or locale defaults.
 
 ---
 
 ## Locale resolution
 
-The UI supports three languages: **English (`en`)**, **Spanish (`es`)**, and
-**Portuguese (`pt`)**.
+The UI supports three languages: **English (`en`)**, **Spanish (`es`)**, and **Portuguese (`pt`)**.
 
 ### Priority order
 
-1. **User override** — `Session.get('locale')`, persisted in
-   `localStorage['employed.locale']`
-2. **Market default** — `currentMarket().locale`
+1. **User override** — stored in `localStorage['employed.locale']`
+2. **Market default** — `currentMarket().locale` (`mz → pt`, `mx → es`)
 3. **Fallback** — `'en'`
-
-### How visitors change language
-
-The header dropdown calls `setLocale(code)` which:
-- Sets `Session('locale')` for reactive re-render
-- Writes `localStorage['employed.locale']` for persistence across page loads
-
-On startup, the stored locale is restored from `localStorage`.
-
-### Locale buckets
-
-Extended locale tags like `es-MX` or `pt-MZ` are stripped to the base
-bucket (`es`, `pt`) by `resolveBucket()`. Only three translation buckets
-exist.
 
 ### Translation system
 
-Translations live in `both/lib/i18n.js` as a flat `Translations` object
-with `en`, `es`, and `pt` keys:
+Translations live in `frontend/src/lib/i18n/` as JSON files keyed by locale (`en.json`, `es.json`, `pt.json`).
 
-```js
-// Template usage
-{{t 'hero.title' appName=appName}}
+Adding a translation is a three-file change — add the key to all three locale files.
 
-// JS usage
-t('hero.title', { appName: 'Employed' })
-```
-
-Adding a translation is a single-file change — add the key to all three
-buckets in `both/lib/i18n.js`.
+Locale codes used throughout: `en`, `pt`, `es` (STANDARDS §4 — no extended tags like `pt-MZ`).
 
 ---
 
 ## Country assignment
 
-When a job is created via `jobs.create`:
+When a job is created via `POST /jobs`:
 
-1. Server resolves the market from the DDP connection's `Host` header
-2. `doc.country` is **force-set** to `market.country` — the client-supplied
-   value is ignored
-3. If the client sends a `marketKey` that doesn't match the connection's
-   market, the method throws
+1. Backend resolves the market from the `Host` header via `get_current_market()`
+2. `job.country` is **force-set** to `market["country"]` — any client-supplied value is ignored
+3. If the client sends a `market_key` that doesn't match the connection's market, the request is rejected
 
-This prevents cross-market pollution (e.g., posting an MX job from the MZ
-subdomain).
+This prevents cross-market pollution (e.g., posting an MX job from the MZ subdomain).
 
 ---
 
 ## SEO and locale
 
-`client/lib/seo.js` handles search-engine localization:
+`frontend/src/lib/seo.ts` handles search-engine localization:
 
-- **`applySeo(routeKey, vars)`** — sets page title and `og:` tags using
-  the current market name and locale-specific strings
-- **`applyHreflangAndCanonical()`** — emits `<link rel="canonical">` and
-  `<link rel="alternate" hreflang="...">` tags for all configured locales
-- Dates are formatted via `Intl.DateTimeFormat` using the current locale
+- Sets `<link rel="canonical">` and `<link rel="alternate" hreflang="...">` tags
+- Uses `Intl.DateTimeFormat` with the current locale for date rendering
 
 ---
 
 ## Adding a new market
 
-1. Add an entry to `MARKETS` in `both/lib/constants.js` with `country`,
-   `locale`, `featuredJob` pricing, and `paymentProviders`
-2. Add country to `COUNTRIES` array in the same file
-3. Configure DNS — point `<key>.employed.co.mz` to the app
-4. Add translations for any market-specific copy in `both/lib/i18n.js`
-5. If the market uses a new locale, add a fourth translation bucket
-   to `both/lib/i18n.js`
+1. Add an entry to `MARKETS` in `backend/app/services/market.py` with `country`, `locale`, `featured_job` pricing, and `payment_providers`
+2. Add the same entry to `frontend/src/lib/market.ts`
+3. Add translations for any market-specific copy to all three locale files in `frontend/src/lib/i18n/`
+4. Configure DNS — point `<key>.employed.xibodev.com` (UAT) or `<key>.employed.co.mz` (prod) to the app
+5. Add a Caddy reverse-proxy block for the new subdomain on Box 3
+6. If the market uses a new locale, add a fourth translation file

@@ -1,70 +1,71 @@
 # Operations Runbook
 
 > Incident response, log triage, and operational procedures for Employed.
+> Stack: FastAPI + Next.js 15 · PostgreSQL 16 · Redis 7 · Docker Compose · Box 3 (`109.123.241.71`)
+
+---
 
 ## Health checks
 
 ### Quick status
 
 ```bash
-# Liveness
-curl -fsS https://employed.co.mz/healthz
+# Backend (FastAPI)
+curl -fsS https://api.employed.xibodev.com/health
 
-# Readiness (includes startup check)
-curl -fsS https://employed.co.mz/healthz?readiness=1
-
-# Database connectivity
-curl -fsS https://employed.co.mz/healthz?db=1
-
-# Full smoke
-curl -fsS https://employed.co.mz/healthz?readiness=1&db=1
+# Frontend (Next.js)
+curl -fsS https://employed.xibodev.com/api/health
 ```
 
-Expected: `{ "ok": true, "time": "...", "ready": true, "db": "ok" }`
+**Backend healthy response:**
+```json
+{ "status": "ok", "db": "ok", "redis": "ok" }
+```
 
-### Automated monitoring
+**Frontend healthy response:**
+```json
+{ "status": "ok", "service": "employed-frontend" }
+```
 
-Point UptimeRobot (or equivalent) at `/healthz?db=1` with a 60-second
-interval. Alert on any non-200 response.
+### On Box 3 (SSH)
+
+```bash
+ssh ubuntu@109.123.241.71
+cd /opt/employed
+docker compose ps               # all services running?
+docker compose logs --tail=50 backend
+docker compose logs --tail=50 frontend
+```
 
 ---
 
 ## Log triage
 
-### Log format
-
-All server logs are JSON to stdout via `server/lib/log.js`:
-
-```json
-{ "level": "info", "msg": "...", "timestamp": "ISO-8601", ... }
-```
-
 ### Where to find logs
 
-| Deployment | Location |
-|------------|----------|
-| Docker | `docker logs <container>` or stdout forwarding to collector |
-| Galaxy | Galaxy dashboard → Logs tab |
-| Datadog/Logtail/Loki | Search by service name |
+All services write to stdout; `docker compose logs` aggregates them.
+
+```bash
+# Follow backend logs in real time
+docker compose logs -f backend
+
+# Last 100 lines from a service
+docker compose logs --tail=100 worker
+
+# All services since 30 minutes ago
+docker compose logs --since=30m
+```
 
 ### Common log patterns
 
 | Pattern | Meaning | Action |
 |---------|---------|--------|
-| `"msg":"Startup checks passed"` | App booted successfully | None |
-| `"msg":"Startup check failed"` | Missing or invalid settings | Check `settings.json` — see error detail |
-| `"msg":"Stripe webhook.*signature"` | Webhook signature mismatch | Verify `STRIPE_WEBHOOK_SECRET` matches Stripe dashboard |
-| `"msg":"Rate limit exceeded"` | IP hit rate limit | Monitor for abuse; consider blocklisting |
-| `"msg":"deactivateExpiredJobs"` | Cron ran job expiration | Normal — runs daily |
-| `"msg":"Account deletion"` | Cron deleted inactive accounts | Normal — **irreversible**, ensure backup exists |
-
-### Error tracking
-
-Errors are reported to **Sentry** (`server/error-reporter.js`).
-
-- Dashboard: Sentry project for Employed
-- DSN configured via `settings.private.sentry.dsn` + `settings.public.sentry.dsn`
-- If DSN is absent, the reporter is a no-op (safe for dev)
+| `"status":"ok","db":"ok"` | Backend booted, DB connected | None |
+| `"db":"error"` in `/health` response | PostgreSQL unreachable | `docker compose logs postgres` |
+| `"redis":"error"` in `/health` response | Redis unreachable | `docker compose logs redis` |
+| `"Stripe webhook.*signature"` | Webhook signature mismatch | Check `STRIPE_WEBHOOK_SECRET` matches Stripe dashboard |
+| `alembic.runtime.migration` | Migration running on startup | Normal — `migrate` service runs once |
+| `OSError: [Errno 111] Connection refused` | Service dependency not ready | Usually transient; check health on the failing dependency |
 
 ---
 
@@ -74,133 +75,124 @@ Errors are reported to **Sentry** (`server/error-reporter.js`).
 
 | Level | Definition | Response time |
 |-------|-----------|---------------|
-| **P1 — Outage** | App is down, `/healthz` failing | Immediate |
-| **P2 — Degraded** | Payments failing, jobs not loading, auth broken | < 1 hour |
+| **P1 — Outage** | App is down, `/health` failing | Immediate |
+| **P2 — Degraded** | Payments failing, auth broken, DB errors | < 1 hour |
 | **P3 — Minor** | Cosmetic issues, non-critical feature broken | Next business day |
 
 ### P1 — App is down
 
-1. **Verify:** `curl https://employed.co.mz/healthz?db=1`
-2. **Check hosting:**
-   - Docker: `docker ps`, `docker logs <container>`
-   - Galaxy: Galaxy dashboard status
-3. **Check MongoDB:** `curl https://employed.co.mz/healthz?db=1` — if `db: "error"`,
-   check Atlas/Mongo status
-4. **Check recent deploys:** Was there a deployment in the last hour? If yes,
-   rollback (see below)
-5. **Restart:** `docker restart <container>` or Galaxy redeploy
+1. **Verify:** `curl https://api.employed.xibodev.com/health`
+2. **SSH to Box 3:** `ssh ubuntu@109.123.241.71`
+3. **Check containers:** `cd /opt/employed && docker compose ps`
+4. **Check logs:** `docker compose logs --tail=100 backend`
+5. **Restart backend:** `docker compose restart backend`
+6. **If postgres is down:** `docker compose restart postgres` then wait for healthcheck to pass before restarting backend
+7. **Check recent deploy:** Was there a push to `uat` in the last hour? If yes, roll back (see below).
 
 ### P2 — Payments failing
 
-1. Check Sentry for payment-related errors
-2. Verify Stripe status: https://status.stripe.com
-3. Check webhook delivery in Stripe dashboard → Webhooks → Recent events
-4. Verify `STRIPE_WEBHOOK_SECRET` hasn't rotated
-5. For M-Pesa/e-Mola in simulator mode: check server logs for settlement errors
+1. Check Stripe status: https://status.stripe.com
+2. Inspect webhook delivery in Stripe dashboard → Webhooks → Recent events
+3. Verify `STRIPE_WEBHOOK_SECRET` in `/opt/employed/.env` matches the dashboard
+4. `docker compose logs --tail=50 backend | grep -i stripe`
 
-### P2 — Auth broken
+### P2 — Database unreachable
 
-1. Check Sentry for `accounts` errors
-2. Verify MongoDB is reachable (`/healthz?db=1`)
-3. Check if `Accounts` package versions changed in a recent deploy
+```bash
+docker compose logs postgres
+docker compose exec postgres pg_isready -U employed -d employed
+# if postgres is running but backend can't connect, check DATABASE_URL in .env
+cat /opt/employed/.env | grep DATABASE_URL
+```
 
 ---
 
 ## Deployment
 
-### Pre-deploy checklist
+### Standard deploy
 
-- [ ] `npm run lint` passes
-- [ ] `meteor npm test` passes
-- [ ] Backup MongoDB: `mongodump --uri "$MONGO_URL" --archive=backup-$(date +%Y%m%d).gz --gzip`
-- [ ] Review `server/migrations.js` for any new destructive migrations
-- [ ] Verify `settings-production.json` has no placeholder values
-
-### Deploy
-
-**Docker:**
-```bash
-docker build -f Dockerfile.prod -t employed:$(date +%Y%m%d) .
-docker stop employed-prod
-docker run -d --name employed-prod -p 3000:3000 \
-  -e ROOT_URL=https://employed.co.mz \
-  -e MONGO_URL='...' \
-  -e MAIL_URL='...' \
-  -e METEOR_SETTINGS="$(cat settings-production.json)" \
-  employed:$(date +%Y%m%d)
-```
-
-**Galaxy:**
-```bash
-meteor deploy employed.co.mz --settings settings-production.json
-```
-
-### Post-deploy verification
+Push to the `uat` branch — GitHub Actions builds and deploys automatically.
 
 ```bash
-curl -fsS https://employed.co.mz/healthz?readiness=1&db=1
-curl -fsS https://employed.co.mz/api/jobs | head -c 200
-curl -fsS https://employed.co.mz/sitemap.xml | head -5
+git push origin uat
 ```
 
-Then: sign in, post a test job, verify it appears, deactivate it.
+Pipeline stages (parallel builds, then sequential deploy):
+1. **build-backend** — pushes `ghcr.io/mekjr1/employed-api:uat`
+2. **build-frontend** — pushes `ghcr.io/mekjr1/employed-frontend:uat`
+3. **deploy** — SCPs compose file, upserts `.env`, `docker compose pull && up -d`, smoke tests `/health`
+
+Monitor at: `gh run list --repo mekjr1/employed.co.mz`
 
 ### Rollback
 
-**Docker:** Run the previous image tag:
+The previous image is still in GHCR. To rollback:
+
 ```bash
-docker stop employed-prod
-docker run -d --name employed-prod ... employed:<previous-tag>
+ssh ubuntu@109.123.241.71
+cd /opt/employed
+
+# Pull the previous image tag (or use a specific digest)
+docker compose pull
+
+# Or: temporarily pin the image digest in docker-compose.yml
+# image: ghcr.io/mekjr1/employed-api@sha256:<previous-digest>
+docker compose up -d
 ```
 
-**Galaxy:** Redeploy from the previous commit:
+For a code rollback, revert the `uat` branch and push:
+
 ```bash
-git checkout <previous-commit>
-meteor deploy employed.co.mz --settings settings-production.json
+git revert HEAD && git push origin uat
 ```
 
-**If a destructive migration ran:** Restore the pre-deploy MongoDB backup:
+### Manual deploy (emergency, no CI)
+
 ```bash
-mongorestore --uri "$MONGO_URL" --archive=backup-YYYYMMDD.gz --gzip --drop
+ssh ubuntu@109.123.241.71
+cd /opt/employed
+docker compose pull
+docker compose up -d --remove-orphans
 ```
 
 ---
 
 ## Scheduled tasks
 
-The `server/cron.js` module runs these on a timer:
+The arq `worker` service runs these background tasks:
 
 | Task | Schedule | Effect | Reversible? |
 |------|----------|--------|-------------|
-| `deactivateExpiredJobs` | Daily | Sets jobs older than 90 days to `inactive` | Yes — set status back to `active` |
-| Account deletion | Daily | Deletes users marked for deletion + their jobs | **No — irreversible** |
+| `deactivate_expired_jobs` | Daily | Sets jobs older than 90 days to `inactive` | Yes — update status back to `active` |
+| Account deletion | Daily | Deletes users with pending deletion requests + their jobs | **No — irreversible** |
 
-**⚠️ Run a backup before the first deploy that includes account deletion.**
+Run a backup before any deploy that includes changes to these tasks.
 
 ---
 
-## Backup and restore
+## Secrets management
 
-### Backup
+Secrets live in `/opt/employed/.env` (chmod 600). They are written by the deploy workflow from GitHub Actions secrets and never committed to the repo.
 
-```bash
-# Nightly backup (set up as a cron job on a separate host)
-mongodump --uri "$MONGO_URL" --archive=backup-$(date +%Y%m%d).gz --gzip
-```
-
-### Restore
+To inspect a secret on Box 3 (without revealing the value):
 
 ```bash
-mongorestore --uri "$MONGO_URL" --archive=backup-YYYYMMDD.gz --gzip --drop
+ssh ubuntu@109.123.241.71
+grep "^STRIPE_SECRET_KEY=" /opt/employed/.env | cut -c1-30
 ```
 
-### Verification
+To rotate a secret:
+1. Update the GitHub Actions secret (`gh secret set EMPLOYED_UAT_<NAME>`)
+2. Push a no-op commit to `uat` to trigger a redeploy
+3. The deploy upserts the new value into `.env` automatically
 
-After restore, run the smoke tests:
-```bash
-curl -fsS https://employed.co.mz/healthz?db=1
-curl -fsS https://employed.co.mz/api/jobs
-```
+---
+
+## Scaling / resource notes
+
+- Backend: FastAPI with uvicorn workers. For higher load, increase `--workers` in the backend `command` in `docker-compose.prod.yml`.
+- Redis: used for arq job queue + session caching. No persistence needed (in-memory only).
+- PostgreSQL: data stored in a named Docker volume `postgres_data`. Back up regularly.
 
 ---
 

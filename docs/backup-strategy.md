@@ -1,28 +1,38 @@
 # Backup Strategy & Disaster Recovery
 
-> employed.co.mz — MongoDB + Meteor
+> employed.co.mz — PostgreSQL 16 on Box 3 (`109.123.241.71`)
+
+---
 
 ## 1. Data Classification
 
 | Store | RPO | RTO | Notes |
 |-------|-----|-----|-------|
-| MongoDB (jobs, users, paymentIntents, jobReports) | 1 hour | 4 hours | Primary business data |
-| Stripe event log | N/A | N/A | Stripe retains this; webhook replay available |
-| UploadCare CDN assets | N/A | N/A | Hosted externally; no backup needed |
-| `.meteor/local` | N/A | Rebuild | Ephemeral build cache |
+| PostgreSQL (jobs, users, payment_intents, job_reports, profiles) | 1 hour | 4 hours | Primary business data — Docker volume `postgres_data` |
+| Stripe event log | N/A | N/A | Stripe retains this; webhook replay available via Stripe dashboard |
+| Redis | N/A | Minutes | Ephemeral cache/queue — no backup needed |
+
+---
 
 ## 2. Backup Schedule
 
-### MongoDB — `mongodump`
+### PostgreSQL — `pg_dump`
 
 ```bash
-# Runs via cron on the host (or a sidecar container)
+# Runs via cron on Box 3 (or a sidecar container)
 # Every 6 hours — matches RPO target of 1 hour with margin
-0 */6 * * * /usr/bin/mongodump \
-  --uri="$MONGO_URL" \
-  --gzip \
-  --archive=/backups/employed-$(date +\%Y\%m\%d-\%H\%M).gz \
+0 */6 * * * docker exec employed-postgres-1 \
+  pg_dump -U employed -d employed --format=custom \
+  > /backups/employed-$(date +%Y%m%d-%H%M).dump \
   2>> /var/log/backup.log
+```
+
+Or using `docker compose exec`:
+
+```bash
+docker compose -f /opt/employed/docker-compose.yml exec -T postgres \
+  pg_dump -U employed -d employed --format=custom \
+  > /backups/employed-$(date +%Y%m%d-%H%M).dump
 ```
 
 ### Retention
@@ -37,77 +47,77 @@ Old backups are pruned by a `find /backups -mtime +N -delete` cron.
 
 ### Off-site Copy
 
-Upload the daily backup to a remote location (S3, B2, rsync to a second server):
-
 ```bash
-# Example: rclone to Backblaze B2
-rclone copy /backups/employed-*.gz b2:employed-backups/daily/ --max-age 24h
+# Example: rclone to Backblaze B2 or any S3-compatible store
+rclone copy /backups/employed-*.dump b2:employed-backups/daily/ --max-age 24h
 ```
+
+---
 
 ## 3. Restore Procedure
 
 ### Full Restore
 
 ```bash
-# Stop the app container first
-docker compose stop app
+# Stop the application but keep postgres running
+docker compose stop backend frontend worker
 
-# Restore from the latest backup
-mongorestore --uri="$MONGO_URL" \
-  --gzip --archive=/backups/employed-YYYYMMDD-HHMM.gz \
-  --drop
+# Restore from backup
+docker compose exec -T postgres \
+  pg_restore -U employed -d employed --clean --if-exists \
+  < /backups/employed-YYYYMMDD-HHMM.dump
 
-# Restart the app
-docker compose start app
+# Restart
+docker compose start backend frontend worker
 ```
 
-### Point-in-Time (oplog)
+### Point-in-Time (WAL archiving)
 
-If the replica set has oplog enabled (recommended for production):
+Not currently configured. To enable, set `wal_level=replica` and configure `archive_command` in PostgreSQL.
 
-```bash
-mongorestore --uri="$MONGO_URL" \
-  --gzip --archive=/backups/employed-YYYYMMDD-HHMM.gz \
-  --oplogReplay \
-  --oplogLimit="$(date -d '2 hours ago' +%s):0"
-```
+---
 
 ## 4. Verification
 
-- **Weekly**: automated `mongorestore --dryRun` against a throwaway container
-- **Monthly**: manual restore to a staging instance, verify job count + user count match
+- **Weekly**: dry-run restore to a throwaway container
+- **Monthly**: manual restore to a staging instance, verify row counts
 
 ```bash
 # Quick sanity check after restore
-mongosh "$MONGO_URL" --eval '
-  print("jobs:", db.jobs.countDocuments());
-  print("users:", db.users.countDocuments());
-  print("paymentIntents:", db.paymentIntents.countDocuments());
-'
+docker compose exec postgres psql -U employed -d employed -c "
+  SELECT
+    (SELECT count(*) FROM jobs) AS jobs,
+    (SELECT count(*) FROM users) AS users,
+    (SELECT count(*) FROM payment_intents) AS payment_intents;
+"
 ```
+
+---
 
 ## 5. Disaster Recovery Runbook
 
 | Scenario | Action | Owner |
 |----------|--------|-------|
 | Database corruption | Restore from latest 6h backup | Ops |
-| Server loss | Re-deploy from Docker image + restore DB | Ops |
-| Region outage | Spin up on fallback VPS + point DNS + restore from off-site backup | Ops |
-| Accidental data deletion | Restore specific collection from backup | Ops + Dev |
+| Server loss | Re-deploy from GHCR images + restore DB from off-site backup | Ops |
+| Region outage | Spin up new VPS, `docker compose up`, restore DB, update DNS | Ops |
+| Accidental data deletion | Restore specific tables from backup into staging, copy rows | Ops + Dev |
 
 ### Recovery Steps
 
-1. Identify scope of damage (which collections? how recent?)
-2. Find the most recent clean backup (`ls -lt /backups/`)
-3. Stop the application (`docker compose stop app`)
-4. Restore (`mongorestore` with appropriate flags)
-5. Verify data integrity (counts, spot-check recent jobs)
-6. Restart application (`docker compose up -d`)
-7. Check `/healthz` endpoint responds 200
-8. Monitor Sentry for error spikes for 1 hour
+1. Identify scope (which tables? how recent?)
+2. Find most recent clean backup (`ls -lt /backups/`)
+3. Stop the application (`docker compose stop backend frontend worker`)
+4. Restore with `pg_restore` (see above)
+5. Verify row counts and spot-check recent records
+6. Restart (`docker compose start backend frontend worker`)
+7. Check `https://api.employed.xibodev.com/health` returns `"status":"ok"`
+8. Monitor logs for error spikes: `docker compose logs -f --tail=50 backend`
+
+---
 
 ## 6. Monitoring
 
-- Backup cron failures → alert via UptimeRobot heartbeat or cron monitoring service
-- Disk space on backup volume → alert at 80% capacity
-- Off-site sync failures → alert via rclone exit code check
+- Backup cron failures → alert via UptimeRobot heartbeat (ping the heartbeat URL at the end of the cron script)
+- Disk space on Box 3 → alert at 80% capacity (`df -h /`)
+- Off-site sync failures → check `rclone` exit code in cron log
