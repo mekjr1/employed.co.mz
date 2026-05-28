@@ -87,7 +87,7 @@ export default async function HomePage() {
             View all jobs →
           </Link>
         </div>
-        <JobGrid jobs={recent} locale={market.locale} emptyMessage="Recent jobs will appear here once the API is connected." />
+        <JobGrid jobs={recent} locale={market.locale} emptyMessage="No jobs posted yet — be the first to post!" />
       </section>
     </Container>
   );
