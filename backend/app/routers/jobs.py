@@ -78,6 +78,31 @@ def _job_to_read(job: Any, request: Request, *, include_contact: bool = True) ->
     )
 
 
+def _pushdown_list_jobs(db: Any, model: Any, market: dict) -> list[Any]:
+    """Attempt database-level push-down of the most selective predicates.
+
+    Falls back to the full table scan when the model fields cannot be
+    resolved (e.g. in tests against a plain SQLite schema).
+    """
+    from app.services.model_utils import get_model_field
+
+    status_field = get_model_field(model, "status")
+    country_field = get_model_field(model, "country")
+    created_field = get_model_field(model, "created_at", "createdAt")
+    cutoff = utcnow() - timedelta(days=90)
+
+    if status_field is not None and country_field is not None and created_field is not None:
+        db_filters = [
+            status_field == "active",
+            country_field == market["country"],
+            created_field >= cutoff,
+        ]
+        return query_all(db, model, filters=db_filters, order_by=created_field.desc())
+
+    # TODO: push-down not available for this model — full scan (deprecation target)
+    return query_all(db, model)
+
+
 def _apply_filters(items: list[Any], market: dict, query: str | None, jobtype: str | None, remote: bool | None) -> list[Any]:
     cutoff = utcnow() - timedelta(days=90)
     filtered = []
@@ -193,7 +218,9 @@ def list_jobs(
     db: Any = Depends(get_db),
     market: dict = Depends(get_current_market),
 ):
-    items = _apply_filters(query_all(db, _job_model()), market, query, jobtype, remote)
+    # Push status/country/age predicates to the DB; apply text/type/remote in Python
+    candidates = _pushdown_list_jobs(db, _job_model(), market)
+    items = _apply_filters(candidates, market, query, jobtype, remote)
     start = (page - 1) * page_size
     end = start + page_size
     return JobListResponse(
@@ -213,7 +240,7 @@ def list_featured_jobs(
     now = utcnow()
     candidates = [
         item
-        for item in _apply_filters(query_all(db, _job_model()), market, None, None, None)
+        for item in _pushdown_list_jobs(db, _job_model(), market)
         if get_attr(item, "featured_through", "featuredThrough") and get_attr(item, "featured_through", "featuredThrough") >= now
     ]
     sample_size = min(3, len(candidates))
@@ -229,7 +256,8 @@ def count_jobs(
     db: Any = Depends(get_db),
     market: dict = Depends(get_current_market),
 ):
-    items = _apply_filters(query_all(db, _job_model()), market, query, jobtype, remote)
+    candidates = _pushdown_list_jobs(db, _job_model(), market)
+    items = _apply_filters(candidates, market, query, jobtype, remote)
     return JobCountResponse(total=len(items))
 
 

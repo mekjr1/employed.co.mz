@@ -42,8 +42,33 @@ def get_model_field(model: Any, *names: str):
     return None
 
 
-def query_all(db: Any, model: Any) -> list[Any]:
-    return list(db.query(model).all())
+def query_all(
+    db: Any,
+    model: Any,
+    *,
+    filters: list | None = None,
+    order_by: Any = None,
+    limit: int | None = None,
+    offset: int | None = None,
+) -> list[Any]:
+    """Return rows from *model*, optionally push-down filtered/ordered/paged.
+
+    When *filters* are supplied they are forwarded directly to SQLAlchemy
+    `.filter()` so the database engine handles the predicate instead of
+    loading the entire table into Python.  Callers that do not supply any
+    keyword arguments get the original behaviour (full-table select).
+    """
+    query = db.query(model)
+    if filters:
+        for f in filters:
+            query = query.filter(f)
+    if order_by is not None:
+        query = query.order_by(order_by)
+    if offset is not None:
+        query = query.offset(offset)
+    if limit is not None:
+        query = query.limit(limit)
+    return list(query.all())
 
 
 def get_by_id(db: Any, model: Any, record_id: Any) -> Any | None:
