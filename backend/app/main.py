@@ -21,6 +21,7 @@ from app.database import get_db
 from app.logging_config import reset_request_id, set_request_id, setup_logging
 from app.middleware.market import MarketMiddleware
 from app.routers import admin, auth, jobs, payments, profiles, public_api, reports, users
+from app.webhooks import router as webhook_router
 
 logger = logging.getLogger(__name__)
 MAX_REQUEST_BODY_SIZE = 1_048_576
@@ -255,6 +256,7 @@ def create_app() -> FastAPI:
     app.include_router(admin.router)
     app.include_router(users.router)
     app.include_router(public_api.router)
+    app.include_router(webhook_router, prefix="/webhooks")
 
     @app.get("/health", include_in_schema=False)
     async def health(db: Session = Depends(get_db)) -> JSONResponse:
