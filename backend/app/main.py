@@ -58,7 +58,9 @@ class RequestBodySizeLimitMiddleware:
         if content_length is not None:
             try:
                 if int(content_length) > self.max_body_size:
-                    await PlainTextResponse("Request body too large", status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE)(scope, receive, send)
+                    await PlainTextResponse(
+                        "Request body too large", status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE
+                    )(scope, receive, send)
                     return
             except ValueError:
                 pass
@@ -77,7 +79,9 @@ class RequestBodySizeLimitMiddleware:
         try:
             await self.app(scope, limited_receive, send)
         except RequestBodyTooLarge:
-            await PlainTextResponse("Request body too large", status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE)(scope, receive, send)
+            await PlainTextResponse("Request body too large", status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE)(
+                scope, receive, send
+            )
 
 
 class SecurityHeadersMiddleware:

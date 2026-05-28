@@ -223,7 +223,9 @@ def _patch_models(monkeypatch: pytest.MonkeyPatch) -> None:
     for name, model in TEST_MODELS.items():
         monkeypatch.setattr(app_models, name, model, raising=False)
     monkeypatch.setattr("app.payments.settlement.coerce_pk", lambda value: str(value) if value is not None else None)
-    monkeypatch.setattr("app.webhooks.stripe_webhook.coerce_pk", lambda value: str(value) if value is not None else None)
+    monkeypatch.setattr(
+        "app.webhooks.stripe_webhook.coerce_pk", lambda value: str(value) if value is not None else None
+    )
     monkeypatch.setattr("app.webhooks.mobile_money.coerce_pk", lambda value: str(value) if value is not None else None)
     rate_limiter._buckets.clear()
     failed_login_tracker.clear()
@@ -416,7 +418,15 @@ def profile_factory(db_session: Session) -> Callable[..., Profile]:
 
 @pytest.fixture()
 def payment_intent_factory(db_session: Session) -> Callable[..., PaymentIntent]:
-    def factory(*, job: Job, user: User, provider_key: str = "stripe", status: str = "pending", market_key: str = "mz", **kwargs: Any) -> PaymentIntent:
+    def factory(
+        *,
+        job: Job,
+        user: User,
+        provider_key: str = "stripe",
+        status: str = "pending",
+        market_key: str = "mz",
+        **kwargs: Any,
+    ) -> PaymentIntent:
         intent = PaymentIntent(
             job_id=job.id,
             user_id=user.id,

@@ -326,11 +326,15 @@ def reset_password(token: str, payload: ResetPasswordRequest, db: Any = Depends(
 
 @router.get("/oauth/{provider}")
 def oauth_redirect(provider: str, request: Request):
-    return RedirectResponse(url=authorize_redirect_url(request, provider), status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+    return RedirectResponse(
+        url=authorize_redirect_url(request, provider), status_code=status.HTTP_307_TEMPORARY_REDIRECT
+    )
 
 
 @router.get("/oauth/{provider}/callback", response_model=TokenResponse, name="oauth_callback")
-async def oauth_callback(provider: str, request: Request, code: str, state: str | None = None, db: Any = Depends(get_db)):
+async def oauth_callback(
+    provider: str, request: Request, code: str, state: str | None = None, db: Any = Depends(get_db)
+):
     if state is None:
         if getattr(exchange_code, "__module__", "") == "app.auth.oauth":
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Missing OAuth state")

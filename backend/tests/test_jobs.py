@@ -100,8 +100,12 @@ def test_get_non_existent_job_returns_404(client, sample_market_headers):
     assert response.status_code == 404
 
 
-def test_create_job_as_authenticated_user_sets_pending_and_market_country(client, test_user, auth_headers, sample_market_headers):
-    response = client.post("/jobs", json=BASE_JOB_PAYLOAD, headers=auth_headers(test_user) | sample_market_headers("mz"))
+def test_create_job_as_authenticated_user_sets_pending_and_market_country(
+    client, test_user, auth_headers, sample_market_headers
+):
+    response = client.post(
+        "/jobs", json=BASE_JOB_PAYLOAD, headers=auth_headers(test_user) | sample_market_headers("mz")
+    )
 
     assert response.status_code == 201
     body = response.json()
@@ -116,7 +120,9 @@ def test_create_job_anonymously_when_recaptcha_is_bypassed(client, monkeypatch, 
 
     monkeypatch.setattr("app.routers.jobs._verify_recaptcha", fake_verify)
 
-    response = client.post("/jobs", json={**BASE_JOB_PAYLOAD, "title": "Anonymous Role"}, headers=sample_market_headers("mz"))
+    response = client.post(
+        "/jobs", json={**BASE_JOB_PAYLOAD, "title": "Anonymous Role"}, headers=sample_market_headers("mz")
+    )
 
     assert response.status_code == 201
     assert response.json()["user_id"] is None

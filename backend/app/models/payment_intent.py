@@ -22,9 +22,7 @@ if TYPE_CHECKING:
 
 class PaymentIntent(Base):
     __tablename__ = "payment_intents"
-    __table_args__ = (
-        sa.Index("ix_payment_intents_provider_ref", "provider_ref"),
-    )
+    __table_args__ = (sa.Index("ix_payment_intents_provider_ref", "provider_ref"),)
 
     job_id: Mapped[UUID] = mapped_column(
         PGUUID(as_uuid=True),

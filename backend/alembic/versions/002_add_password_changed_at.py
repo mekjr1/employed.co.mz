@@ -4,6 +4,7 @@ Revision ID: 002_add_password_changed_at
 Revises: 001_initial_schema
 Create Date: 2026-05-24 00:30:00
 """
+
 from __future__ import annotations
 
 from alembic import op

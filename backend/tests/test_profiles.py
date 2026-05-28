@@ -41,7 +41,9 @@ def test_update_own_profile_returns_200(client, test_user, auth_headers, profile
 
 def test_second_profile_submission_updates_existing_profile(client, test_user, auth_headers):
     first = client.post("/profiles", json=PROFILE_PAYLOAD, headers=auth_headers(test_user))
-    second = client.post("/profiles", json={**PROFILE_PAYLOAD, "title": "Updated Title"}, headers=auth_headers(test_user))
+    second = client.post(
+        "/profiles", json={**PROFILE_PAYLOAD, "title": "Updated Title"}, headers=auth_headers(test_user)
+    )
 
     assert first.status_code == 201
     assert second.status_code == 201

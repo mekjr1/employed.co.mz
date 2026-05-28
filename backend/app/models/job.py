@@ -25,9 +25,7 @@ if TYPE_CHECKING:
 
 class Job(Base):
     __tablename__ = "jobs"
-    __table_args__ = (
-        sa.Index("ix_jobs_status_country_created_at", "status", "country", "created_at"),
-    )
+    __table_args__ = (sa.Index("ix_jobs_status_country_created_at", "status", "country", "created_at"),)
 
     user_id: Mapped[UUID | None] = mapped_column(
         PGUUID(as_uuid=True),

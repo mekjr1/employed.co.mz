@@ -79,7 +79,9 @@ def provider_config(provider: str) -> dict:
     client_id = _setting(provider, "CLIENT_ID")
     client_secret = _setting(provider, "CLIENT_SECRET")
     if not client_id or not client_secret:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=f"{provider} OAuth is not configured")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=f"{provider} OAuth is not configured"
+        )
     return {**config, "client_id": client_id, "client_secret": client_secret}
 
 

@@ -56,7 +56,10 @@ def _environment() -> str:
 
 
 def ensure_jwt_secret_configured() -> None:
-    if _setting("JWT_SECRET_KEY", "SECRET_KEY", "secret_key") in (None, "") and _environment() not in {"testing", "test"}:
+    if _setting("JWT_SECRET_KEY", "SECRET_KEY", "secret_key") in (None, "") and _environment() not in {
+        "testing",
+        "test",
+    }:
         raise RuntimeError("SECRET_KEY must be configured before starting the application")
 
 

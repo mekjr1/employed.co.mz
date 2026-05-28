@@ -32,7 +32,9 @@ def test_admin_set_job_status_updates_status_history(client, test_admin, auth_he
     assert job.status_history[-1]["to"] == "active"
 
 
-def test_admin_bulk_set_status_returns_requested_and_updated_counts(client, test_admin, auth_headers, sample_job, db_session):
+def test_admin_bulk_set_status_returns_requested_and_updated_counts(
+    client, test_admin, auth_headers, sample_job, db_session
+):
     jobs = [sample_job(status="pending") for _ in range(3)]
 
     response = client.patch(

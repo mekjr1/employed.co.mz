@@ -53,11 +53,7 @@ def _find_intent_from_session(db: Session, session_payload: dict):
     if not job_id:
         return None
 
-    stmt = (
-        select(PaymentIntent)
-        .where(PaymentIntent.job_id == job_id)
-        .order_by(desc(PaymentIntent.created_at))
-    )
+    stmt = select(PaymentIntent).where(PaymentIntent.job_id == job_id).order_by(desc(PaymentIntent.created_at))
     return db.execute(stmt).scalars().first()
 
 

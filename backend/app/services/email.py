@@ -68,7 +68,9 @@ def send_job_submitted_email(to_email: str, job_title: str, job_url: str) -> boo
     )
 
 
-def send_job_status_changed_email(to_email: str, job_title: str, new_status: str, job_url: str, reason: str | None = None) -> bool:
+def send_job_status_changed_email(
+    to_email: str, job_title: str, new_status: str, job_url: str, reason: str | None = None
+) -> bool:
     reason_text = f" Reason: {reason}" if reason else ""
     reason_html = f"<p>Reason: {reason}</p>" if reason else ""
     return send_email(

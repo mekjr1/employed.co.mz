@@ -10,9 +10,24 @@ from app.auth.dependencies import get_current_user, get_primary_email, get_user_
 from app.database import get_db
 from app.middleware.market import get_current_market
 from app.payments import registry as payment_registry
-from app.schemas.payments import PaymentInitiate, PaymentInitiateResponse, PaymentProviderRead, PaymentStatusResponse, ProvidersResponse
+from app.schemas.payments import (
+    PaymentInitiate,
+    PaymentInitiateResponse,
+    PaymentProviderRead,
+    PaymentStatusResponse,
+    ProvidersResponse,
+)
 from app.services.market import MARKETS
-from app.services.model_utils import get_attr, get_by_id, get_model_field, query_all, resolve_model, save, set_attr, utcnow
+from app.services.model_utils import (
+    get_attr,
+    get_by_id,
+    get_model_field,
+    query_all,
+    resolve_model,
+    save,
+    set_attr,
+    utcnow,
+)
 
 router = APIRouter(prefix="/payments", tags=["payments"])
 logger = logging.getLogger(__name__)
@@ -148,6 +163,7 @@ def initiate_payment(
     try:
         adapter = payment_registry.get(payload.provider_key)
         import asyncio
+
         result = asyncio.get_event_loop().run_until_complete(
             adapter.initiate(
                 intent_id=intent_id,
@@ -225,7 +241,9 @@ def providers_for_market(market: dict = Depends(get_current_market)):
     return ProvidersResponse(
         market_key=market["key"],
         providers=[
-            PaymentProviderRead(key=provider, label=PROVIDER_LABELS.get(provider, provider.title()), market_key=market["key"])
+            PaymentProviderRead(
+                key=provider, label=PROVIDER_LABELS.get(provider, provider.title()), market_key=market["key"]
+            )
             for provider in MARKETS[market["key"]]["payment_providers"]
         ],
     )

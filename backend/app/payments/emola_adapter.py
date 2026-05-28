@@ -45,7 +45,9 @@ def _simulator_outcome(msisdn: str) -> tuple[str, int, str | None]:
     return mapping.get(msisdn, ("completed", 5000, None))
 
 
-async def _enqueue_simulated_intent(intent_id: str, outcome_status: str, outcome_reason: str | None, delay_ms: int) -> None:
+async def _enqueue_simulated_intent(
+    intent_id: str, outcome_status: str, outcome_reason: str | None, delay_ms: int
+) -> None:
     from arq import create_pool
     from arq.connections import RedisSettings
 

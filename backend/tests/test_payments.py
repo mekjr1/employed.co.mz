@@ -5,7 +5,9 @@ from app.payments.settlement import settle_intent
 from tests.conftest import utcnow
 
 
-def test_initiate_stripe_payment_returns_redirect_kind(client, sample_job, test_user, auth_headers, sample_market_headers):
+def test_initiate_stripe_payment_returns_redirect_kind(
+    client, sample_job, test_user, auth_headers, sample_market_headers
+):
     job = sample_job(user=test_user)
 
     response = client.post(
@@ -46,7 +48,9 @@ def test_initiate_payment_reuses_existing_open_intent(
     db_session,
 ):
     job = sample_job(user=test_user)
-    existing = payment_intent_factory(job=job, user=test_user, provider_key="mpesa", status="awaiting_user", provider_ref="pending-existing")
+    existing = payment_intent_factory(
+        job=job, user=test_user, provider_key="mpesa", status="awaiting_user", provider_ref="pending-existing"
+    )
 
     response = client.post(
         "/payments/initiate",
@@ -73,7 +77,9 @@ def test_initiate_emola_payment_returns_await_kind(client, sample_job, test_user
     assert response.json()["provider_key"] == "emola"
 
 
-def test_initiate_payment_rejects_provider_not_available_for_market(client, sample_job, test_user, auth_headers, sample_market_headers):
+def test_initiate_payment_rejects_provider_not_available_for_market(
+    client, sample_job, test_user, auth_headers, sample_market_headers
+):
     job = sample_job(user=test_user, country="Mexico")
 
     response = client.post(
@@ -85,7 +91,9 @@ def test_initiate_payment_rejects_provider_not_available_for_market(client, samp
     assert response.status_code == 400
 
 
-def test_poll_payment_status_returns_current_status(client, payment_intent_factory, sample_job, test_user, auth_headers):
+def test_poll_payment_status_returns_current_status(
+    client, payment_intent_factory, sample_job, test_user, auth_headers
+):
     job = sample_job(user=test_user)
     intent = payment_intent_factory(job=job, user=test_user, status="awaiting_user", provider_key="mpesa")
 
@@ -115,7 +123,9 @@ def test_cancel_completed_payment_is_noop(client, payment_intent_factory, sample
     assert response.json()["status"] == "completed"
 
 
-def test_settlement_marks_intent_completed_and_extends_job_featured_through(db_session, payment_intent_factory, sample_job, test_user):
+def test_settlement_marks_intent_completed_and_extends_job_featured_through(
+    db_session, payment_intent_factory, sample_job, test_user
+):
     job = sample_job(user=test_user, featured=False)
     intent = payment_intent_factory(job=job, user=test_user, status="pending", extended_through=utcnow())
     new_through = utcnow().replace(microsecond=0)

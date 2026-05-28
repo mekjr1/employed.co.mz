@@ -4,6 +4,7 @@ Revision ID: 001_initial_schema
 Revises:
 Create Date: 2026-05-24 00:00:00
 """
+
 from __future__ import annotations
 
 from alembic import op
@@ -81,14 +82,25 @@ def upgrade() -> None:
 
     op.create_table(
         "users",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, nullable=False, server_default=sa.text("gen_random_uuid()")),
+        sa.Column(
+            "id",
+            postgresql.UUID(as_uuid=True),
+            primary_key=True,
+            nullable=False,
+            server_default=sa.text("gen_random_uuid()"),
+        ),
         sa.Column("email", sa.String(length=320), nullable=False),
         sa.Column("email_verified", sa.Boolean(), nullable=False, server_default=sa.text("false")),
         sa.Column("username", sa.String(length=64), nullable=True),
         sa.Column("password_hash", sa.String(length=128), nullable=True),
         sa.Column("display_name", sa.String(length=128), nullable=True),
         sa.Column("roles", postgresql.ARRAY(sa.Text()), nullable=False, server_default=sa.text("'{}'::text[]")),
-        sa.Column("oauth_providers", postgresql.JSONB(astext_type=sa.Text()), nullable=False, server_default=sa.text("'{}'::jsonb")),
+        sa.Column(
+            "oauth_providers",
+            postgresql.JSONB(astext_type=sa.Text()),
+            nullable=False,
+            server_default=sa.text("'{}'::jsonb"),
+        ),
         sa.Column("is_developer", sa.Boolean(), nullable=False, server_default=sa.text("false")),
         sa.Column("deletion_requested_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("deletion_scheduled_for", sa.DateTime(timezone=True), nullable=True),
@@ -100,8 +112,16 @@ def upgrade() -> None:
 
     op.create_table(
         "jobs",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, nullable=False, server_default=sa.text("gen_random_uuid()")),
-        sa.Column("user_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="SET NULL"), nullable=True),
+        sa.Column(
+            "id",
+            postgresql.UUID(as_uuid=True),
+            primary_key=True,
+            nullable=False,
+            server_default=sa.text("gen_random_uuid()"),
+        ),
+        sa.Column(
+            "user_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+        ),
         sa.Column("title", sa.String(length=256), nullable=False),
         sa.Column("company", sa.String(length=256), nullable=True),
         sa.Column("country", country_enum, nullable=False),
@@ -119,8 +139,18 @@ def upgrade() -> None:
         sa.Column("salary_period", salary_period_enum, nullable=True),
         sa.Column("status", job_status_enum, nullable=False, server_default=sa.text("'pending'")),
         sa.Column("featured_through", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("featured_charge_history", postgresql.JSONB(astext_type=sa.Text()), nullable=False, server_default=sa.text("'[]'::jsonb")),
-        sa.Column("status_history", postgresql.JSONB(astext_type=sa.Text()), nullable=False, server_default=sa.text("'[]'::jsonb")),
+        sa.Column(
+            "featured_charge_history",
+            postgresql.JSONB(astext_type=sa.Text()),
+            nullable=False,
+            server_default=sa.text("'[]'::jsonb"),
+        ),
+        sa.Column(
+            "status_history",
+            postgresql.JSONB(astext_type=sa.Text()),
+            nullable=False,
+            server_default=sa.text("'[]'::jsonb"),
+        ),
         sa.Column("published_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("expired_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("recaptcha_score", sa.Float(), nullable=True),
@@ -130,8 +160,16 @@ def upgrade() -> None:
 
     op.create_table(
         "profiles",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, nullable=False, server_default=sa.text("gen_random_uuid()")),
-        sa.Column("user_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
+        sa.Column(
+            "id",
+            postgresql.UUID(as_uuid=True),
+            primary_key=True,
+            nullable=False,
+            server_default=sa.text("gen_random_uuid()"),
+        ),
+        sa.Column(
+            "user_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+        ),
         sa.Column("user_name", sa.String(length=128), nullable=True),
         sa.Column("custom_image_url", sa.String(length=2048), nullable=True),
         sa.Column("name", sa.String(length=128), nullable=False),
@@ -156,9 +194,19 @@ def upgrade() -> None:
 
     op.create_table(
         "payment_intents",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, nullable=False, server_default=sa.text("gen_random_uuid()")),
-        sa.Column("job_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("jobs.id", ondelete="CASCADE"), nullable=False),
-        sa.Column("user_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
+        sa.Column(
+            "id",
+            postgresql.UUID(as_uuid=True),
+            primary_key=True,
+            nullable=False,
+            server_default=sa.text("gen_random_uuid()"),
+        ),
+        sa.Column(
+            "job_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("jobs.id", ondelete="CASCADE"), nullable=False
+        ),
+        sa.Column(
+            "user_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+        ),
         sa.Column("market_key", market_key_enum, nullable=False),
         sa.Column("provider_key", payment_provider_key_enum, nullable=False),
         sa.Column("provider_ref", sa.String(length=256), nullable=True),
@@ -170,7 +218,9 @@ def upgrade() -> None:
         sa.Column("extended_through", sa.DateTime(timezone=True), nullable=True),
         sa.Column("failure_reason", sa.String(length=256), nullable=True),
         sa.Column("simulator", sa.Boolean(), nullable=False, server_default=sa.text("false")),
-        sa.Column("meta", postgresql.JSONB(astext_type=sa.Text()), nullable=False, server_default=sa.text("'{}'::jsonb")),
+        sa.Column(
+            "meta", postgresql.JSONB(astext_type=sa.Text()), nullable=False, server_default=sa.text("'{}'::jsonb")
+        ),
         sa.Column("settled_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
@@ -178,14 +228,29 @@ def upgrade() -> None:
 
     op.create_table(
         "job_reports",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, nullable=False, server_default=sa.text("gen_random_uuid()")),
-        sa.Column("job_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("jobs.id", ondelete="CASCADE"), nullable=False),
+        sa.Column(
+            "id",
+            postgresql.UUID(as_uuid=True),
+            primary_key=True,
+            nullable=False,
+            server_default=sa.text("gen_random_uuid()"),
+        ),
+        sa.Column(
+            "job_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("jobs.id", ondelete="CASCADE"), nullable=False
+        ),
         sa.Column("reason", report_reason_enum, nullable=False),
         sa.Column("details", sa.String(length=2000), nullable=True),
         sa.Column("reporter_ip_hash", sa.String(length=32), nullable=True),
-        sa.Column("reporter_user_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="SET NULL"), nullable=True),
+        sa.Column(
+            "reporter_user_id",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey("users.id", ondelete="SET NULL"),
+            nullable=True,
+        ),
         sa.Column("resolution", report_resolution_enum, nullable=False, server_default=sa.text("'pending'")),
-        sa.Column("resolved_by", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="SET NULL"), nullable=True),
+        sa.Column(
+            "resolved_by", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+        ),
         sa.Column("resolved_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
@@ -198,7 +263,9 @@ def upgrade() -> None:
     op.execute("CREATE INDEX idx_jobs_company_trgm ON jobs USING gin (company gin_trgm_ops)")
 
     op.create_index("idx_payment_intents_job_user", "payment_intents", ["job_id", "user_id"], unique=False)
-    op.execute("CREATE INDEX idx_payment_intents_provider_ref ON payment_intents (provider_ref) WHERE provider_ref IS NOT NULL")
+    op.execute(
+        "CREATE INDEX idx_payment_intents_provider_ref ON payment_intents (provider_ref) WHERE provider_ref IS NOT NULL"
+    )
 
     op.execute("CREATE INDEX idx_job_reports_resolution ON job_reports (resolution, created_at DESC)")
 

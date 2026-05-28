@@ -36,7 +36,11 @@ def public_jobs(
     )
 
 
-@router.get("/featuredJobs", response_model=list[JobRead], dependencies=[Depends(rate_limit(60, 60, "public_api_featured_jobs"))])
+@router.get(
+    "/featuredJobs",
+    response_model=list[JobRead],
+    dependencies=[Depends(rate_limit(60, 60, "public_api_featured_jobs"))],
+)
 def public_featured_jobs(
     request: Request,
     db: Any = Depends(get_db),
@@ -46,7 +50,8 @@ def public_featured_jobs(
     items = [
         item
         for item in _apply_filters(query_all(db, _job_model()), market, None, None, None)
-        if get_attr(item, "featured_through", "featuredThrough") and get_attr(item, "featured_through", "featuredThrough") >= now
+        if get_attr(item, "featured_through", "featuredThrough")
+        and get_attr(item, "featured_through", "featuredThrough") >= now
     ]
     items = items[:3]
     return [_job_to_read(item, request, include_contact=False) for item in items]

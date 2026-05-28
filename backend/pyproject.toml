@@ -1,0 +1,20 @@
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+# Keep default Pyflakes (F) + pycodestyle errors (E) + import warnings (E402).
+# Per-file overrides below allow imports after env/runtime setup in the few
+# files that legitimately need it.
+
+[tool.ruff.lint.per-file-ignores]
+# Alembic's env.py mutates sys.path and configures the runtime before
+# importing project modules; the late imports are intentional.
+"alembic/env.py" = ["E402"]
+# One-off migration scripts set up environment + sys.path before importing
+# the application package; the late imports are intentional.
+"scripts/*.py" = ["E402"]
+# Test conftest patches sys.modules with light fakes for optional native deps
+# (slugify, bleach) BEFORE importing the application package, otherwise the
+# import chain would fail. The late imports are required, not a smell.
+"tests/conftest.py" = ["E402"]

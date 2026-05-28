@@ -75,7 +75,9 @@ def is_email_verified(user: Any) -> bool:
             attr = getattr(first, "verified", None)
             if attr is not None:
                 return bool(attr)
-    oauth_only = any(getattr(user, attr, None) for attr in ("google_id", "facebook_id", "github_id", "twitter_id", "oauth_provider"))
+    oauth_only = any(
+        getattr(user, attr, None) for attr in ("google_id", "facebook_id", "github_id", "twitter_id", "oauth_provider")
+    )
     return oauth_only or not bool(get_primary_email(user))
 
 
@@ -89,7 +91,7 @@ def _get_password_changed_at(user: Any):
 
 def _decode_bearer(
     credentials: HTTPAuthorizationCredentials | None,
-    password_changed_at = None,
+    password_changed_at=None,
 ) -> TokenPayload:
     if credentials is None or credentials.scheme.lower() != "bearer":
         raise _unauthorized()

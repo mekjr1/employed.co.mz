@@ -66,17 +66,27 @@ def export_my_data(db: Any = Depends(get_db), current_user: Any = Depends(get_cu
     jobs = [_serialize_record(job) for job in query_all(db, job_model) if get_attr(job, "user_id", "userId") == user_id]
     try:
         profile_model = resolve_model("Profile", "Profiles")
-        profile = next((item for item in query_all(db, profile_model) if get_attr(item, "user_id", "userId") == user_id), None)
+        profile = next(
+            (item for item in query_all(db, profile_model) if get_attr(item, "user_id", "userId") == user_id), None
+        )
     except RuntimeError:
         profile = None
     try:
         payment_model = resolve_model("PaymentIntent", "PaymentIntents")
-        payments = [_serialize_record(item) for item in query_all(db, payment_model) if get_attr(item, "user_id", "userId") == user_id]
+        payments = [
+            _serialize_record(item)
+            for item in query_all(db, payment_model)
+            if get_attr(item, "user_id", "userId") == user_id
+        ]
     except RuntimeError:
         payments = []
     try:
         report_model = resolve_model("JobReport", "Report", "JobReports")
-        reports = [_serialize_record(item) for item in query_all(db, report_model) if get_attr(item, "reporter_user_id", "reporterUserId") == user_id]
+        reports = [
+            _serialize_record(item)
+            for item in query_all(db, report_model)
+            if get_attr(item, "reporter_user_id", "reporterUserId") == user_id
+        ]
     except RuntimeError:
         reports = []
     return UserExport(

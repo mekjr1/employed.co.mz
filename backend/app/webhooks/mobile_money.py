@@ -21,7 +21,17 @@ router = APIRouter(tags=["webhooks"])
 CALLBACK_REPLAY_WINDOW = timedelta(minutes=5)
 PROCESSED_CALLBACK_EVENTS = ReplayCache(ttl_seconds=int(CALLBACK_REPLAY_WINDOW.total_seconds()), max_entries=10000)
 TIMESTAMP_FIELDS = ("timestamp", "created_at", "createdAt", "sent_at", "sentAt")
-EVENT_ID_FIELDS = ("event_id", "eventId", "nonce", "nonce_id", "nonceId", "callback_id", "callbackId", "request_id", "requestId")
+EVENT_ID_FIELDS = (
+    "event_id",
+    "eventId",
+    "nonce",
+    "nonce_id",
+    "nonceId",
+    "callback_id",
+    "callbackId",
+    "request_id",
+    "requestId",
+)
 EVENT_TYPE_FIELDS = ("event_type", "eventType", "type")
 
 
@@ -31,7 +41,9 @@ def _setting(name: str, default=None):
 
 def _verify_signature(raw_body: bytes, signature: str | None, secret: str | None, provider: str) -> None:
     if not secret:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=f"{provider}-webhook-secret-missing")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=f"{provider}-webhook-secret-missing"
+        )
     if not signature:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"missing-{provider}-signature")
 
@@ -52,10 +64,20 @@ def _normalize_status(value: str | None) -> str:
 
 
 def _extract_payload_fields(payload: dict) -> tuple[str | None, str | None, str, str | None]:
-    provider_ref = payload.get("provider_ref") or payload.get("providerRef") or payload.get("transactionId") or payload.get("conversationId")
+    provider_ref = (
+        payload.get("provider_ref")
+        or payload.get("providerRef")
+        or payload.get("transactionId")
+        or payload.get("conversationId")
+    )
     intent_id = payload.get("intent_id") or payload.get("intentId")
     status_value = payload.get("status") or payload.get("transactionStatus") or payload.get("resultCode")
-    reason = payload.get("failure_reason") or payload.get("failureReason") or payload.get("resultDesc") or payload.get("message")
+    reason = (
+        payload.get("failure_reason")
+        or payload.get("failureReason")
+        or payload.get("resultDesc")
+        or payload.get("message")
+    )
     return provider_ref, intent_id, _normalize_status(str(status_value) if status_value is not None else None), reason
 
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.auth.dependencies import get_current_user, get_user_id, is_admin_user
 from app.database import get_db
@@ -76,7 +76,12 @@ def _apply_profile_fields(profile: Any, payload: ProfileCreate | ProfileUpdate, 
         if field in values:
             set_attr(profile, values[field], *aliases)
     set_attr(profile, get_user_id(user), "user_id", "userId")
-    set_attr(profile, get_attr(user, "display_name", "name", "full_name", "username", default=get_attr(user, "email")), "user_name", "userName")
+    set_attr(
+        profile,
+        get_attr(user, "display_name", "name", "full_name", "username", default=get_attr(user, "email")),
+        "user_name",
+        "userName",
+    )
     set_attr(profile, utcnow(), "updated_at", "updatedAt")
     if get_attr(profile, "created_at", "createdAt") is None:
         set_attr(profile, utcnow(), "created_at", "createdAt")

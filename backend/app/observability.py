@@ -4,6 +4,7 @@ Call ``init_sentry()`` once at application startup (create_app).
 When SENTRY_DSN is not set the function is a no-op so local and CI
 environments are unaffected.
 """
+
 from __future__ import annotations
 
 import logging
@@ -41,4 +42,6 @@ def init_sentry() -> None:
         # Do not send PII by default
         send_default_pii=False,
     )
-    logger.info("observability.sentry: initialised environment=%s traces_sample_rate=%s", environment, traces_sample_rate)
+    logger.info(
+        "observability.sentry: initialised environment=%s traces_sample_rate=%s", environment, traces_sample_rate
+    )

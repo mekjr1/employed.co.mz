@@ -304,18 +304,19 @@ def validate_required_fields(model: type[Any], values: dict[str, Any]) -> None:
     for column in table.columns:
         if column.primary_key:
             continue
-        if not column.nullable and column.server_default is None and column.default is None and values.get(column.name) is None:
+        if (
+            not column.nullable
+            and column.server_default is None
+            and column.default is None
+            and values.get(column.name) is None
+        ):
             raise ValueError(f"Missing required field '{column.name}'")
 
 
 def build_upsert_statement(model: type[Any], batch: list[dict[str, Any]]) -> Any:
     table = model.__table__
     stmt = pg_insert(table).values(batch)
-    update_columns = {
-        column.name: stmt.excluded[column.name]
-        for column in table.columns
-        if not column.primary_key
-    }
+    update_columns = {column.name: stmt.excluded[column.name] for column in table.columns if not column.primary_key}
     primary_key_columns = [column.name for column in table.primary_key.columns]
     return stmt.on_conflict_do_update(index_elements=primary_key_columns, set_=update_columns)
 
@@ -337,7 +338,9 @@ def flush_batch(
             session.execute(build_upsert_statement(model, batch))
         return len(batch), 0
     except Exception as exc:  # noqa: BLE001
-        logger.warning("Batch upsert failed for %s (%s rows): %s; retrying row-by-row", collection_name, len(batch), exc)
+        logger.warning(
+            "Batch upsert failed for %s (%s rows): %s; retrying row-by-row", collection_name, len(batch), exc
+        )
         migrated = 0
         errored = 0
         for row in batch:
@@ -371,7 +374,9 @@ def migrate_collection(
     buffer: list[dict[str, Any]] = []
 
     logger.info("Migrating %s (%s documents)", spec.source_collection, total)
-    progress = tqdm(collection.find({}, no_cursor_timeout=True).batch_size(batch_size), total=total, desc=spec.source_collection)
+    progress = tqdm(
+        collection.find({}, no_cursor_timeout=True).batch_size(batch_size), total=total, desc=spec.source_collection
+    )
 
     for document in progress:
         raw_id = document.get("_id")

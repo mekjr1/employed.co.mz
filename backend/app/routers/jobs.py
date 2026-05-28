@@ -27,7 +27,17 @@ from app.services.model_utils import delete, get_attr, get_by_id, query_all, res
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
 VALID_STATUSES = {"pending", "active", "flagged", "inactive", "filled"}
-JOB_TYPES = {"Full Time", "Part Time", "Contract", "Temporary", "Internship", "Freelance", "Remote", "Volunteer", "Other"}
+JOB_TYPES = {
+    "Full Time",
+    "Part Time",
+    "Contract",
+    "Temporary",
+    "Internship",
+    "Freelance",
+    "Remote",
+    "Volunteer",
+    "Other",
+}
 
 
 def _job_model():
@@ -103,7 +113,9 @@ def _pushdown_list_jobs(db: Any, model: Any, market: dict) -> list[Any]:
     return query_all(db, model)
 
 
-def _apply_filters(items: list[Any], market: dict, query: str | None, jobtype: str | None, remote: bool | None) -> list[Any]:
+def _apply_filters(
+    items: list[Any], market: dict, query: str | None, jobtype: str | None, remote: bool | None
+) -> list[Any]:
     cutoff = utcnow() - timedelta(days=90)
     filtered = []
     for item in items:
@@ -160,7 +172,9 @@ async def _verify_recaptcha(token: str | None, request: Request) -> bool:
         data = response.json()
         min_score = float(getattr(settings, "RECAPTCHA_MIN_SCORE", 0.5))
         action = data.get("action")
-        return bool(data.get("success")) and (action in (None, "submit_job")) and float(data.get("score", 0)) >= min_score
+        return (
+            bool(data.get("success")) and (action in (None, "submit_job")) and float(data.get("score", 0)) >= min_score
+        )
 
 
 def _payload_values(payload: Any, **kwargs) -> dict:
@@ -241,7 +255,8 @@ def list_featured_jobs(
     candidates = [
         item
         for item in _pushdown_list_jobs(db, _job_model(), market)
-        if get_attr(item, "featured_through", "featuredThrough") and get_attr(item, "featured_through", "featuredThrough") >= now
+        if get_attr(item, "featured_through", "featuredThrough")
+        and get_attr(item, "featured_through", "featuredThrough") >= now
     ]
     sample_size = min(3, len(candidates))
     chosen = random.sample(candidates, sample_size) if sample_size else []
@@ -371,5 +386,7 @@ def deactivate_job(
     saved = save(db, job)
     owner_email = get_primary_email(current_user)
     if owner_email and is_admin_user(current_user):
-        send_job_status_changed_email(owner_email, get_attr(saved, "title", default="Job"), new_status, _build_job_url(request, saved))
+        send_job_status_changed_email(
+            owner_email, get_attr(saved, "title", default="Job"), new_status, _build_job_url(request, saved)
+        )
     return _job_to_read(saved, request)

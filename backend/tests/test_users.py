@@ -8,7 +8,9 @@ def test_get_users_me_returns_user_info(client, test_user, auth_headers):
     assert response.json()["email"] == test_user.email
 
 
-def test_export_data_returns_account_jobs_and_profile(client, test_user, auth_headers, sample_job, profile_factory, payment_intent_factory, report_factory):
+def test_export_data_returns_account_jobs_and_profile(
+    client, test_user, auth_headers, sample_job, profile_factory, payment_intent_factory, report_factory
+):
     job = sample_job(user=test_user)
     profile_factory(user=test_user)
     payment_intent_factory(job=job, user=test_user)

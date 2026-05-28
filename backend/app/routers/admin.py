@@ -106,7 +106,15 @@ def bulk_set_status(
         if job is None:
             continue
         history = list(get_attr(job, "status_history", "statusHistory", default=[]) or [])
-        history.append({"at": utcnow().isoformat(), "by": str(get_user_id(admin_user) or ""), "from": get_attr(job, "status"), "to": payload.status, "reason": payload.reason})
+        history.append(
+            {
+                "at": utcnow().isoformat(),
+                "by": str(get_user_id(admin_user) or ""),
+                "from": get_attr(job, "status"),
+                "to": payload.status,
+                "reason": payload.reason,
+            }
+        )
         set_attr(job, history[-100:], "status_history", "statusHistory")
         set_attr(job, payload.status, "status")
         set_attr(job, utcnow(), "updated_at", "updatedAt")

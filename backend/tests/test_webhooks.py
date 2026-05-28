@@ -42,7 +42,9 @@ def test_stripe_webhook_with_invalid_signature_returns_400(client, monkeypatch):
     assert response.status_code == 400
 
 
-def test_stripe_checkout_session_completed_settles_intent(client, monkeypatch, payment_intent_factory, sample_job, test_user, db_session):
+def test_stripe_checkout_session_completed_settles_intent(
+    client, monkeypatch, payment_intent_factory, sample_job, test_user, db_session
+):
     job = sample_job(user=test_user, featured=False)
     intent = payment_intent_factory(job=job, user=test_user, status="pending")
 
@@ -108,7 +110,9 @@ def test_stripe_duplicate_event_is_ignored(client, monkeypatch):
 def test_mpesa_callback_with_valid_hmac_returns_200(client, monkeypatch, payment_intent_factory, sample_job, test_user):
     secret = "mpesa-secret"
     job = sample_job(user=test_user)
-    intent = payment_intent_factory(job=job, user=test_user, provider_key="mpesa", status="awaiting_user", provider_ref="ref-123")
+    intent = payment_intent_factory(
+        job=job, user=test_user, provider_key="mpesa", status="awaiting_user", provider_ref="ref-123"
+    )
     payload = {"provider_ref": intent.provider_ref, "status": "successful"}
     raw = json.dumps(payload).encode("utf-8")
     signature = hmac.new(secret.encode("utf-8"), raw, hashlib.sha256).hexdigest()
