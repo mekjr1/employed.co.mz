@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import Container from "@/components/layout/Container";
 import { Button, buttonStyles } from "@/components/ui/Button";
@@ -15,6 +16,7 @@ export default function Header() {
   const { market, switchMarket } = useMarket();
   const { isAuthenticated, loading, user, signOut } = useAuth();
   const [locale, setLocale] = useState("en");
+  const t = useTranslations("nav");
 
   useEffect(() => {
     const storedLocale = window.localStorage.getItem("employed_locale") ?? market.locale.slice(0, 2).toLowerCase();
@@ -31,16 +33,16 @@ export default function Header() {
 
           <nav className="hidden items-center gap-3 text-sm text-zinc-300 md:flex">
             <Link href="/jobs" className="transition hover:text-white">
-              Browse jobs
+              {t("browseJobs")}
             </Link>
             <Link href="/jobs/new" className="transition hover:text-white">
-              Post a job
+              {t("postJob")}
             </Link>
             <Link href="/terms" className="transition hover:text-white">
-              Terms
+              {t("terms")}
             </Link>
             <Link href="/privacy" className="transition hover:text-white">
-              Privacy
+              {t("privacy")}
             </Link>
           </nav>
         </div>
@@ -48,22 +50,22 @@ export default function Header() {
         {/* Mobile-only primary navigation row — visible below md breakpoint */}
         <nav className="flex items-center gap-4 text-sm text-zinc-300 md:hidden">
           <Link href="/jobs" className="font-medium transition hover:text-white">
-            Browse jobs
+            {t("browseJobs")}
           </Link>
           <Link href="/jobs/new" className="transition hover:text-white">
-            Post a job
+            {t("postJob")}
           </Link>
           <Link href="/terms" className="transition hover:text-white">
-            Terms
+            {t("terms")}
           </Link>
           <Link href="/privacy" className="transition hover:text-white">
-            Privacy
+            {t("privacy")}
           </Link>
         </nav>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
           <label className="flex items-center gap-2 rounded-full border border-zinc-800 bg-[#16213e] px-3 py-2 text-sm text-zinc-300">
-            <span className="text-zinc-400">Market</span>
+            <span className="text-zinc-400">{t("market")}</span>
             <select
               className="bg-transparent text-white outline-none"
               value={market.key}
@@ -78,7 +80,7 @@ export default function Header() {
           </label>
 
           <label className="flex items-center gap-2 rounded-full border border-zinc-800 bg-[#16213e] px-3 py-2 text-sm text-zinc-300">
-            <span className="text-zinc-400">Locale</span>
+            <span className="text-zinc-400">{t("locale")}</span>
             <select
               className="bg-transparent text-white outline-none"
               value={locale}
@@ -98,22 +100,22 @@ export default function Header() {
 
           <div className="flex items-center gap-2">
             <Link href="/jobs/new" className={buttonStyles({ variant: "primary", size: "sm" })}>
-              Post a job
+              {t("postJob")}
             </Link>
             {loading ? null : isAuthenticated ? (
               <>
-                <span className={classNames("hidden text-sm text-zinc-400 sm:inline", user?.name && "text-zinc-200")}>{user?.name ?? "Signed in"}</span>
+                <span className={classNames("hidden text-sm text-zinc-400 sm:inline", user?.name && "text-zinc-200")}>{user?.name ?? t("signedIn")}</span>
                 <Button variant="secondary" size="sm" onClick={signOut}>
-                  Sign out
+                  {t("signOut")}
                 </Button>
               </>
             ) : (
               <>
                 <Link href={process.env.NEXT_PUBLIC_SIGN_IN_URL ?? "/sign-in"} className={buttonStyles({ variant: "ghost", size: "sm" })}>
-                  Sign in
+                  {t("signIn")}
                 </Link>
                 <Link href={process.env.NEXT_PUBLIC_SIGN_UP_URL ?? "/sign-up"} className={buttonStyles({ variant: "secondary", size: "sm" })}>
-                  Create account
+                  {t("createAccount")}
                 </Link>
               </>
             )}

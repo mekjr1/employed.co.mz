@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { headers } from "next/headers";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
 
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
@@ -25,19 +27,22 @@ export async function generateMetadata() {
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const requestHeaders = await headers();
   const market = resolveMarketFromHeaders(requestHeaders);
+  const messages = await getMessages();
 
   return (
     <html lang={market.locale}>
       <body>
-        <MarketProvider initialMarket={market}>
-          <AuthProvider>
-            <div className="flex min-h-screen flex-col">
-              <Header />
-              <main className="flex-1 py-10">{children}</main>
-              <Footer />
-            </div>
-          </AuthProvider>
-        </MarketProvider>
+        <NextIntlClientProvider messages={messages}>
+          <MarketProvider initialMarket={market}>
+            <AuthProvider>
+              <div className="flex min-h-screen flex-col">
+                <Header />
+                <main className="flex-1 py-10">{children}</main>
+                <Footer />
+              </div>
+            </AuthProvider>
+          </MarketProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
