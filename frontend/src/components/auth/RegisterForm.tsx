@@ -110,10 +110,14 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             onChange={(event) => setPassword(event.target.value)}
           />
           <div className="space-y-2">
-            <div className="h-2 rounded-full bg-white/10">
-              <div className={`h-2 rounded-full ${strength.color} ${strength.width}`} />
-            </div>
-            <p className="text-xs text-[#a1a1aa]">Password strength: {strength.label}</p>
+            {password.length > 0 ? (
+              <>
+                <div className="h-2 rounded-full bg-white/10">
+                  <div className={`h-2 rounded-full ${strength.color} ${strength.width}`} />
+                </div>
+                <p className="text-xs text-[#a1a1aa]">Password strength: {strength.label}</p>
+              </>
+            ) : null}
           </div>
         </div>
 
