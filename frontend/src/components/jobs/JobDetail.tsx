@@ -13,7 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 export default function JobDetail({ job, market }: { job: Job; market: MarketConfig }) {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [message, setMessage] = useState<string | null>(null);
