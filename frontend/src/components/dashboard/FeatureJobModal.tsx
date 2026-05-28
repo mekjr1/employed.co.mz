@@ -130,14 +130,21 @@ export function FeatureJobModal({ isOpen, jobId, jobTitle, marketKey, onClose, o
       const payload = await apiFetch<Record<string, unknown>>("/payments/initiate", {
         method: "POST",
         body: {
-          jobId,
-          provider: selectedProvider,
-          msisdn: digits || undefined,
+          job_id: jobId,
+          provider_key: selectedProvider,
+          payer_msisdn: digits || undefined,
         },
         cache: "no-store",
       });
-      const redirectUrl = (payload.redirectUrl as string | undefined) ?? (payload.url as string | undefined);
-      const nextPaymentId = (payload.paymentId as string | undefined) ?? (payload.intentId as string | undefined) ?? null;
+      const redirectUrl =
+        (payload.redirect_url as string | undefined) ??
+        (payload.redirectUrl as string | undefined) ??
+        (payload.url as string | undefined);
+      const nextPaymentId =
+        (payload.intent_id as string | undefined) ??
+        (payload.paymentId as string | undefined) ??
+        (payload.intentId as string | undefined) ??
+        null;
       const kind = (payload.kind as string | undefined) ?? (redirectUrl ? "redirect" : "await");
 
       if (kind === "redirect" && redirectUrl) {

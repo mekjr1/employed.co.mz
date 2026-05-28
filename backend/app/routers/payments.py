@@ -1,18 +1,21 @@
 from __future__ import annotations
 
+import logging
 from datetime import timedelta
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
-from app.auth.dependencies import get_current_user, get_user_id, is_email_verified
+from app.auth.dependencies import get_current_user, get_primary_email, get_user_id, is_email_verified
 from app.database import get_db
 from app.middleware.market import get_current_market
+from app.payments import registry as payment_registry
 from app.schemas.payments import PaymentInitiate, PaymentInitiateResponse, PaymentProviderRead, PaymentStatusResponse, ProvidersResponse
 from app.services.market import MARKETS
 from app.services.model_utils import get_attr, get_by_id, get_model_field, query_all, resolve_model, save, set_attr, utcnow
 
 router = APIRouter(prefix="/payments", tags=["payments"])
+logger = logging.getLogger(__name__)
 
 PROVIDER_LABELS = {"stripe": "Stripe", "mpesa": "M-Pesa", "emola": "e-Mola"}
 
@@ -44,15 +47,18 @@ def _find_owned_intent(db: Any, intent_id: str, user_id: str):
     return intent
 
 
-def _build_initiate_response(intent: Any) -> PaymentInitiateResponse:
+def _build_initiate_response(intent: Any, redirect_url: str | None = None) -> PaymentInitiateResponse:
     provider_key = get_attr(intent, "provider_key", "providerKey", default="")
     is_stripe = provider_key == "stripe"
+    # Prefer the explicit redirect_url arg; fall back to meta.stripe_url stored by the adapter
+    meta = get_attr(intent, "meta", default={}) or {}
+    resolved_redirect = redirect_url or (meta.get("stripe_url") if is_stripe else None)
     return PaymentInitiateResponse(
         intent_id=str(get_attr(intent, "id", "_id", default="")),
         provider_key=provider_key,
         status=get_attr(intent, "status", default="pending"),
         kind="redirect" if is_stripe else "await",
-        redirect_url=None if is_stripe else None,
+        redirect_url=resolved_redirect,
         provider_ref=None if is_stripe else get_attr(intent, "provider_ref", "providerRef"),
     )
 
@@ -132,6 +138,55 @@ def initiate_payment(
     set_attr(intent, utcnow(), "updated_at", "updatedAt")
     set_attr(intent, payload.provider_key != "stripe", "simulator")
     saved = save(db, intent)
+
+    # Invoke the registered payment adapter
+    intent_id = str(get_attr(saved, "id", "_id", default=""))
+    user_email = get_primary_email(current_user) if hasattr(current_user, "email") else None
+    base_url = str(request.base_url).rstrip("/")
+    job_title = get_attr(job, "title", default="")
+
+    try:
+        adapter = payment_registry.get(payload.provider_key)
+        import asyncio
+        result = asyncio.get_event_loop().run_until_complete(
+            adapter.initiate(
+                intent_id=intent_id,
+                job_id=payload.job_id,
+                user_id=str(get_user_id(current_user)),
+                amount=price["amount"],
+                currency=price["currency"],
+                payer_msisdn=payload.payer_msisdn,
+                return_url=f"{base_url}/jobs/{payload.job_id}",
+                cancel_url=f"{base_url}/jobs/{payload.job_id}",
+                customer_email=user_email,
+                extended_through=extended_through,
+                market_key=market["key"],
+                job_title=job_title,
+            )
+        )
+        db.refresh(saved)
+        redirect_url = result.url
+        if result.provider_ref and not get_attr(saved, "provider_ref", "providerRef"):
+            set_attr(saved, result.provider_ref, "provider_ref", "providerRef")
+            save(db, saved)
+
+        if payload.provider_key == "stripe":
+            return _build_initiate_response(saved, redirect_url=redirect_url)
+        return PaymentInitiateResponse(
+            intent_id=intent_id,
+            provider_key=payload.provider_key,
+            status=get_attr(saved, "status", default="awaiting_user"),
+            kind="await",
+            provider_ref=get_attr(saved, "provider_ref", "providerRef") or result.provider_ref,
+        )
+    except (KeyError, RuntimeError) as adapter_exc:
+        # Adapter not configured (e.g. Stripe keys missing) — fall back to stub response
+        logger.warning(
+            "payments.adapter.unavailable provider=%s intent_id=%s reason=%s",
+            payload.provider_key,
+            intent_id,
+            adapter_exc,
+        )
 
     if payload.provider_key == "stripe":
         return _build_initiate_response(saved)
