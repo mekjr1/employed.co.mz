@@ -45,6 +45,22 @@ export default function Header() {
           </nav>
         </div>
 
+        {/* Mobile-only primary navigation row — visible below md breakpoint */}
+        <nav className="flex items-center gap-4 text-sm text-zinc-300 md:hidden">
+          <Link href="/jobs" className="font-medium transition hover:text-white">
+            Browse jobs
+          </Link>
+          <Link href="/jobs/new" className="transition hover:text-white">
+            Post a job
+          </Link>
+          <Link href="/terms" className="transition hover:text-white">
+            Terms
+          </Link>
+          <Link href="/privacy" className="transition hover:text-white">
+            Privacy
+          </Link>
+        </nav>
+
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
           <label className="flex items-center gap-2 rounded-full border border-zinc-800 bg-[#16213e] px-3 py-2 text-sm text-zinc-300">
             <span className="text-zinc-400">Market</span>
