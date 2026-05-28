@@ -171,8 +171,6 @@ def _set_job_fields(job: Any, payload: JobCreate | JobUpdate, market: dict, user
     }.items():
         if field in values:
             set_attr(job, values[field], *aliases)
-    if "title" in values:
-        set_attr(job, slugify(values["title"]), "slug")
     set_attr(job, market["country"], "country")
     set_attr(job, utcnow(), "updated_at", "updatedAt")
     if get_attr(job, "created_at", "createdAt") is None:

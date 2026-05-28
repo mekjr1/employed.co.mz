@@ -3,7 +3,6 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
-import traceback
 from contextlib import asynccontextmanager
 from typing import Any
 from uuid import uuid4
@@ -235,8 +234,6 @@ def create_app() -> FastAPI:
             },
         )
         content: dict[str, Any] = {"detail": "Internal server error"}
-        if _is_development():
-            content["traceback"] = traceback.format_exception(type(exc), exc, exc.__traceback__)
         return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content=content)
 
     app.add_middleware(RequestBodySizeLimitMiddleware, max_body_size=MAX_REQUEST_BODY_SIZE)
