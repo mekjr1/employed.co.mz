@@ -68,6 +68,12 @@ services:
       migrate:
         condition: service_completed_successfully
     command: ["arq", "app.workers.config.WorkerSettings"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import os, redis; r=redis.Redis.from_url(os.environ['REDIS_URL'], socket_connect_timeout=2, socket_timeout=2); r.ping()"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 
   frontend:
     image: ghcr.io/mekjr1/employed-frontend:uat
