@@ -1,0 +1,5 @@
+# CODEOWNERS
+# All files: default owner until team roles are formalised.
+# Replace @mekjr1 with the actual GitHub handle once team accounts are confirmed.
+*       @mekjr1
+
