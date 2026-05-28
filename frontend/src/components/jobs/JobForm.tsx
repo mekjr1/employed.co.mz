@@ -183,7 +183,21 @@ export default function JobForm({ mode, job }: { mode: "create" | "edit"; job?: 
           <RichTextEditor label="Job description" value={values.description} onChange={(value) => update("description", value)} error={errors.description} />
         </div>
 
-        {errors.form ? <div className="rounded-2xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{errors.form}</div> : null}
+        {errors.form ? (
+          <div className="rounded-2xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+            <p>{errors.form}</p>
+            <button
+              type="button"
+              className="mt-2 text-xs font-medium text-rose-300 underline underline-offset-2 hover:text-rose-100"
+              onClick={() => {
+                setErrors({});
+                setSubmitting(false);
+              }}
+            >
+              Dismiss and try again
+            </button>
+          </div>
+        ) : null}
         {success ? <div className="rounded-2xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">{success}</div> : null}
 
         <div className="flex flex-wrap items-center gap-3">
