@@ -10,6 +10,7 @@
     "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {
+    "@sentry/nextjs": "^9.0.0",
     "@tiptap/react": "^2.10.4",
     "@tiptap/starter-kit": "^2.10.4",
     "next": "15.0.0",

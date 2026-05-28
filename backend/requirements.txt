@@ -4,3 +4,4 @@ psycopg2-binary
 pydantic-settings
 python-dotenv
 email-validator
+sentry-sdk[fastapi]>=2.0

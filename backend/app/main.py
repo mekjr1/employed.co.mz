@@ -20,6 +20,7 @@ from app.config import settings
 from app.database import get_db
 from app.logging_config import reset_request_id, set_request_id, setup_logging
 from app.middleware.market import MarketMiddleware
+from app.observability import init_sentry
 from app.routers import admin, auth, jobs, payments, profiles, public_api, reports, users
 from app.webhooks import router as webhook_router
 
@@ -184,6 +185,7 @@ async def lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     setup_logging(settings.log_level)
+    init_sentry()
 
     app = FastAPI(
         title=_settings_value("APP_NAME", default="Employed API"),
