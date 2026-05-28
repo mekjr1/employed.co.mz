@@ -258,6 +258,15 @@ def refresh_token(payload: RefreshTokenRequest, db: Any = Depends(get_db)):
     return _token_response(user)
 
 
+@router.post("/logout", response_model=MessageResponse, status_code=status.HTTP_200_OK)
+def logout() -> MessageResponse:
+    """Stateless logout — the client discards its tokens.
+    This endpoint exists so the frontend can fire a POST and UptimeRobot / CORS
+    pre-flight checks succeed without a 404.
+    """
+    return MessageResponse(message="Logged out")
+
+
 @router.post("/verify-email/{token}", response_model=TokenStatusResponse)
 def verify_email(token: str, db: Any = Depends(get_db)):
     payload = decode_verification_token(token)
