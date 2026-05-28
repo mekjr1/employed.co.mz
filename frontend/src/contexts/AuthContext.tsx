@@ -48,6 +48,7 @@ type AuthResponse = {
 };
 
 const TOKEN_KEY = "employed_token";
+const REFRESH_TOKEN_KEY = "employed_refresh_token";
 const TOKEN_COOKIE = "employed_token";
 const ADMIN_COOKIE = "employed_is_admin";
 const REFRESH_BUFFER_MS = 60_000;
@@ -63,9 +64,18 @@ function getStoredToken(): string | null {
   return window.localStorage.getItem(TOKEN_KEY);
 }
 
+function getStoredRefreshToken(): string | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  return window.localStorage.getItem(REFRESH_TOKEN_KEY);
+}
+
 function clearStoredToken() {
   if (typeof window !== "undefined") {
     window.localStorage.removeItem(TOKEN_KEY);
+    window.localStorage.removeItem(REFRESH_TOKEN_KEY);
   }
 }
 
@@ -140,12 +150,15 @@ function isVerifiedUser(user: AppUser | null) {
   return !!user.emails?.some((email) => email.verified);
 }
 
-function persistToken(token: string) {
+function persistToken(token: string, refreshToken?: string) {
   if (typeof window === "undefined") {
     return;
   }
 
   window.localStorage.setItem(TOKEN_KEY, token);
+  if (refreshToken) {
+    window.localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+  }
   const expiresAt = parseJwtExpiry(token) ?? Date.now() + 7 * 24 * 60 * 60 * 1000;
   setCookie(TOKEN_COOKIE, token, expiresAt);
 }
@@ -174,9 +187,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const applyAuth = useCallback((user: AppUser | null, token: string | null) => {
+  const applyAuth = useCallback((user: AppUser | null, token: string | null, refreshTokenValue?: string) => {
     if (token) {
-      persistToken(token);
+      persistToken(token, refreshTokenValue);
     }
 
     if (user) {
@@ -210,8 +223,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [clearRefreshTimer]);
 
   const refreshToken = useCallback(async () => {
-    const activeToken = getStoredToken() ?? state.token;
-    if (!activeToken) {
+    const storedRefreshToken = getStoredRefreshToken();
+    if (!storedRefreshToken) {
       logout();
       return;
     }
@@ -219,16 +232,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const payload = await apiFetch<AuthResponse>("/auth/refresh", {
         method: "POST",
-        body: { refresh_token: activeToken },
+        body: { refresh_token: storedRefreshToken },
         cache: "no-store",
       });
-      const nextToken = payload.token ?? payload.accessToken ?? payload.access_token ?? activeToken;
+      const nextToken = payload.token ?? payload.accessToken ?? payload.access_token ?? (getStoredToken() ?? "");
+      const nextRefresh = payload.refreshToken ?? payload.refresh_token ?? storedRefreshToken;
       const user = payload.user ?? (await fetchMe(nextToken));
-      applyAuth(user, nextToken);
+      applyAuth(user, nextToken, nextRefresh);
     } catch {
       logout();
     }
-  }, [applyAuth, logout, state.token]);
+  }, [applyAuth, logout]);
 
   const scheduleRefresh = useCallback(
     (token: string | null) => {
@@ -258,8 +272,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error("No access token returned by login.");
       }
 
+      const refreshTokenValue = payload.refreshToken ?? payload.refresh_token;
       const user = payload.user ?? (await fetchMe(token));
-      applyAuth(user, token);
+      applyAuth(user, token, refreshTokenValue ?? undefined);
     },
     [applyAuth],
   );
