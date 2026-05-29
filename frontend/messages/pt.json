@@ -21,11 +21,45 @@
   "home": {
     "heroTitle": "Encontre sua próxima oportunidade",
     "heroSubtitle": "Navegue por centenas de vagas locais em Moçambique e México.",
+    "heroTagline": "Empregos locais. Contratação local.",
+    "heroBody": "Descubra anúncios públicos pensados para {country}. Pesquise oportunidades activas, veja as vagas mais recentes e alcance talento local rapidamente.",
+    "browseJobsCta": "Ver vagas",
+    "postJobCta": "Publicar vaga",
+    "featuredListingLabel": "Vaga em destaque",
+    "featuredListingHelper": "Promova vagas urgentes com um cartão em destaque e colocação no topo da página.",
+    "supportedPayments": "Pagamentos suportados: {providers}",
+    "recentJobsKicker": "Vagas recentes",
+    "latestActiveRoles": "Últimas vagas activas",
+    "viewAllJobs": "Ver todas as vagas",
     "searchPlaceholder": "Pesquisar vagas…",
     "searchButton": "Pesquisar",
-    "noJobs": "Nenhuma vaga correspondente no momento.",
+    "noJobs": "Ainda não há vagas publicadas — seja o primeiro a publicar!",
     "noJobsHint": "Seja o primeiro — publique uma vaga e alcance talentos locais.",
     "postFirstJob": "Publicar a primeira vaga"
+  },
+  "jobsList": {
+    "kicker": "Explore oportunidades",
+    "title": "Procurar vagas públicas em {country}",
+    "subtitle": "Pesquise por título, empresa ou localização. Filtre por vagas remotas e controle o tamanho dos resultados para um fluxo de contratação mais rápido.",
+    "jobsFound": "{count, plural, =0 {Nenhuma vaga encontrada} one {# vaga encontrada} other {# vagas encontradas}}",
+    "featuredSeparate": "As vagas em destaque ficam separadas do feed principal."
+  },
+  "jobGrid": {
+    "emptyTitle": "Ainda nada para mostrar",
+    "emptyBody": "Nenhuma vaga corresponde aos seus filtros ainda."
+  },
+  "featuredStrip": {
+    "kicker": "Vagas em destaque",
+    "title": "Vagas com máxima visibilidade a contratar agora",
+    "makeFeatured": "Coloque a sua vaga em destaque",
+    "exploreOpportunity": "Explorar oportunidade"
+  },
+  "pagination": {
+    "showing": "A mostrar {start}–{end} de {total}",
+    "perPage": "Por página",
+    "previous": "Anterior",
+    "next": "Seguinte",
+    "pageOf": "Página {page} de {total}"
   },
   "jobs": {
     "featuredBadge": "Destaque",

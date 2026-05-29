@@ -21,11 +21,45 @@
   "home": {
     "heroTitle": "Find your next opportunity",
     "heroSubtitle": "Browse hundreds of local jobs across Mozambique and Mexico.",
+    "heroTagline": "Local jobs. Local hiring.",
+    "heroBody": "Discover public listings designed for {country}. Search active opportunities, review the latest roles, and reach local talent fast.",
+    "browseJobsCta": "Browse jobs",
+    "postJobCta": "Post a job",
+    "featuredListingLabel": "Featured listing",
+    "featuredListingHelper": "Promote urgent roles with a premium highlighted card and top-of-page placement.",
+    "supportedPayments": "Supported payments: {providers}",
+    "recentJobsKicker": "Recent jobs",
+    "latestActiveRoles": "Latest active roles",
+    "viewAllJobs": "View all jobs",
     "searchPlaceholder": "Search jobs…",
     "searchButton": "Search",
-    "noJobs": "No matching jobs right now.",
+    "noJobs": "No jobs posted yet — be the first to post!",
     "noJobsHint": "Be the first — post a job and reach local talent.",
     "postFirstJob": "Post the first job"
+  },
+  "jobsList": {
+    "kicker": "Explore opportunities",
+    "title": "Browse public jobs in {country}",
+    "subtitle": "Search by title, company, or location. Filter to remote roles and control result size for a faster hiring workflow.",
+    "jobsFound": "{count, plural, =0 {No jobs found} one {# job found} other {# jobs found}}",
+    "featuredSeparate": "Featured jobs stay separate from the main feed."
+  },
+  "jobGrid": {
+    "emptyTitle": "Nothing to show yet",
+    "emptyBody": "No jobs matched your filters yet."
+  },
+  "featuredStrip": {
+    "kicker": "Featured jobs",
+    "title": "Top visibility roles hiring now",
+    "makeFeatured": "Make your role featured",
+    "exploreOpportunity": "Explore opportunity"
+  },
+  "pagination": {
+    "showing": "Showing {start}–{end} of {total}",
+    "perPage": "Per page",
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {page} of {total}"
   },
   "jobs": {
     "featuredBadge": "Featured",

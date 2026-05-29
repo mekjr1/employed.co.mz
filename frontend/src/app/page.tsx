@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { headers } from "next/headers";
+import { getTranslations } from "next-intl/server";
 
 import Container from "@/components/layout/Container";
 import FeaturedStrip from "@/components/jobs/FeaturedStrip";
@@ -44,6 +45,7 @@ export default async function HomePage() {
   const market = resolveMarketFromHeaders(requestHeaders);
   const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? market.host;
   const { featured, recent } = await loadHomeData(host, market.country);
+  const t = await getTranslations("home");
 
   return (
     <Container className="space-y-10">
@@ -51,26 +53,26 @@ export default async function HomePage() {
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1.3fr)_minmax(280px,0.7fr)] lg:items-center">
           <div className="space-y-5">
             <p className="text-sm font-semibold uppercase tracking-[0.28em] text-indigo-200">{market.siteName}</p>
-            <h1 className="max-w-3xl text-4xl font-black tracking-tight text-white sm:text-5xl">{market.tagline}</h1>
+            <h1 className="max-w-3xl text-4xl font-black tracking-tight text-white sm:text-5xl">{t("heroTagline")}</h1>
             <p className="max-w-2xl text-lg leading-8 text-zinc-200">
-              Discover public listings designed for {market.country}. Search active opportunities, review the latest roles, and reach local talent fast.
+              {t("heroBody", { country: market.country })}
             </p>
             <div className="flex flex-wrap gap-3">
               <Link href="/jobs" className={buttonStyles({ variant: "primary", size: "lg" })}>
-                Browse jobs
+                {t("browseJobsCta")}
               </Link>
               <Link href="/jobs/new" className={buttonStyles({ variant: "secondary", size: "lg" })}>
-                Post a job
+                {t("postJobCta")}
               </Link>
             </div>
           </div>
           <div className="card-surface grid gap-4 p-6 text-sm text-zinc-300">
             <div>
-              <p className="text-zinc-500">Featured listing</p>
+              <p className="text-zinc-500">{t("featuredListingLabel")}</p>
               <p className="mt-2 text-2xl font-semibold text-zinc-100">{market.featuredJob.label}</p>
             </div>
-            <p>Promote urgent roles with a premium highlighted card and top-of-page placement.</p>
-            <Button variant="secondary">Supported payments: {market.paymentProviders.join(", ")}</Button>
+            <p>{t("featuredListingHelper")}</p>
+            <Button variant="secondary">{t("supportedPayments", { providers: market.paymentProviders.join(", ") })}</Button>
           </div>
         </div>
       </section>
@@ -80,14 +82,14 @@ export default async function HomePage() {
       <section className="space-y-5">
         <div className="flex items-end justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-indigo-300">Recent jobs</p>
-            <h2 className="text-2xl font-semibold text-zinc-100">Latest active roles</h2>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-indigo-300">{t("recentJobsKicker")}</p>
+            <h2 className="text-2xl font-semibold text-zinc-100">{t("latestActiveRoles")}</h2>
           </div>
           <Link href="/jobs" className="text-sm font-medium text-indigo-300 hover:text-indigo-200">
-            View all jobs →
+            {t("viewAllJobs")} →
           </Link>
         </div>
-        <JobGrid jobs={recent} locale={market.locale} emptyMessage="No jobs posted yet — be the first to post!" />
+        <JobGrid jobs={recent} locale={market.locale} emptyMessage={t("noJobs")} />
       </section>
     </Container>
   );

@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { getTranslations } from "next-intl/server";
 
 import Container from "@/components/layout/Container";
 import FeaturedStrip from "@/components/jobs/FeaturedStrip";
@@ -60,6 +61,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
   const requestHeaders = await headers();
   const market = resolveMarketFromHeaders(requestHeaders);
   const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? market.host;
+  const t = await getTranslations("jobsList");
 
   const page = toPositiveInt(typeof params.page === "string" ? params.page : undefined, 1);
   const perPage = toPositiveInt(typeof params.per_page === "string" ? params.per_page : undefined, PER_PAGE_OPTIONS[0]);
@@ -80,30 +82,34 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
   return (
     <Container className="space-y-8">
       <section className="space-y-3">
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-indigo-300">Explore opportunities</p>
-        <h1 className="text-4xl font-bold tracking-tight text-zinc-100">Browse public jobs in {market.country}</h1>
-        <p className="max-w-3xl text-lg text-zinc-400">Search by title, company, or location. Filter to remote roles and control result size for a faster hiring workflow.</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-indigo-300">{t("kicker")}</p>
+        <h1 className="text-4xl font-bold tracking-tight text-zinc-100">{t("title", { country: market.country })}</h1>
+        <p className="max-w-3xl text-lg text-zinc-400">{t("subtitle")}</p>
       </section>
 
       <JobFilters initialSearch={search} initialJobType={jobType} initialRemote={remote} />
       <FeaturedStrip jobs={data.featured} />
 
       <section className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-zinc-400">
-          <p><span className="font-semibold text-zinc-100">{data.total}</span> jobs found</p>
-          <p>Featured jobs stay separate from the main feed.</p>
-        </div>
+        {data.total > 0 ? (
+          <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-zinc-400">
+            <p className="font-medium text-zinc-100">{t("jobsFound", { count: data.total })}</p>
+            <p>{t("featuredSeparate")}</p>
+          </div>
+        ) : null}
         <JobGrid jobs={data.jobs} locale={market.locale} />
       </section>
 
-      <Pagination
-        page={data.page}
-        perPage={data.perPage}
-        total={data.total}
-        totalPages={data.totalPages}
-        pathname="/jobs"
-        params={{ search, job_type: jobType, remote: remote || undefined }}
-      />
+      {data.total > 0 ? (
+        <Pagination
+          page={data.page}
+          perPage={data.perPage}
+          total={data.total}
+          totalPages={data.totalPages}
+          pathname="/jobs"
+          params={{ search, job_type: jobType, remote: remote || undefined }}
+        />
+      ) : null}
     </Container>
   );
 }

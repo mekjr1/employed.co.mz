@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/Button";
 import { PER_PAGE_OPTIONS } from "@/lib/constants";
@@ -16,6 +17,7 @@ interface PaginationProps {
 
 export default function Pagination({ page, perPage, total, totalPages, pathname, params = {} }: PaginationProps) {
   const router = useRouter();
+  const t = useTranslations("pagination");
 
   function navigate(nextPage: number, nextPerPage = perPage) {
     const query = new URLSearchParams();
@@ -34,9 +36,9 @@ export default function Pagination({ page, perPage, total, totalPages, pathname,
   return (
     <div className="card-surface flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="space-y-1 text-sm text-zinc-400">
-        <p className="text-zinc-200">Showing {start}–{end} of {total} jobs</p>
+        <p className="text-zinc-200">{t("showing", { start, end, total })}</p>
         <label className="inline-flex items-center gap-2">
-          <span>Per page</span>
+          <span>{t("perPage")}</span>
           <select
             className="rounded-lg border border-zinc-700 bg-[#111827] px-3 py-2 text-zinc-100 outline-none"
             value={perPage}
@@ -53,13 +55,13 @@ export default function Pagination({ page, perPage, total, totalPages, pathname,
 
       <div className="flex items-center gap-2">
         <Button variant="secondary" disabled={page <= 1} onClick={() => navigate(page - 1)}>
-          Previous
+          {t("previous")}
         </Button>
         <span className="text-sm text-zinc-400">
-          Page {page} of {Math.max(totalPages, 1)}
+          {t("pageOf", { page, total: Math.max(totalPages, 1) })}
         </span>
         <Button variant="secondary" disabled={page >= totalPages} onClick={() => navigate(page + 1)}>
-          Next
+          {t("next")}
         </Button>
       </div>
     </div>

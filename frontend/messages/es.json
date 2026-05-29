@@ -21,11 +21,45 @@
   "home": {
     "heroTitle": "Encuentra tu próxima oportunidad",
     "heroSubtitle": "Explora cientos de empleos locales en Mozambique y México.",
+    "heroTagline": "Empleos locales. Contratación local.",
+    "heroBody": "Descubre anuncios públicos diseñados para {country}. Busca oportunidades activas, revisa los puestos más recientes y llega rápido al talento local.",
+    "browseJobsCta": "Ver empleos",
+    "postJobCta": "Publicar empleo",
+    "featuredListingLabel": "Empleo destacado",
+    "featuredListingHelper": "Promociona puestos urgentes con una tarjeta destacada y ubicación al inicio de la página.",
+    "supportedPayments": "Pagos compatibles: {providers}",
+    "recentJobsKicker": "Empleos recientes",
+    "latestActiveRoles": "Últimos puestos activos",
+    "viewAllJobs": "Ver todos los empleos",
     "searchPlaceholder": "Buscar empleos…",
     "searchButton": "Buscar",
-    "noJobs": "No hay empleos coincidentes por ahora.",
+    "noJobs": "Aún no hay empleos publicados — ¡sé el primero en publicar!",
     "noJobsHint": "Sé el primero — publica un empleo y llega al talento local.",
     "postFirstJob": "Publicar el primer empleo"
+  },
+  "jobsList": {
+    "kicker": "Explora oportunidades",
+    "title": "Buscar empleos públicos en {country}",
+    "subtitle": "Busca por título, empresa o ubicación. Filtra por puestos remotos y controla el tamaño de los resultados para un flujo de contratación más rápido.",
+    "jobsFound": "{count, plural, =0 {No se encontraron empleos} one {# empleo encontrado} other {# empleos encontrados}}",
+    "featuredSeparate": "Los empleos destacados se muestran separados del feed principal."
+  },
+  "jobGrid": {
+    "emptyTitle": "Aún nada que mostrar",
+    "emptyBody": "Ningún empleo coincide con tus filtros todavía."
+  },
+  "featuredStrip": {
+    "kicker": "Empleos destacados",
+    "title": "Puestos de máxima visibilidad contratando ahora",
+    "makeFeatured": "Destaca tu vacante",
+    "exploreOpportunity": "Explorar oportunidad"
+  },
+  "pagination": {
+    "showing": "Mostrando {start}–{end} de {total}",
+    "perPage": "Por página",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "pageOf": "Página {page} de {total}"
   },
   "jobs": {
     "featuredBadge": "Destacado",
