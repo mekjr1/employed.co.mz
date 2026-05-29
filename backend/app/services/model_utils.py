@@ -71,6 +71,25 @@ def query_all(
     return list(query.all())
 
 
+def query_by_user(db: Any, model: Any, user_id: Any, *, order_desc: bool = True) -> list[Any]:
+    """Return rows from *model* owned by *user_id*, push-down where supported.
+
+    When the model exposes a ``user_id``/``userId`` column we forward the
+    predicate (and optional ``created_at`` ordering) to SQLAlchemy so the
+    DB handles them. Falls back to a Python-side scan for in-memory test
+    rigs whose models do not expose the columns as ORM attributes.
+    """
+    user_field = get_model_field(model, "user_id", "userId")
+    if user_field is not None:
+        order_field = get_model_field(model, "created_at", "createdAt")
+        order_by = order_field.desc() if (order_desc and order_field is not None) else order_field
+        return query_all(db, model, filters=[user_field == user_id], order_by=order_by)
+    items = [item for item in query_all(db, model) if get_attr(item, "user_id", "userId") == user_id]
+    if order_desc:
+        items.sort(key=lambda item: get_attr(item, "created_at", "createdAt", default=utcnow()), reverse=True)
+    return items
+
+
 def get_by_id(db: Any, model: Any, record_id: Any) -> Any | None:
     if hasattr(db, "get"):
         try:

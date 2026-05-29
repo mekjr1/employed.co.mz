@@ -47,9 +47,7 @@ class Settings(BaseSettings):
 
     # reCAPTCHA (server-side verification + frontend site key passthrough)
     recaptcha_secret_key: str | None = Field(default=None, alias="RECAPTCHA_SECRET_KEY")
-    next_public_recaptcha_site_key: str | None = Field(
-        default=None, alias="NEXT_PUBLIC_RECAPTCHA_SITE_KEY"
-    )
+    next_public_recaptcha_site_key: str | None = Field(default=None, alias="NEXT_PUBLIC_RECAPTCHA_SITE_KEY")
 
     # Google OAuth
     google_client_id: str | None = Field(default=None, alias="GOOGLE_CLIENT_ID")

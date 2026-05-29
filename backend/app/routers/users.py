@@ -13,7 +13,16 @@ from app.middleware.rate_limit import rate_limit
 from app.schemas.auth import MessageResponse
 from app.schemas.users import AccountDeletionResponse, UserExport, UserRead
 from app.services.email import send_verification_email
-from app.services.model_utils import get_attr, query_all, resolve_model, save, set_attr, utcnow
+from app.services.model_utils import (
+    get_attr,
+    get_model_field,
+    query_all,
+    query_by_user,
+    resolve_model,
+    save,
+    set_attr,
+    utcnow,
+)
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -54,6 +63,14 @@ def _serialize_record(record: Any) -> dict[str, Any]:
     return data
 
 
+def _query_by_reporter(db: Any, model: Any, user_id: Any) -> list[Any]:
+    """Push-down JobReport.reporter_user_id = uid; fall back to scan."""
+    reporter_field = get_model_field(model, "reporter_user_id", "reporterUserId")
+    if reporter_field is not None:
+        return query_all(db, model, filters=[reporter_field == user_id])
+    return [item for item in query_all(db, model) if get_attr(item, "reporter_user_id", "reporterUserId") == user_id]
+
+
 @router.get("/me", response_model=UserRead)
 def me(current_user: Any = Depends(get_current_user)):
     return _serialize_user(current_user)
@@ -63,30 +80,20 @@ def me(current_user: Any = Depends(get_current_user)):
 def export_my_data(db: Any = Depends(get_db), current_user: Any = Depends(get_current_user)):
     user_id = get_user_id(current_user)
     job_model = resolve_model("Job", "Jobs")
-    jobs = [_serialize_record(job) for job in query_all(db, job_model) if get_attr(job, "user_id", "userId") == user_id]
+    jobs = [_serialize_record(job) for job in query_by_user(db, job_model, user_id)]
     try:
         profile_model = resolve_model("Profile", "Profiles")
-        profile = next(
-            (item for item in query_all(db, profile_model) if get_attr(item, "user_id", "userId") == user_id), None
-        )
+        profile = next(iter(query_by_user(db, profile_model, user_id, order_desc=False)), None)
     except RuntimeError:
         profile = None
     try:
         payment_model = resolve_model("PaymentIntent", "PaymentIntents")
-        payments = [
-            _serialize_record(item)
-            for item in query_all(db, payment_model)
-            if get_attr(item, "user_id", "userId") == user_id
-        ]
+        payments = [_serialize_record(item) for item in query_by_user(db, payment_model, user_id)]
     except RuntimeError:
         payments = []
     try:
         report_model = resolve_model("JobReport", "Report", "JobReports")
-        reports = [
-            _serialize_record(item)
-            for item in query_all(db, report_model)
-            if get_attr(item, "reporter_user_id", "reporterUserId") == user_id
-        ]
+        reports = [_serialize_record(item) for item in _query_by_reporter(db, report_model, user_id)]
     except RuntimeError:
         reports = []
     return UserExport(

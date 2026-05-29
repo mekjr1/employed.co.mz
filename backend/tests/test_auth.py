@@ -126,8 +126,10 @@ def test_oauth_callback_creates_or_updates_user(client, monkeypatch):
     assert body["user"]["email"] == "oauth@example.com"
     assert body["user"]["email_verified"] is True
 
+
 def test_logout_revokes_refresh_token_jti(client, test_user):
     from app.auth.revocation import reset_memory_store
+
     reset_memory_store()
 
     login = client.post("/auth/login", json={"email": test_user.email, "password": "password123"}).json()

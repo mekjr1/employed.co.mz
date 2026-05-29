@@ -22,7 +22,17 @@ from app.middleware.market import get_current_market
 from app.schemas.jobs import JobCountResponse, JobCreate, JobListResponse, JobRead, JobUpdate
 from app.services.email import send_job_status_changed_email, send_job_submitted_email
 from app.services.html_sanitizer import sanitize_html
-from app.services.model_utils import delete, get_attr, get_by_id, query_all, resolve_model, save, set_attr, utcnow
+from app.services.model_utils import (
+    delete,
+    get_attr,
+    get_by_id,
+    query_all,
+    query_by_user,
+    resolve_model,
+    save,
+    set_attr,
+    utcnow,
+)
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
@@ -283,8 +293,7 @@ def list_my_jobs(
     current_user: Any = Depends(get_current_user),
 ):
     user_id = get_user_id(current_user)
-    items = [item for item in query_all(db, _job_model()) if get_attr(item, "user_id", "userId") == user_id]
-    items.sort(key=lambda item: get_attr(item, "created_at", "createdAt", default=utcnow()), reverse=True)
+    items = query_by_user(db, _job_model(), user_id)
     return [_job_to_read(item, request) for item in items]
 
 

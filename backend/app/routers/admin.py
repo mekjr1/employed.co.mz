@@ -10,12 +10,56 @@ from app.database import get_db
 from app.schemas.jobs import JobListResponse
 from app.schemas.reports import ReportRead
 from app.schemas.users import UserRead
-from app.services.model_utils import get_attr, get_by_id, query_all, resolve_model, save, set_attr, utcnow
+from app.services.model_utils import (
+    get_attr,
+    get_by_id,
+    get_model_field,
+    query_all,
+    resolve_model,
+    save,
+    set_attr,
+    utcnow,
+)
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 VALID_STATUSES = {"pending", "active", "flagged", "inactive", "filled"}
 VALID_RESOLUTIONS = {"pending", "reviewed", "dismissed", "job_removed"}
+
+
+def _pushdown_admin_jobs(db: Any, model: Any, status_filter: str | None) -> list[Any]:
+    """Push admin /jobs WHERE/ORDER BY to the DB; fall back to a full scan."""
+    status_field = get_model_field(model, "status")
+    created_field = get_model_field(model, "created_at", "createdAt")
+    if status_field is not None or created_field is not None:
+        filters = [status_field == status_filter] if (status_filter and status_field is not None) else []
+        order_by = created_field.desc() if created_field is not None else None
+        items = query_all(db, model, filters=filters or None, order_by=order_by)
+        if status_filter and status_field is None:
+            items = [item for item in items if get_attr(item, "status") == status_filter]
+        return items
+    items = query_all(db, model)
+    if status_filter:
+        items = [item for item in items if get_attr(item, "status") == status_filter]
+    items.sort(key=lambda item: get_attr(item, "created_at", "createdAt", default=utcnow()), reverse=True)
+    return items
+
+
+def _pushdown_admin_reports(db: Any, model: Any, resolution: str | None) -> list[Any]:
+    resolution_field = get_model_field(model, "resolution")
+    created_field = get_model_field(model, "created_at", "createdAt")
+    if resolution_field is not None or created_field is not None:
+        filters = [resolution_field == resolution] if (resolution and resolution_field is not None) else []
+        order_by = created_field.desc() if created_field is not None else None
+        items = query_all(db, model, filters=filters or None, order_by=order_by, limit=200)
+        if resolution and resolution_field is None:
+            items = [item for item in items if get_attr(item, "resolution") == resolution]
+        return items
+    items = query_all(db, model)
+    if resolution:
+        items = [item for item in items if get_attr(item, "resolution") == resolution]
+    items.sort(key=lambda item: get_attr(item, "created_at", "createdAt", default=utcnow()), reverse=True)
+    return items[:200]
 
 
 class JobStatusUpdate(BaseModel):
@@ -45,10 +89,7 @@ def admin_jobs(
 ):
     from app.routers.jobs import _job_model, _job_to_read
 
-    items = query_all(db, _job_model())
-    if status_filter:
-        items = [item for item in items if get_attr(item, "status") == status_filter]
-    items.sort(key=lambda item: get_attr(item, "created_at", "createdAt", default=utcnow()), reverse=True)
+    items = _pushdown_admin_jobs(db, _job_model(), status_filter)
     start = (page - 1) * page_size
     end = start + page_size
     return JobListResponse(
@@ -192,12 +233,9 @@ def admin_reports(
     admin_user: Any = Depends(require_admin),
 ):
     report_model = resolve_model("JobReport", "Report", "JobReports")
-    items = query_all(db, report_model)
-    if resolution:
-        if resolution not in VALID_RESOLUTIONS:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid report resolution")
-        items = [item for item in items if get_attr(item, "resolution") == resolution]
-    items.sort(key=lambda item: get_attr(item, "created_at", "createdAt", default=utcnow()), reverse=True)
+    if resolution and resolution not in VALID_RESOLUTIONS:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid report resolution")
+    items = _pushdown_admin_reports(db, report_model, resolution)
     return [
         ReportRead(
             id=str(get_attr(item, "id", "_id", default="")),
