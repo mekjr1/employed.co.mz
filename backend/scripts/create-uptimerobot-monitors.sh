@@ -51,9 +51,10 @@ fi
 create_if_missing() {
   local friendly_name="$1"
   local url="$2"
+  local norm_url="${url%/}"
   local existing_id
-  existing_id="$(echo "${existing}" | jq -r --arg url "${url}" \
-    '.data[]? | select(.url == $url) | .id' | head -n1)"
+  existing_id="$(echo "${existing}" | jq -r --arg url "${norm_url}" \
+    '.data[]? | select((.url | sub("/$"; "")) == $url) | .id' | head -n1)"
   if [[ -n "${existing_id}" ]]; then
     echo "[uptimerobot] EXISTS ${friendly_name} (id=${existing_id}, url=${url}) -- skipping"
     return 0
