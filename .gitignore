@@ -34,3 +34,16 @@ build/
 
 # Quality run results — ephemeral per-run data, not committed
 .quality-run/
+
+# Build / cache artefacts (P-NEW-004)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+.next/
+.turbo/

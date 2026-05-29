@@ -42,7 +42,7 @@ When the team is ready to add PagerDuty or OpsGenie:
 
 | Role | Schedule | Contact |
 |------|----------|---------|
-| Primary on-call | TBD — assign via PagerDuty/OpsGenie | @mekjr1 (placeholder) |
+| Primary on-call | TBD — assign via PagerDuty/OpsGenie | @mekjr1 |
 | Secondary/escalation | TBD | TBD |
 
 > **Action required:** Assign on-call owners and configure real alert

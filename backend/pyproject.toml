@@ -1,6 +1,11 @@
 [tool.ruff]
 line-length = 120
 target-version = "py312"
+# Once-applied Alembic migrations are immutable: never reformat the on-disk
+# representation of a version that has already been applied to a database. The
+# in-place line-wrap from a routine `ruff format .` run silently changes the
+# checksum used by some deploy tooling. See docs/operations/alembic-policy.md.
+exclude = ["alembic/versions"]
 
 [tool.ruff.lint]
 # Keep default Pyflakes (F) + pycodestyle errors (E) + import warnings (E402).
