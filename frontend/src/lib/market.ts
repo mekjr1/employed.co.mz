@@ -4,7 +4,7 @@ export const MARKETS = {
   mx: {
     key: "mx",
     country: "Mexico",
-    locale: "es-MX",
+    locale: "es",
     siteName: "Employed MX",
     tagline: "Local jobs. Local hiring.",
     host: "mx.employed.co.mz",
@@ -14,7 +14,7 @@ export const MARKETS = {
   mz: {
     key: "mz",
     country: "Mozambique",
-    locale: "pt-MZ",
+    locale: "pt",
     siteName: "Employed MZ",
     tagline: "Local jobs. Local hiring.",
     host: "mz.employed.co.mz",
