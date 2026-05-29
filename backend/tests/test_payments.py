@@ -1,14 +1,27 @@
 from __future__ import annotations
 
 from app.models.payment_intent import PaymentIntent
+from app.payments import registry as payment_registry
+from app.payments.base import InitiateResult
 from app.payments.settlement import settle_intent
 from tests.conftest import utcnow
 
 
 def test_initiate_stripe_payment_returns_redirect_kind(
-    client, sample_job, test_user, auth_headers, sample_market_headers
+    client, sample_job, test_user, auth_headers, sample_market_headers, monkeypatch
 ):
+    """Stripe happy path: when adapter succeeds it returns 201 + kind=redirect + redirect_url."""
     job = sample_job(user=test_user)
+
+    async def _fake_initiate(**_kwargs):
+        return InitiateResult(
+            kind="redirect",
+            provider_ref="cs_test_fake",
+            url="https://stripe.example/checkout/cs_test_fake",
+        )
+
+    stripe_adapter = payment_registry.get("stripe")
+    monkeypatch.setattr(stripe_adapter, "initiate", _fake_initiate)
 
     response = client.post(
         "/payments/initiate",
@@ -20,6 +33,25 @@ def test_initiate_stripe_payment_returns_redirect_kind(
     body = response.json()
     assert body["provider_key"] == "stripe"
     assert body["kind"] == "redirect"
+    assert body["redirect_url"] == "https://stripe.example/checkout/cs_test_fake"
+
+
+def test_initiate_stripe_payment_returns_503_when_adapter_disabled(
+    client, sample_job, test_user, auth_headers, sample_market_headers
+):
+    """Regression for NEW-P005: an unconfigured Stripe key must NOT silently 201."""
+    job = sample_job(user=test_user)
+
+    response = client.post(
+        "/payments/initiate",
+        json={"job_id": job.id, "provider_key": "stripe"},
+        headers=auth_headers(test_user) | sample_market_headers("mz"),
+    )
+
+    # In the test rig STRIPE_SECRET_KEY is unset → adapter raises RuntimeError → 503
+    assert response.status_code == 503
+    body = response.json()
+    assert "stripe" in body["detail"].lower() or "not configured" in body["detail"].lower()
 
 
 def test_initiate_mpesa_payment_returns_await_kind(client, sample_job, test_user, auth_headers, sample_market_headers):

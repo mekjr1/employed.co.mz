@@ -6,7 +6,7 @@ MARKETS: dict[str, dict[str, Any]] = {
     "mx": {
         "key": "mx",
         "country": "Mexico",
-        "locale": "es-MX",
+        "locale": "es",
         "site_name": "Employed MX",
         "tagline": "Local jobs. Local hiring.",
         "featured_job": {"amount": 99900, "currency": "mxn", "label": "MX$999"},
@@ -15,7 +15,7 @@ MARKETS: dict[str, dict[str, Any]] = {
     "mz": {
         "key": "mz",
         "country": "Mozambique",
-        "locale": "pt-MZ",
+        "locale": "pt",
         "site_name": "Employed MZ",
         "tagline": "Local jobs. Local hiring.",
         "featured_job": {"amount": 250000, "currency": "mzn", "label": "MZN 2,500"},

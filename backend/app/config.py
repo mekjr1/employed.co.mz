@@ -39,6 +39,37 @@ class Settings(BaseSettings):
     smtp_use_ssl: bool = Field(default=False, alias="SMTP_USE_SSL")
     email_from: str | None = Field(default=None, alias="FROM_EMAIL")
 
+    # Stripe (Resend-style: declared even though adapters read via _setting helper,
+    # so pydantic-settings hydrates the values instead of silently dropping them).
+    stripe_secret_key: str | None = Field(default=None, alias="STRIPE_SECRET_KEY")
+    stripe_publishable_key: str | None = Field(default=None, alias="STRIPE_PUBLISHABLE_KEY")
+    stripe_webhook_secret: str | None = Field(default=None, alias="STRIPE_WEBHOOK_SECRET")
+
+    # reCAPTCHA (server-side verification + frontend site key passthrough)
+    recaptcha_secret_key: str | None = Field(default=None, alias="RECAPTCHA_SECRET_KEY")
+    next_public_recaptcha_site_key: str | None = Field(
+        default=None, alias="NEXT_PUBLIC_RECAPTCHA_SITE_KEY"
+    )
+
+    # Google OAuth
+    google_client_id: str | None = Field(default=None, alias="GOOGLE_CLIENT_ID")
+    google_client_secret: str | None = Field(default=None, alias="GOOGLE_CLIENT_SECRET")
+
+    # Observability
+    sentry_dsn: str | None = Field(default=None, alias="SENTRY_DSN")
+    sentry_environment: str | None = Field(default=None, alias="SENTRY_ENVIRONMENT")
+
+    # Privacy: salt used to hash MSISDN / IP before logging
+    ip_salt: str | None = Field(default=None, alias="IP_SALT")
+
+    # Public base URLs (used for OAuth + email links)
+    app_base_url: str | None = Field(default=None, alias="APP_BASE_URL")
+    frontend_base_url: str | None = Field(default=None, alias="FRONTEND_BASE_URL")
+
+    # NOTE: M-Pesa and e-Mola fields are intentionally omitted — those adapters
+    # are by-design not yet implemented. Add MPESA_* / EMOLA_* fields here when
+    # the live integrations land.
+
     @model_validator(mode="after")
     def apply_environment_defaults(self) -> "Settings":
         environment = (self.environment or "development").strip().lower()

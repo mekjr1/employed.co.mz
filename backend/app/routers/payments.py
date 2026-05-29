@@ -109,8 +109,25 @@ def _find_existing_open_intent(db: Any, job_id: str, user_id: str):
     return existing[0] if existing else None
 
 
+def _simulator_stub_response(db: Any, saved: Any, provider_key: str) -> PaymentInitiateResponse:
+    """Fallback response for unimplemented mobile-money simulators (mpesa/emola).
+
+    Stripe must NEVER take this path — Stripe failures surface as 5xx instead.
+    """
+    provider_ref = f"pending-{get_attr(saved, 'id', '_id', default='intent')}"
+    set_attr(saved, provider_ref, "provider_ref", "providerRef")
+    save(db, saved)
+    return PaymentInitiateResponse(
+        intent_id=str(get_attr(saved, "id", "_id", default="")),
+        provider_key=provider_key,
+        status=get_attr(saved, "status", default="awaiting_user"),
+        kind="await",
+        provider_ref=provider_ref,
+    )
+
+
 @router.post("/initiate", response_model=PaymentInitiateResponse, status_code=status.HTTP_201_CREATED)
-def initiate_payment(
+async def initiate_payment(
     payload: PaymentInitiate,
     request: Request,
     db: Any = Depends(get_db),
@@ -154,7 +171,6 @@ def initiate_payment(
     set_attr(intent, payload.provider_key != "stripe", "simulator")
     saved = save(db, intent)
 
-    # Invoke the registered payment adapter
     intent_id = str(get_attr(saved, "id", "_id", default=""))
     user_email = get_primary_email(current_user) if hasattr(current_user, "email") else None
     base_url = str(request.base_url).rstrip("/")
@@ -162,59 +178,79 @@ def initiate_payment(
 
     try:
         adapter = payment_registry.get(payload.provider_key)
-        import asyncio
-
-        result = asyncio.get_event_loop().run_until_complete(
-            adapter.initiate(
-                intent_id=intent_id,
-                job_id=payload.job_id,
-                user_id=str(get_user_id(current_user)),
-                amount=price["amount"],
-                currency=price["currency"],
-                payer_msisdn=payload.payer_msisdn,
-                return_url=f"{base_url}/jobs/{payload.job_id}",
-                cancel_url=f"{base_url}/jobs/{payload.job_id}",
-                customer_email=user_email,
-                extended_through=extended_through,
-                market_key=market["key"],
-                job_title=job_title,
-            )
-        )
-        db.refresh(saved)
-        redirect_url = result.url
-        if result.provider_ref and not get_attr(saved, "provider_ref", "providerRef"):
-            set_attr(saved, result.provider_ref, "provider_ref", "providerRef")
-            save(db, saved)
-
-        if payload.provider_key == "stripe":
-            return _build_initiate_response(saved, redirect_url=redirect_url)
-        return PaymentInitiateResponse(
-            intent_id=intent_id,
-            provider_key=payload.provider_key,
-            status=get_attr(saved, "status", default="awaiting_user"),
-            kind="await",
-            provider_ref=get_attr(saved, "provider_ref", "providerRef") or result.provider_ref,
-        )
-    except (KeyError, RuntimeError) as adapter_exc:
-        # Adapter not configured (e.g. Stripe keys missing) — fall back to stub response
+    except KeyError as exc:
         logger.warning(
-            "payments.adapter.unavailable provider=%s intent_id=%s reason=%s",
+            "payments.adapter.unregistered provider=%s intent_id=%s reason=%s",
             payload.provider_key,
             intent_id,
-            adapter_exc,
+            exc,
         )
+        if payload.provider_key == "stripe":
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Stripe payments are currently unavailable",
+            ) from exc
+        # M-Pesa / e-Mola adapters are by-design not implemented yet.
+        return _simulator_stub_response(db, saved, payload.provider_key)
+
+    try:
+        result = await adapter.initiate(
+            intent_id=intent_id,
+            job_id=payload.job_id,
+            user_id=str(get_user_id(current_user)),
+            amount=price["amount"],
+            currency=price["currency"],
+            payer_msisdn=payload.payer_msisdn,
+            return_url=f"{base_url}/jobs/{payload.job_id}",
+            cancel_url=f"{base_url}/jobs/{payload.job_id}",
+            customer_email=user_email,
+            extended_through=extended_through,
+            market_key=market["key"],
+            job_title=job_title,
+        )
+    except RuntimeError as exc:
+        # Adapter explicitly opted out (e.g. StripeCheckoutProvider raises
+        # RuntimeError("stripe-not-configured") when STRIPE_SECRET_KEY is unset).
+        logger.warning(
+            "payments.adapter.disabled provider=%s intent_id=%s reason=%s",
+            payload.provider_key,
+            intent_id,
+            exc,
+        )
+        if payload.provider_key == "stripe":
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=f"Payment provider not configured: {exc}",
+            ) from exc
+        return _simulator_stub_response(db, saved, payload.provider_key)
+    except Exception as exc:
+        logger.exception(
+            "payments.adapter.failed provider=%s intent_id=%s",
+            payload.provider_key,
+            intent_id,
+        )
+        if payload.provider_key == "stripe":
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=f"Payment provider error: {exc.__class__.__name__}",
+            ) from exc
+        # M-Pesa / e-Mola are by-design not yet implemented; graceful stub fallback.
+        return _simulator_stub_response(db, saved, payload.provider_key)
+
+    db.refresh(saved)
+    redirect_url = result.url
+    if result.provider_ref and not get_attr(saved, "provider_ref", "providerRef"):
+        set_attr(saved, result.provider_ref, "provider_ref", "providerRef")
+        save(db, saved)
 
     if payload.provider_key == "stripe":
-        return _build_initiate_response(saved)
-    provider_ref = f"pending-{get_attr(saved, 'id', '_id', default='intent')}"
-    set_attr(saved, provider_ref, "provider_ref", "providerRef")
-    save(db, saved)
+        return _build_initiate_response(saved, redirect_url=redirect_url)
     return PaymentInitiateResponse(
-        intent_id=str(get_attr(saved, "id", "_id", default="")),
+        intent_id=intent_id,
         provider_key=payload.provider_key,
         status=get_attr(saved, "status", default="awaiting_user"),
         kind="await",
-        provider_ref=provider_ref,
+        provider_ref=get_attr(saved, "provider_ref", "providerRef") or result.provider_ref,
     )
 
 
