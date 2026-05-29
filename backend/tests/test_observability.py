@@ -13,6 +13,14 @@ def test_health_echoes_forwarded_request_id(client):
     assert response.json()["db"] == "ok"
 
 
+def test_health_accepts_head_for_uptimerobot(client):
+    # Regression: DEC-0002 — UptimeRobot HTTP monitors default to HEAD, so
+    # answering HEAD with 405 made every monitor read "down" even when the
+    # service was healthy. /health must accept HEAD with the same status code.
+    response = client.head("/health", headers={"Host": "mz.employed.co.mz"})
+    assert response.status_code == 200
+
+
 def test_validation_errors_are_sanitized(client, test_admin, auth_headers):
     response = client.patch(
         "/admin/jobs/bulk-status",

@@ -264,7 +264,7 @@ def create_app() -> FastAPI:
     app.include_router(public_api.router)
     app.include_router(webhook_router, prefix="/webhooks")
 
-    @app.get("/health", include_in_schema=False)
+    @app.api_route("/health", methods=["GET", "HEAD"], include_in_schema=False)
     async def health(db: Session = Depends(get_db)) -> JSONResponse:
         components: dict[str, str] = {"db": "ok", "redis": "not_configured"}
 

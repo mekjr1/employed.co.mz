@@ -9,9 +9,8 @@
 | Layer | Tool | Owner |
 |-------|------|-------|
 | Error tracking | Sentry (`SENTRY_DSN` env var) | Dev team |
-| Uptime monitoring | UptimeRobot -> `/healthz?db=1` | Ops |
-| Application metrics | `/metrics` endpoint (JSON) | Ops |
-| Backup monitoring | Cron exit-code check | Ops |
+| Uptime monitoring | UptimeRobot -> `/health` (HEAD, 5 min) | Ops |
+| Backup monitoring | Cron exit-code check on `backend/scripts/backup-db.sh` | Ops |
 
 ### Sentry Alert Rules (recommended)
 
