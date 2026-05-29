@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import threading
 import time
 from collections import defaultdict, deque
@@ -262,19 +263,32 @@ def refresh_token(payload: RefreshTokenRequest, db: Any = Depends(get_db)):
 
 
 @router.post("/logout", response_model=MessageResponse, status_code=status.HTTP_200_OK)
-def logout(payload: RefreshTokenRequest | None = None) -> MessageResponse:
+async def logout(request: Request) -> MessageResponse:
     """Logout — revokes the supplied refresh token's JTI in Redis (if provided).
 
-    The endpoint accepts an empty body for backward compatibility with clients
-    that simply want a 200 on POST. When a refresh_token is supplied, its JTI is
+    The endpoint accepts an empty body, an empty JSON object ``{}``, or a body
+    with ``refresh_token: null`` for backward compatibility with clients that
+    simply want a 200 on POST. When a refresh_token is supplied, its JTI is
     added to the revocation store so any later /auth/refresh attempt with the
     same token fails with 401.
     """
-    if payload and payload.refresh_token:
+    refresh_token_value: str | None = None
+    try:
+        raw = await request.body()
+        if raw:
+            data = json.loads(raw.decode("utf-8") or "{}")
+            if isinstance(data, dict):
+                candidate = data.get("refresh_token")
+                if isinstance(candidate, str) and candidate.strip():
+                    refresh_token_value = candidate.strip()
+    except (ValueError, UnicodeDecodeError):
+        # Garbage body — still 200, nothing to revoke.
+        return MessageResponse(message="Logged out")
+
+    if refresh_token_value:
         try:
-            decoded = decode_token(payload.refresh_token, expected_type="refresh")
+            decoded = decode_token(refresh_token_value, expected_type="refresh")
         except ValueError:
-            # Garbage token — nothing to revoke, still 200.
             return MessageResponse(message="Logged out")
         if decoded.jti and decoded.exp:
             now_ts = int(time.time())

@@ -149,6 +149,20 @@ def test_logout_without_body_still_returns_200(client):
     assert response.json()["message"] == "Logged out"
 
 
+def test_logout_with_empty_json_object_still_returns_200(client):
+    # Regression: clients sending Content-Type: application/json + body "{}"
+    # must NOT receive 422. Validator-bound RefreshTokenRequest schemas would
+    # reject the missing field; the manual JSON parse keeps it permissive.
+    response = client.post("/auth/logout", json={})
+    assert response.status_code == 200
+    assert response.json()["message"] == "Logged out"
+
+
+def test_logout_with_null_refresh_token_still_returns_200(client):
+    response = client.post("/auth/logout", json={"refresh_token": None})
+    assert response.status_code == 200
+
+
 def test_logout_with_invalid_token_still_returns_200(client):
     response = client.post("/auth/logout", json={"refresh_token": "not-a-jwt"})
     assert response.status_code == 200
