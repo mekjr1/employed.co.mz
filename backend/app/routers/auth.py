@@ -19,6 +19,7 @@ from app.auth.jwt import (
 )
 from app.auth.oauth import authorize_redirect_url, exchange_code
 from app.auth.passwords import hash_password, verify_password
+from app.auth.revocation import is_revoked, revoke_jti
 from app.database import get_db
 from app.middleware.rate_limit import rate_limit
 from app.schemas.auth import (
@@ -244,6 +245,8 @@ def refresh_token(payload: RefreshTokenRequest, db: Any = Depends(get_db)):
         token = decode_token(payload.refresh_token, expected_type="refresh")
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token") from exc
+    if token.jti and is_revoked(token.jti):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token has been revoked")
     user = next((item for item in query_all(db, _user_model()) if str(get_user_id(item)) == token.sub), None)
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
@@ -259,11 +262,24 @@ def refresh_token(payload: RefreshTokenRequest, db: Any = Depends(get_db)):
 
 
 @router.post("/logout", response_model=MessageResponse, status_code=status.HTTP_200_OK)
-def logout() -> MessageResponse:
-    """Stateless logout — the client discards its tokens.
-    This endpoint exists so the frontend can fire a POST and UptimeRobot / CORS
-    pre-flight checks succeed without a 404.
+def logout(payload: RefreshTokenRequest | None = None) -> MessageResponse:
+    """Logout — revokes the supplied refresh token's JTI in Redis (if provided).
+
+    The endpoint accepts an empty body for backward compatibility with clients
+    that simply want a 200 on POST. When a refresh_token is supplied, its JTI is
+    added to the revocation store so any later /auth/refresh attempt with the
+    same token fails with 401.
     """
+    if payload and payload.refresh_token:
+        try:
+            decoded = decode_token(payload.refresh_token, expected_type="refresh")
+        except ValueError:
+            # Garbage token — nothing to revoke, still 200.
+            return MessageResponse(message="Logged out")
+        if decoded.jti and decoded.exp:
+            now_ts = int(time.time())
+            ttl = max(1, int(decoded.exp) - now_ts)
+            revoke_jti(decoded.jti, ttl)
     return MessageResponse(message="Logged out")
 
 

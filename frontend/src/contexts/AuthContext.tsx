@@ -209,6 +209,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     clearRefreshTimer();
+    // Capture the refresh token BEFORE clearing local state so the server can
+    // revoke its JTI in Redis. Best-effort; ignore failures.
+    const refreshTokenToRevoke = getStoredRefreshToken();
     clearStoredToken();
     clearCookie(TOKEN_COOKIE);
     clearCookie(ADMIN_COOKIE);
@@ -219,7 +222,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAdmin: false,
       isEmailVerified: false,
     });
-    void apiFetch<void>("/auth/logout", { method: "POST" }).catch(() => undefined);
+    void apiFetch<void>("/auth/logout", {
+      method: "POST",
+      body: refreshTokenToRevoke ? { refresh_token: refreshTokenToRevoke } : undefined,
+    }).catch(() => undefined);
   }, [clearRefreshTimer]);
 
   const refreshToken = useCallback(async () => {

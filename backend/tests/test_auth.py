@@ -125,3 +125,28 @@ def test_oauth_callback_creates_or_updates_user(client, monkeypatch):
     body = response.json()
     assert body["user"]["email"] == "oauth@example.com"
     assert body["user"]["email_verified"] is True
+
+def test_logout_revokes_refresh_token_jti(client, test_user):
+    from app.auth.revocation import reset_memory_store
+    reset_memory_store()
+
+    login = client.post("/auth/login", json={"email": test_user.email, "password": "password123"}).json()
+    refresh_token = login["refresh_token"]
+
+    logout = client.post("/auth/logout", json={"refresh_token": refresh_token})
+    assert logout.status_code == 200
+
+    refresh = client.post("/auth/refresh", json={"refresh_token": refresh_token})
+    assert refresh.status_code == 401
+    assert "revoked" in refresh.json()["detail"].lower()
+
+
+def test_logout_without_body_still_returns_200(client):
+    response = client.post("/auth/logout")
+    assert response.status_code == 200
+    assert response.json()["message"] == "Logged out"
+
+
+def test_logout_with_invalid_token_still_returns_200(client):
+    response = client.post("/auth/logout", json={"refresh_token": "not-a-jwt"})
+    assert response.status_code == 200

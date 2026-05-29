@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 import os
+import uuid
 from typing import Any
 
 from jose import JWTError, jwt
@@ -15,6 +16,7 @@ class TokenPayload(BaseModel):
     type: str
     exp: int | None = None
     iat: int | None = None
+    jti: str | None = None
     email: str | None = None
 
 
@@ -99,7 +101,9 @@ def create_access_token(subject: str, extra: dict[str, Any] | None = None) -> st
 
 def create_refresh_token(subject: str, extra: dict[str, Any] | None = None) -> str:
     days = int(_setting("REFRESH_TOKEN_EXPIRE_DAYS", default=7))
-    return _create_token(subject, "refresh", timedelta(days=days), extra)
+    payload_extra = dict(extra or {})
+    payload_extra.setdefault("jti", uuid.uuid4().hex)
+    return _create_token(subject, "refresh", timedelta(days=days), payload_extra)
 
 
 def create_verification_token(subject: str, email: str) -> str:
